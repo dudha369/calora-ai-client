@@ -1,0 +1,16 @@
+.nav-link {
+    display: flex;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    transition: all .3s;
+}
+
+.nav-link:hover {
+    transform: scale(1.1);
+}
+
+.nav-link.active {
+    transform: scale(1.1);
+    color: cyan;
+}
