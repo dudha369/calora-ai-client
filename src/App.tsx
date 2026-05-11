@@ -9,7 +9,7 @@ function App() {
     WebApp?.expand();
   }, []);
 
-  const user = WebApp?.initData.user;
+  const user = WebApp?.initDataUnsafe.user;
   const theme = WebApp?.themeParams;
 
   const bgColor = theme?.bg_color || 'black';

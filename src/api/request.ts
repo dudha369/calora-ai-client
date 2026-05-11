@@ -9,7 +9,7 @@ async function request(endpoint: string, method: Method, data?: string) {
     const options: RequestInit = {
         method: method,
         headers: {
-            Authorization: WebApp?.initData ?? "",
+            Authorization: JSON.stringify(WebApp?.initDataUnsafe),
             ContentType: "application/json",
             Access: "application/json",
         },
