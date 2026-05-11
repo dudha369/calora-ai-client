@@ -28,23 +28,23 @@ export const NavigationBar = ({iconColor}: NavigationBarProps) => {
         color: iconColor
       }}>
         <NavigationBarItem
-          to="/calora-ai-client/"
+          to="/"
           icon={<House className="icon" />}
           end
         />
 
         <NavigationBarItem
-          to="/calora-ai-client/history"
+          to="/history"
           icon={<History className="icon" />}
         />
 
         <NavigationBarItem
-          to="/calora-ai-client/settings"
+          to="/settings"
           icon={<Settings className="icon" />}
         />
 
         <NavigationBarItem
-          to="/calora-ai-client/profile"
+          to="/profile"
           icon={<User className="icon" />}
         />
       </nav>

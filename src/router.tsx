@@ -8,7 +8,7 @@ import { ProfilePage } from "./components/pages/ProfilePage";
 
 export const router = createBrowserRouter([
   {
-    path: "/calora-ai-client/",
+    path: "/",
     element: <App />,
     children: [
       {
