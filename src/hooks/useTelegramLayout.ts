@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { WebApp } from "../api/telegram";
+
 export function useTelegramLayout() {
   const [safe, setSafe] = useState({ top: 0, bottom: 0 });
 
@@ -10,7 +13,7 @@ export function useTelegramLayout() {
 
         bottom:
           (WebApp?.safeAreaInset?.bottom ?? 0) +
-          (WebApp?.contentSafeAreaInset?.bottom ?? 0)
+          (WebApp?.contentSafeAreaInset?.bottom ?? 0),
       });
     };
 
