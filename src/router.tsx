@@ -1,8 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
-import App from "./App";
+import { App } from "./App";
 import { HomePage } from "./components/pages/HomePage.tsx";
-import { HistoryPage } from "./components/pages/HistoryPage";
-import { SettingsPage } from "./components/pages/SettingsPage";
+import { AnalyticsPage } from "./components/pages/AnalyticsPage";
+import { AIPage } from "./components/pages/AIPage";
 import { ProfilePage } from "./components/pages/ProfilePage";
 
 
@@ -16,12 +16,12 @@ export const router = createBrowserRouter([
         element: <HomePage />
       },
       {
-        path: "history",
-        element: <HistoryPage />,
+        path: "analytics",
+        element: <AnalyticsPage />,
       },
       {
-        path: "settings",
-        element: <SettingsPage />,
+        path: "ai",
+        element: <AIPage />,
       },
       {
         path: "profile",

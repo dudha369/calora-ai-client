@@ -1,4 +1,4 @@
-export const HistoryPage = () => {
+export const AnalyticsPage = () => {
   return (
     <div>
       History

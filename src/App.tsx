@@ -1,39 +1,99 @@
-import {useEffect} from "react";
-import {WebApp} from "./api/telegram.ts";
-import {NavigationBar} from "./components/NavigationBar/NavigationBar.tsx";
-import {Outlet} from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Outlet } from "react-router-dom";
+import { useQuery } from "react-query";
+import { init, initData, viewport } from "@telegram-apps/sdk";
 
-function App() {
+import { NavigationBar } from "./components/NavigationBar/NavigationBar";
+import UserContext from "./context/UserContext";
+
+import { request } from "./api/api";
+import { isMobileDevice, WebApp } from "./api/telegram";
+
+import { getValidTheme } from "./getValidTheme";
+
+import type { IUser } from "./interfaces/IUser";
+
+export function App() {
+  const [safeTop, setSafeTop] = useState(0);
+
+  const {data: user, isLoading} = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const res = await request("users/get");
+      return res.data;
+    },
+    select: (data) => data.user as IUser
+  });
+
   useEffect(() => {
-    WebApp?.ready();
-    WebApp?.expand();
+    const initTelegram = async () => {
+      try {
+        init();
+
+        initData.restore();
+
+        await viewport.mount();
+        viewport.expand();
+
+        if (isMobileDevice()) {
+          WebApp?.requestFullscreen();
+        }
+
+        updateSafeArea();
+      } catch (error) {
+        console.error("Telegram init error:", error);
+      }
+    };
+
+    const updateSafeArea = () => {
+      const top =
+        (WebApp?.safeAreaInset?.top ?? 0) +
+        (WebApp?.contentSafeAreaInset?.top ?? 0);
+
+      setSafeTop(top);
+    };
+
+    initTelegram();
+
+    WebApp?.onEvent('fullscreenChanged', updateSafeArea);
+    WebApp?.onEvent('safeAreaChanged', updateSafeArea);
+
+    return () => {
+      WebApp?.offEvent('fullscreenChanged', updateSafeArea);
+      WebApp?.offEvent('safeAreaChanged', updateSafeArea);
+    };
   }, []);
 
-  const user = WebApp?.initDataUnsafe.user;
-  const theme = WebApp?.themeParams;
+  useEffect(() => {
+    if (!isLoading) {
+      WebApp?.ready();
+    }
+  }, [isLoading]);
 
-  const bgColor = theme?.bg_color || 'black';
-  const textColor = theme?.text_color || 'white';
+  const theme = getValidTheme(WebApp?.themeParams, "telegram"); // TODO
 
-  const username = user?.username || 'unknown';
+  const contextValue = useMemo(() => {
+    return {
+      user,
+      isLoading
+    };
+  }, [user, isLoading]);
 
   return (
-    <div style={{minHeight: '100vh', display: 'flex', flexDirection: 'column'}}>
-      <main
-        style={{
-          backgroundColor: bgColor,
-          color: textColor,
-          flex: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-      }}>
-        <Outlet context={{ username }} />
-      </main>
+    <UserContext.Provider value={ contextValue }>
+      <div
+        style={{ paddingTop: safeTop }}
+        className="h-screen flex justify-center items-center text-white text-3xl"
+      >
+        <header>
+        </header>
 
-      <NavigationBar iconColor={textColor}/>
-    </div>
-  )
+        <main className="flex-1 overflow-y-auto">
+          <Outlet />
+        </main>
+
+        <NavigationBar iconColor={theme.text_color!} />
+      </div>
+    </UserContext.Provider>
+  );
 }
-
-export default App

@@ -1,11 +1,13 @@
 import {NavigationBarItem} from "./NavigationBarItem.tsx";
-import { House, History, Settings, User } from "lucide-react";
+import { HouseHeart, ChartNoAxesColumn, Astroid, User } from "lucide-react";
+import type { CSSProperties } from "react";
 
 interface NavigationBarProps {
+  style?: CSSProperties;
   iconColor: string;
 }
 
-export const NavigationBar = ({iconColor}: NavigationBarProps) => {
+export const NavigationBar = ({style, iconColor}: NavigationBarProps) => {
   return (
     <footer style={{
       position: 'fixed',
@@ -16,6 +18,7 @@ export const NavigationBar = ({iconColor}: NavigationBarProps) => {
       justifyContent: 'center',
     }}>
       <nav style={{
+        ...style,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -29,18 +32,18 @@ export const NavigationBar = ({iconColor}: NavigationBarProps) => {
       }}>
         <NavigationBarItem
           to="/"
-          icon={<House className="icon" />}
+          icon={<HouseHeart className="icon" />}
           end
         />
 
         <NavigationBarItem
-          to="/history"
-          icon={<History className="icon" />}
+          to="/analytics"
+          icon={<ChartNoAxesColumn className="icon" />}
         />
 
         <NavigationBarItem
-          to="/settings"
-          icon={<Settings className="icon" />}
+          to="/ai"
+          icon={<Astroid className="icon" />}
         />
 
         <NavigationBarItem

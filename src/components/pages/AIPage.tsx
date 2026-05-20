@@ -1,4 +1,4 @@
-export const SettingsPage = () => {
+export const AIPage = () => {
   return (
     <div>
 

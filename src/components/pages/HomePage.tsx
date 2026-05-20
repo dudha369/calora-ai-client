@@ -1,18 +1,9 @@
-import { useOutletContext } from "react-router-dom";
-
-type OutletContext = {
-  username: string;
-};
-
+import { useUser } from "../../context/UserContext.ts";
 
 export const HomePage = () => {
-  const { username } = useOutletContext<OutletContext>();
+  const { user } = useUser();
 
   return (
-    <div>
-      <h1>
-        Привет, {username}!
-      </h1>
-    </div>
-  )
-}
+    <h1>Привет, {user?.name}!</h1>
+  );
+};
