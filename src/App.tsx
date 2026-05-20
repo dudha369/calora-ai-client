@@ -6,46 +6,50 @@ import UserContext from "./context/UserContext";
 
 import { request } from "./api/api";
 import { NavigationBar } from "./components/NavigationBar/NavigationBar";
+import { LoadingScreen } from "./components/LoadingScreen/LoadingScreen";
 
 import { useTelegram } from "./providers/TelegramRootProvider";
-import { useTelegramTheme } from "./hooks/useTelegramTheme";
 
 import type { IUser } from "./interfaces/IUser";
 
-export function App() {
-  const { ready, safeTop, safeBottom } = useTelegram();
+interface UserResponse {
+  user: IUser;
+}
 
-  const theme = useTelegramTheme();
+export function App() {
+  const { ready, safeTop, safeBottom, theme } = useTelegram();
 
   const { data: user, isLoading } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const res = await request("users/get");
-      return res.data.user as IUser;
+      const res = await request<UserResponse>("users/get");
+      return res.data.user;
     },
-    enabled: ready
+    enabled: ready,
   });
 
-  const contextValue = {
-    user,
-    isLoading: !ready || isLoading
-  };
+  const isAppLoading = !ready || isLoading;
+
+  if (isAppLoading) {
+    return (
+      <ThemeContext.Provider value={theme}>
+        <LoadingScreen />
+      </ThemeContext.Provider>
+    );
+  }
 
   return (
     <ThemeContext.Provider value={theme}>
-      <UserContext.Provider value={contextValue}>
+      <UserContext.Provider value={{ user, isLoading: false }}>
         <div
-          style={{
-            paddingTop: safeTop,
-            paddingBottom: safeBottom
-          }}
+          style={{ paddingTop: safeTop }}
           className="h-screen flex flex-col bg-[var(--tg-bg-color)] text-[var(--tg-text-color)]"
         >
           <main className="flex-1 overflow-y-auto">
             <Outlet />
           </main>
 
-          <NavigationBar iconColor={theme.text_color} />
+          <NavigationBar safeBottom={safeBottom} />
         </div>
       </UserContext.Provider>
     </ThemeContext.Provider>

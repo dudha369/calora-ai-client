@@ -1,15 +1,17 @@
-import { createContext, useEffect, useState, useContext } from "react";
-import { init, initData, viewport } from "@telegram-apps/sdk";
+import { createContext, useState, useContext } from "react";
 
-import { WebApp, isMobileDevice } from "../api/telegram";
-
+import { useTelegramInit } from "../hooks/useTelegramInit";
 import { useTelegramTheme } from "../hooks/useTelegramTheme";
 import { useTelegramLayout } from "../hooks/useTelegramLayout";
+import { WebApp } from "../api/telegram";
+
+import type { Theme } from "../interfaces/Theme";
 
 type TelegramState = {
   ready: boolean;
   safeTop: number;
   safeBottom: number;
+  theme: Theme;
 };
 
 const TelegramContext = createContext<TelegramState | null>(null);
@@ -26,46 +28,17 @@ export function TelegramRootProvider({ children }: { children: React.ReactNode }
   const theme = useTelegramTheme();
   const { top, bottom } = useTelegramLayout();
 
-  const [safeTop, setSafeTop] = useState(0);
-  const [safeBottom, setSafeBottom] = useState(0);
-
-  useEffect(() => {
-    const update = () => {
-      setSafeTop(top);
-      setSafeBottom(bottom);
-    };
-
-    update();
-  }, [top, bottom]);
-
-  useEffect(() => {
-    const run = async () => {
-      init();
-      initData.restore();
-
-      await viewport.mount();
-      await viewport.expand();
-
-      if (isMobileDevice()) {
-        WebApp?.requestFullscreen();
-      }
-
-      setReady(true);
-    };
-
-    run();
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-
+  // Uses the dedicated hook — no duplicated logic
+  useTelegramInit(() => {
     WebApp?.ready();
-  }, [ready]);
+    setReady(true);
+  });
 
   const value: TelegramState = {
     ready,
-    safeTop,
-    safeBottom
+    safeTop: top,
+    safeBottom: bottom,
+    theme,
   };
 
   return (

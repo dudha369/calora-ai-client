@@ -1,19 +1,23 @@
-import axis from "axios";
-import {initData} from "@telegram-apps/sdk";
+import axios from "axios";
+import { initData } from "@telegram-apps/sdk";
 
-type Method = "GET" | "POST";
+type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL;
 
-export const request = async (endpoint: string, method: Method = "GET", data?: any) => {
-  return await axis.request({
+export const request = async <T = unknown>(
+  endpoint: string,
+  method: Method = "GET",
+  data?: unknown
+): Promise<{ data: T }> => {
+  return await axios.request({
     url: `${SERVER_API_URL}/api/${endpoint}`,
-    method: method,
+    method,
     headers: {
-      initData: `${initData.raw()}`,
+      initData: initData.raw() ?? "",
       Accept: "application/json",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    data: data ? JSON.stringify(data) : undefined
+    data: data ? JSON.stringify(data) : undefined,
   });
-}
+};

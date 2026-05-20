@@ -2,6 +2,10 @@ import { useEffect } from "react";
 import { init, initData, viewport } from "@telegram-apps/sdk";
 import { WebApp, isMobileDevice } from "../api/telegram";
 
+/**
+ * Initialises the Telegram Mini App SDK once and calls onReady when done.
+ * Use this hook inside TelegramRootProvider only.
+ */
 export function useTelegramInit(onReady: () => void) {
   useEffect(() => {
     const run = async () => {
@@ -21,5 +25,6 @@ export function useTelegramInit(onReady: () => void) {
     };
 
     run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }
