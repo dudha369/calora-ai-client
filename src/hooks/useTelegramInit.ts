@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { init, initData, viewport } from "@telegram-apps/sdk";
-import { isMobileDevice } from "../api/telegram";
+import { init, initData, viewport, themeParams } from "@tma.js/sdk-react";
+import { isMobileDevice } from "../utils/device";
 
 function requestSafeAreaUpdate() {
   try {
@@ -11,8 +11,7 @@ function requestSafeAreaUpdate() {
       w.TelegramWebviewProxy.postEvent("web_app_request_safe_area", "{}");
       w.TelegramWebviewProxy.postEvent("web_app_request_content_safe_area", "{}");
     }
-  } catch {
-  }
+  } catch {}
 }
 
 export function useTelegramInit(onReady: () => void) {
@@ -21,7 +20,7 @@ export function useTelegramInit(onReady: () => void) {
       try {
         init();
         initData.restore();
-
+        themeParams.mount();
         await viewport.mount();
         viewport.expand();
 
@@ -29,8 +28,7 @@ export function useTelegramInit(onReady: () => void) {
           try {
             await viewport.requestFullscreen();
             requestSafeAreaUpdate();
-          } catch {
-          }
+          } catch {}
         }
       } finally {
         onReady();

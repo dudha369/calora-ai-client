@@ -1,10 +1,7 @@
 import { createContext, useState, useContext } from "react";
-
 import { useTelegramInit } from "../hooks/useTelegramInit";
 import { useTelegramTheme } from "../hooks/useTelegramTheme";
 import { useTelegramLayout } from "../hooks/useTelegramLayout";
-import { WebApp } from "../api/telegram";
-
 import type { Theme } from "../interfaces/Theme";
 
 type TelegramState = {
@@ -28,20 +25,11 @@ export function TelegramRootProvider({ children }: { children: React.ReactNode }
   const theme = useTelegramTheme();
   const { top, bottom } = useTelegramLayout(ready);
 
-  useTelegramInit(() => {
-    WebApp?.ready();
-    setReady(true);
-  });
-
-  const value: TelegramState = {
-    ready,
-    safeTop: top,
-    safeBottom: bottom,
-    theme,
-  };
+  // WebApp.ready() теперь вызывает SDK автоматически внутри init()
+  useTelegramInit(() => setReady(true));
 
   return (
-    <TelegramContext.Provider value={value}>
+    <TelegramContext.Provider value={{ ready, safeTop: top, safeBottom: bottom, theme }}>
       {children}
     </TelegramContext.Provider>
   );

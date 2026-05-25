@@ -1,5 +1,5 @@
 import type { ThemeParams } from "telegram-web-app";
-import type { Theme, ThemeMode } from "./interfaces/Theme";
+import type { Theme, ThemeMode } from "../interfaces/Theme";
 
 const LIGHT: Theme = {
   bg_color: "#ffffff",

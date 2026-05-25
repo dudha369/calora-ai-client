@@ -1,43 +1,47 @@
 import { useEffect, useState } from "react";
-import { WebApp } from "../api/telegram";
-import { getValidTheme } from "../getValidTheme";
+import { themeParams } from "@tma.js/sdk-react";
+import { getValidTheme } from "../utils/getValidTheme";
 import type { Theme } from "../interfaces/Theme";
 
+function readTheme(): Theme {
+  try {
+    return getValidTheme(themeParams.state(), "telegram");
+  } catch {
+    return getValidTheme(undefined, "telegram");
+  }
+}
+
+function applyThemeToCss(theme: Theme) {
+  const root = document.documentElement;
+  root.style.setProperty("--tg-bg-color", theme.bg_color);
+  root.style.setProperty("--tg-text-color", theme.text_color);
+  root.style.setProperty("--tg-hint-color", theme.hint_color);
+  root.style.setProperty("--tg-link-color", theme.link_color);
+  root.style.setProperty("--tg-button-color", theme.button_color);
+  root.style.setProperty("--tg-button-text-color", theme.button_text_color);
+  root.style.setProperty("--tg-secondary-bg-color", theme.secondary_bg_color);
+  root.style.setProperty("--tg-header-bg-color", theme.header_bg_color);
+  root.style.setProperty("--tg-section-bg-color", theme.section_bg_color);
+  root.style.setProperty("--tg-section-header-text-color", theme.section_header_text_color);
+  root.style.setProperty("--tg-subtitle-text-color", theme.subtitle_text_color);
+  root.style.setProperty("--tg-destructive-text-color", theme.destructive_text_color);
+  root.style.setProperty("--tg-accent-text-color", theme.accent_text_color);
+  root.style.setProperty("--tg-section-separator-color", theme.section_separator_color);
+}
+
 export function useTelegramTheme(): Theme {
-  const [theme, setTheme] = useState<Theme>(() =>
-    getValidTheme(WebApp?.themeParams, "telegram")
-  );
+  const [theme, setTheme] = useState<Theme>(readTheme);
 
   useEffect(() => {
-    const applyTheme = () => {
-      const newTheme = getValidTheme(WebApp?.themeParams, "telegram");
-      setTheme(newTheme);
+    applyThemeToCss(theme);
 
-      const root = document.documentElement;
+    const unsub = themeParams.state.sub(() => {
+      const next = readTheme();
+      setTheme(next);
+      applyThemeToCss(next);
+    });
 
-      root.style.setProperty("--tg-bg-color", newTheme.bg_color);
-      root.style.setProperty("--tg-text-color", newTheme.text_color);
-      root.style.setProperty("--tg-hint-color", newTheme.hint_color);
-      root.style.setProperty("--tg-link-color", newTheme.link_color);
-      root.style.setProperty("--tg-button-color", newTheme.button_color);
-      root.style.setProperty("--tg-button-text-color", newTheme.button_text_color);
-      root.style.setProperty("--tg-secondary-bg-color", newTheme.secondary_bg_color);
-      root.style.setProperty("--tg-header-bg-color", newTheme.header_bg_color);
-      root.style.setProperty("--tg-section-bg-color", newTheme.section_bg_color);
-      root.style.setProperty("--tg-section-header-text-color", newTheme.section_header_text_color);
-      root.style.setProperty("--tg-subtitle-text-color", newTheme.subtitle_text_color);
-      root.style.setProperty("--tg-destructive-text-color", newTheme.destructive_text_color);
-      root.style.setProperty("--tg-accent-text-color", newTheme.accent_text_color);
-      root.style.setProperty("--tg-section-separator-color", newTheme.section_separator_color);
-    };
-
-    applyTheme();
-
-    WebApp?.onEvent("themeChanged", applyTheme);
-
-    return () => {
-      WebApp?.offEvent("themeChanged", applyTheme);
-    };
+    return unsub;
   }, []);
 
   return theme;
