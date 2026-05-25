@@ -3,18 +3,15 @@ import { useQuery } from "react-query";
 
 import ThemeContext from "./context/ThemeContext";
 import UserContext from "./context/UserContext";
+import { ScannerProvider } from "./providers/ScannerProvider.tsx";
 
 import { request } from "./api/api";
 import { NavigationBar } from "./components/NavigationBar/NavigationBar";
-import { LoadingScreen } from "./components/LoadingScreen/LoadingScreen";
+import { LoadingScreen } from "./components/LoadingScreen";
 
 import { useTelegram } from "./providers/TelegramRootProvider";
 
-import type { IUser } from "./interfaces/IUser";
-
-interface UserResponse {
-  user: IUser;
-}
+import type { UserResponse } from "./interfaces/IUser";
 
 export function App() {
   const { ready, safeTop, safeBottom, theme } = useTelegram();
@@ -30,28 +27,24 @@ export function App() {
 
   const isAppLoading = !ready || isLoading;
 
-  if (isAppLoading) {
-    return (
-      <ThemeContext.Provider value={theme}>
-        <LoadingScreen />
-      </ThemeContext.Provider>
-    );
-  }
-
   return (
     <ThemeContext.Provider value={theme}>
       <UserContext.Provider value={{ user, isLoading: false }}>
-        <div
-          style={{ paddingTop: safeTop }}
-          className="h-screen flex flex-col bg-[var(--tg-bg-color)] text-[var(--tg-text-color)]"
-        >
-          <main className="flex-1 overflow-y-auto">
-            <Outlet />
-          </main>
+        <ScannerProvider>
+          <div
+            style={{ paddingTop: safeTop }}
+            className="h-screen flex flex-col px-4 bg-(--tg-bg-color) text-(--tg-text-color)"
+          >
+            <main className="flex-1 overflow-y-auto">
+              <Outlet />
+            </main>
 
-          <NavigationBar safeBottom={safeBottom} />
-        </div>
+              <NavigationBar safeBottom={safeBottom} />
+          </div>
+        </ScannerProvider>
       </UserContext.Provider>
+
+      {isAppLoading && <LoadingScreen />}
     </ThemeContext.Provider>
   );
 }

@@ -26,9 +26,8 @@ export function TelegramRootProvider({ children }: { children: React.ReactNode }
   const [ready, setReady] = useState(false);
 
   const theme = useTelegramTheme();
-  const { top, bottom } = useTelegramLayout();
+  const { top, bottom } = useTelegramLayout(ready);
 
-  // Uses the dedicated hook — no duplicated logic
   useTelegramInit(() => {
     WebApp?.ready();
     setReady(true);

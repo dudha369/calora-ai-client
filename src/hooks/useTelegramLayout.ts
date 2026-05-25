@@ -1,34 +1,41 @@
 import { useEffect, useState } from "react";
-import { WebApp } from "../api/telegram";
+import { viewport } from "@telegram-apps/sdk";
 
-export function useTelegramLayout() {
-  const [safe, setSafe] = useState({ top: 0, bottom: 0 });
+type Safe = { top: number; bottom: number };
+
+function readFromSignals(): Safe {
+  try {
+    const sa = viewport.safeAreaInsets();
+    const csa = viewport.contentSafeAreaInsets();
+    return {
+      top: (sa?.top ?? 0) + (csa?.top ?? 0),
+      bottom: (sa?.bottom ?? 0) + (csa?.bottom ?? 0),
+    };
+  } catch {
+    return { top: 0, bottom: 0 };
+  }
+}
+
+export function useTelegramLayout(ready: boolean) {
+  const [safe, setSafe] = useState<Safe>({ top: 0, bottom: 0 });
 
   useEffect(() => {
-    const update = () => {
-      setSafe({
-        top:
-          (WebApp?.safeAreaInset?.top ?? 0) +
-          (WebApp?.contentSafeAreaInset?.top ?? 0),
+    if (!ready) return;
 
-        bottom:
-          (WebApp?.safeAreaInset?.bottom ?? 0) +
-          (WebApp?.contentSafeAreaInset?.bottom ?? 0),
-      });
-    };
+    setSafe(readFromSignals());
 
-    update();
-
-    WebApp?.onEvent("safeAreaChanged", update);
-    WebApp?.onEvent("contentSafeAreaChanged", update);
-    WebApp?.onEvent("fullscreenChanged", update);
+    const unsubSA = viewport.safeAreaInsets.sub(() => {
+      setSafe(readFromSignals());
+    });
+    const unsubCSA = viewport.contentSafeAreaInsets.sub(() => {
+      setSafe(readFromSignals());
+    });
 
     return () => {
-      WebApp?.offEvent("safeAreaChanged", update);
-      WebApp?.offEvent("contentSafeAreaChanged", update);
-      WebApp?.offEvent("fullscreenChanged", update);
+      unsubSA();
+      unsubCSA();
     };
-  }, []);
+  }, [ready]);
 
   return safe;
 }

@@ -3,3 +3,7 @@ export interface IUser {
     created_at: Date;
     name: string;
 }
+
+export interface UserResponse {
+  user: IUser;
+}

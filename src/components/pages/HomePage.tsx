@@ -8,7 +8,7 @@ export const HomePage = () => {
   const { user } = useUser();
   const theme = useTheme();
 
-  const firstName = user?.name?.split(" ")[0] ?? "Привет";
+  const firstName = user?.name ?? "аноним";
 
   // Demo stats — replace with real data
   const stats = [
@@ -94,13 +94,6 @@ export const HomePage = () => {
         ))}
       </div>
 
-      {/* Quick log button */}
-      <button
-        className="w-full rounded-2xl py-4 text-sm font-semibold"
-        style={{ backgroundColor: theme.button_color, color: theme.button_text_color }}
-      >
-        + Добавить приём пищи
-      </button>
     </div>
   );
 };

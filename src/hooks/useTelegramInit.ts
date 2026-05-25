@@ -1,11 +1,20 @@
 import { useEffect } from "react";
 import { init, initData, viewport } from "@telegram-apps/sdk";
-import { WebApp, isMobileDevice } from "../api/telegram";
+import { isMobileDevice } from "../api/telegram";
 
-/**
- * Initialises the Telegram Mini App SDK once and calls onReady when done.
- * Use this hook inside TelegramRootProvider only.
- */
+function requestSafeAreaUpdate() {
+  try {
+    const w = window as unknown as {
+      TelegramWebviewProxy?: { postEvent(type: string, data: string): void };
+    };
+    if (w.TelegramWebviewProxy) {
+      w.TelegramWebviewProxy.postEvent("web_app_request_safe_area", "{}");
+      w.TelegramWebviewProxy.postEvent("web_app_request_content_safe_area", "{}");
+    }
+  } catch {
+  }
+}
+
 export function useTelegramInit(onReady: () => void) {
   useEffect(() => {
     const run = async () => {
@@ -14,10 +23,14 @@ export function useTelegramInit(onReady: () => void) {
         initData.restore();
 
         await viewport.mount();
-        await viewport.expand();
+        viewport.expand();
 
         if (isMobileDevice()) {
-          WebApp?.requestFullscreen();
+          try {
+            await viewport.requestFullscreen();
+            requestSafeAreaUpdate();
+          } catch {
+          }
         }
       } finally {
         onReady();
@@ -25,6 +38,5 @@ export function useTelegramInit(onReady: () => void) {
     };
 
     run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

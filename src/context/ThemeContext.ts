@@ -1,7 +1,6 @@
 import { createContext, useContext } from "react";
 import type { Theme } from "../interfaces/Theme";
 
-// Light theme as safe default — prevents crash if used before provider mounts
 const DEFAULT_THEME: Theme = {
   bg_color: "#ffffff",
   text_color: "#000000",
