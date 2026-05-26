@@ -1,7 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import type { ReactNode, MouseEvent } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import { useScanner } from "../../context/ScannerContext";
+import { useScanner } from "../../hooks/useScanner";
 
 interface FabButtonProps {
   to: string;

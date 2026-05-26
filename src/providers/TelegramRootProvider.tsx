@@ -1,31 +1,15 @@
-import { createContext, useState, useContext } from "react";
+import { type ReactNode, useState } from "react";
 import { useTelegramInit } from "../hooks/useTelegramInit";
 import { useTelegramTheme } from "../hooks/useTelegramTheme";
 import { useTelegramLayout } from "../hooks/useTelegramLayout";
-import type { Theme } from "../interfaces/Theme";
+import { TelegramContext } from "../context/TelegramContext.ts";
 
-type TelegramState = {
-  ready: boolean;
-  safeTop: number;
-  safeBottom: number;
-  theme: Theme;
-};
-
-const TelegramContext = createContext<TelegramState | null>(null);
-
-export function useTelegram() {
-  const ctx = useContext(TelegramContext);
-  if (!ctx) throw new Error("useTelegram must be used inside TelegramRootProvider");
-  return ctx;
-}
-
-export function TelegramRootProvider({ children }: { children: React.ReactNode }) {
+export function TelegramRootProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   const theme = useTelegramTheme();
   const { top, bottom } = useTelegramLayout(ready);
 
-  // WebApp.ready() теперь вызывает SDK автоматически внутри init()
   useTelegramInit(() => setReady(true));
 
   return (

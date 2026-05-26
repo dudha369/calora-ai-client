@@ -1,5 +1,5 @@
 import { useRef, useCallback, type ReactNode } from "react";
-import { ScannerContext } from "../context/ScannerContext.tsx";
+import { ScannerContext } from "../context/ScannerContext.ts";
 
 
 export const ScannerProvider = ({ children }: { children: ReactNode }) => {
@@ -16,6 +16,6 @@ export const ScannerProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ScannerContext.Provider value={{ registerCapture, triggerCapture }}>
       {children}
-      </ScannerContext.Provider>
+    </ScannerContext.Provider>
   );
 };

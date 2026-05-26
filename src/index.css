@@ -34,12 +34,13 @@ body,
 }
 
 body {
-  background: var(--tg-bg-color);
-  color: var(--tg-text-color);
   /* Prevent text size adjustment after orientation changes */
   -webkit-text-size-adjust: 100%;
   /* Smooth font rendering */
   -webkit-font-smoothing: antialiased;
+
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* ── Scrollbar (hide on mobile, minimal on desktop) ─────────────────────── */

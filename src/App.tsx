@@ -9,7 +9,7 @@ import { request } from "./api/api";
 import { NavigationBar } from "./components/NavigationBar/NavigationBar";
 import { LoadingScreen } from "./components/LoadingScreen";
 
-import { useTelegram } from "./providers/TelegramRootProvider";
+import { useTelegram } from "./hooks/useTelegram.ts";
 
 import type { UserResponse } from "./interfaces/IUser";
 
