@@ -1,5 +1,5 @@
-import { useUser } from "../../context/UserContext";
-import { useTheme } from "../../context/ThemeContext";
+import { useUser } from "../context/UserContext";
+import { useTheme } from "../context/ThemeContext";
 import { User, Target, Bell, Shield, ChevronRight, LogOut } from "lucide-react";
 
 const NAV_HEIGHT = 80;

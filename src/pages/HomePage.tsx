@@ -1,5 +1,5 @@
-import { useUser } from "../../context/UserContext";
-import { useTheme } from "../../context/ThemeContext";
+import { useUser } from "../context/UserContext";
+import { useTheme } from "../context/ThemeContext";
 import { Flame, Droplets, Dumbbell, TrendingUp } from "lucide-react";
 
 const NAV_HEIGHT = 80; // px — space reserved for the floating nav

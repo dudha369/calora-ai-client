@@ -34,6 +34,7 @@ export const FabButton = ({ to, icon, activeIcon, label }: FabButtonProps) => {
       style={{
         color: theme.button_text_color,
         backgroundColor: theme.button_color,
+        outline: `4px solid ${theme.secondary_bg_color}`,
       }}
     >
       {({ isActive }) => (

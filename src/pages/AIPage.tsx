@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useTheme } from "../../context/ThemeContext";
+import { useTheme } from "../context/ThemeContext";
 import { Send, Sparkles } from "lucide-react";
 
 type Message = { role: "user" | "ai"; text: string };

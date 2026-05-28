@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useCamera } from "../../hooks/useCamera";
-import { useScanner } from "../../hooks/useScanner";
-import { useBackButton } from "../../hooks/useBackButton";
+import { useCamera } from "../hooks/useCamera";
+import { useScanner } from "../hooks/useScanner";
+import { useBackButton } from "../hooks/useBackButton";
 
 export const ScannerPage = () => {
   const camera = useCamera();
