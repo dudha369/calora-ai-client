@@ -4,7 +4,6 @@ import { createContext } from "react";
 type TelegramState = {
   ready: boolean;
   safeTop: number;
-  safeBottom: number;
   theme: Theme;
 };
 

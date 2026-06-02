@@ -2,8 +2,6 @@ import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
 import { User, Target, Bell, Shield, ChevronRight, LogOut } from "lucide-react";
 
-const NAV_HEIGHT = 80;
-
 const MENU_ITEMS = [
   { icon: Target, label: "Цели питания", hint: "2 500 ккал / день" },
   { icon: Bell, label: "Уведомления", hint: "Включены" },
@@ -15,7 +13,7 @@ export const ProfilePage = () => {
   const theme = useTheme();
 
   return (
-    <div className="flex flex-col gap-5 px-4 pt-5" style={{ paddingBottom: NAV_HEIGHT }}>
+    <div className="flex flex-col gap-5">
       <h1 className="text-2xl font-bold" style={{ color: theme.text_color }}>Профиль</h1>
 
       {/* Avatar card */}

@@ -1,8 +1,8 @@
-import { useTheme } from "../context/ThemeContext";
-import { Sprout } from "lucide-react";
+import { Sprout } from 'lucide-react';
+import { useTelegram } from '../../hooks/useTelegram';
 
 export const LoadingScreen = () => {
-  const theme = useTheme();
+  const { theme } = useTelegram();
 
   return (
     <div
@@ -16,7 +16,6 @@ export const LoadingScreen = () => {
           size={42}
         />
       </div>
-
       <p
         className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-6 text-sm font-medium tracking-widest uppercase"
         style={{ color: theme.hint_color }}

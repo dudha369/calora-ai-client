@@ -1,7 +1,5 @@
 import { useTheme } from "../context/ThemeContext";
 
-const NAV_HEIGHT = 80;
-
 const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 const DATA = [1920, 2100, 1750, 2300, 1840, 2450, 1600];
 const MAX = Math.max(...DATA);
@@ -17,7 +15,7 @@ export const AnalyticsPage = () => {
   const theme = useTheme();
 
   return (
-    <div className="flex flex-col gap-5 px-4 pt-5" style={{ paddingBottom: NAV_HEIGHT }}>
+    <div className="flex flex-col gap-5">
       <h1 className="text-2xl font-bold" style={{ color: theme.text_color }}>Аналитика</h1>
 
       {/* Weekly bar chart */}

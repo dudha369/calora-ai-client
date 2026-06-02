@@ -15,12 +15,15 @@ export const NavItem = ({ to, icon, label }: NavigationBarItemProps) => {
     <NavLink
       to={to}
       title={label}
-      className="flex items-center justify-center w-12 h-12 transition-colors duration-200 ease-in-out"
+      className="flex-1 h-full max-w-16 transition-colors duration-200 ease-in-out"
       style={({ isActive }) => ({
         color: isActive ? theme.text_color : theme.hint_color,
       })}
     >
-      {icon}
+      <div className="flex h-full flex-col items-center justify-center gap-px text-sm font-semibold">
+        {icon}
+        <span>{label}</span>
+      </div>
     </NavLink>
   );
 };

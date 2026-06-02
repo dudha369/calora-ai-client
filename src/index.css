@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* ── Telegram theme CSS variables (defaults for browser preview) ─────────── */
 :root {
   --tg-bg-color: #ffffff;
   --tg-text-color: #000000;
@@ -18,46 +17,42 @@
   --tg-section-separator-color: #d9d9d9;
 }
 
-/* ── Resets ──────────────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
+@layer base {
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+    }
 
-html,
-body,
-#root {
-  height: 100%;
-}
+    html,
+    body,
+    #root {
+        height: 100%;
+    }
 
-body {
-  /* Prevent text size adjustment after orientation changes */
-  -webkit-text-size-adjust: 100%;
-  /* Smooth font rendering */
-  -webkit-font-smoothing: antialiased;
+  body {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
 
-  -webkit-user-select: none;
-  user-select: none;
-}
+    -webkit-user-select: none;
+    user-select: none;
+  }
 
-/* ── Scrollbar (hide on mobile, minimal on desktop) ─────────────────────── */
-::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
 
-/* ── Tap highlight (remove default blue flash on mobile) ─────────────────── */
-* {
-  -webkit-tap-highlight-color: transparent;
-}
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
 
-/* ── Button reset ────────────────────────────────────────────────────────── */
-button {
-  border: none;
-  cursor: pointer;
-  background: none;
-  font: inherit;
+  button {
+    border: none;
+    cursor: pointer;
+    background: none;
+    font: inherit;
+  }
 }

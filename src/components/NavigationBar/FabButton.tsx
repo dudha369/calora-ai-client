@@ -30,11 +30,11 @@ export const FabButton = ({ to, icon, activeIcon, label }: FabButtonProps) => {
       to={to}
       title={label}
       onClick={handleClick}
-      className="flex -translate-y-3 items-center justify-center w-15 h-15 rounded-full"
+      className="flex -translate-y-3 items-center justify-center w-16 h-16 rounded-full"
       style={{
         color: theme.button_text_color,
         backgroundColor: theme.button_color,
-        outline: `4px solid ${theme.secondary_bg_color}`,
+        outline: `${theme.secondary_bg_color} solid 5px`,
       }}
     >
       {({ isActive }) => (

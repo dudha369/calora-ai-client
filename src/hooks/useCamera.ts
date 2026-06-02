@@ -1,32 +1,52 @@
 import { type RefObject, useRef, useState, useCallback, useEffect } from "react";
+import { BrowserMultiFormatReader } from "@zxing/browser";
 
 export type FacingMode = "user" | "environment";
+export type CameraMethod = "stream" | "input"; // новое
 
 export interface CameraState {
   isReady: boolean;
   isStreaming: boolean;
   error: string | null;
   facingMode: FacingMode;
+  method: CameraMethod; // новое — чем работаем
 }
 
 export interface UseCameraReturn extends CameraState {
   videoRef: RefObject<HTMLVideoElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  inputRef: RefObject<HTMLInputElement | null>; // новое
   startCamera: (facing?: FacingMode) => Promise<void>;
   stopCamera: () => void;
   takePhoto: () => string | null;
   switchCamera: () => Promise<void>;
+  scanBarcode: () => Promise<string | null>; // новое
+  openInputCamera: () => void; // новое — для iOS
 }
+
+// Определяем iOS один раз за пределами хука
+function isIOS(): boolean {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+const zxingReader = new BrowserMultiFormatReader();
 
 export function useCamera(): UseCameraReturn {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null); // новое
 
   const [isReady, setIsReady] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<FacingMode>("environment");
+
+  // Выбираем метод один раз при маунте
+  const method: CameraMethod = isIOS() ? "input" : "stream";
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -42,20 +62,22 @@ export function useCamera(): UseCameraReturn {
 
   const startCamera = useCallback(
     async (facing: FacingMode = facingMode) => {
+      // На iOS не запускаем getUserMedia — только через input
+      if (method === "input") return;
+
       setError(null);
       stopCamera();
 
       try {
-        const constraints: MediaStreamConstraints = {
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: facing,
             width: { ideal: 1920 },
             height: { ideal: 1080 },
           },
           audio: false,
-        };
+        });
 
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
         streamRef.current = stream;
 
         if (videoRef.current) {
@@ -66,13 +88,20 @@ export function useCamera(): UseCameraReturn {
         }
       } catch (err) {
         const msg =
-          err instanceof Error ? err.message : "Не удалось получить доступ к камере";
+          err instanceof Error
+            ? err.message
+            : "Не удалось получить доступ к камере";
         setError(msg);
         setIsStreaming(false);
       }
     },
-    [facingMode, stopCamera]
+    [facingMode, method, stopCamera]
   );
+
+  // iOS: открываем системный пикер
+  const openInputCamera = useCallback(() => {
+    inputRef.current?.click();
+  }, []);
 
   const switchCamera = useCallback(async () => {
     const next: FacingMode = facingMode === "user" ? "environment" : "user";
@@ -108,16 +137,39 @@ export function useCamera(): UseCameraReturn {
     return canvas.toDataURL("image/jpeg", 0.92);
   }, [isReady]);
 
+  // Новое: сканируем текущий кадр видео
+  const scanBarcode = useCallback(async (): Promise<string | null> => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas || !isReady) return null;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    try {
+      const result = zxingReader.decodeFromCanvas(canvas);
+      return result.getText();
+    } catch {
+      return null;
+    }
+  }, [isReady]);
+
   return {
     videoRef,
     canvasRef,
+    inputRef,
     isReady,
     isStreaming,
     error,
     facingMode,
+    method,
     startCamera,
     stopCamera,
     takePhoto,
     switchCamera,
+    scanBarcode,
+    openInputCamera,
   };
 }

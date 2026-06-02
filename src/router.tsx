@@ -1,11 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 import { App } from "./App";
-import { HomePage } from "./pages/HomePage.tsx";
-import { AnalyticsPage } from "./pages/AnalyticsPage";
-import { ScannerPage } from "./pages/ScannerPage.tsx";
-import { AIPage } from "./pages/AIPage";
-import { ProfilePage } from "./pages/ProfilePage";
-
 
 export const router = createBrowserRouter([
   {
@@ -14,23 +8,27 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />
+        lazy: () => import("./pages/HomePage").then(m => ({ Component: m.HomePage }))
+      },
+      {
+        path: "onboarding",
+        lazy: () => import("./pages/OnboardingPage").then(m => ({ Component: m.OnboardingPage }))
       },
       {
         path: "analytics",
-        element: <AnalyticsPage />,
+        lazy: () => import("./pages/AnalyticsPage").then(m => ({ Component: m.AnalyticsPage }))
       },
       {
         path: "scanner",
-        element: <ScannerPage />
+        lazy: () => import("./pages/ScannerPage").then(m => ({ Component: m.ScannerPage }))
       },
       {
         path: "ai",
-        element: <AIPage />,
+        lazy: () => import("./pages/AIPage").then(m => ({ Component: m.AIPage }))
       },
       {
         path: "profile",
-        element: <ProfilePage/>,
+        lazy: () => import("./pages/ProfilePage").then(m => ({ Component: m.ProfilePage }))
       },
     ],
   },

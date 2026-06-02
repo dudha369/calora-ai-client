@@ -11,7 +11,7 @@ export const request = async <T = unknown>(
   data?: unknown
 ): Promise<{ data: T }> => {
   return await axios.request({
-    url: `${SERVER_API_URL}/api/${endpoint}`,
+    url: `${SERVER_API_URL}/${endpoint}`,
     method,
     headers: {
       initData: initData.raw() ?? "",

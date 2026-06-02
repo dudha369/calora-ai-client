@@ -10,8 +10,6 @@ const SUGGESTIONS = [
   "Составь план питания на завтра",
 ];
 
-const NAV_HEIGHT = 80;
-
 export const AIPage = () => {
   const theme = useTheme();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -35,7 +33,7 @@ export const AIPage = () => {
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-full" style={{ paddingBottom: NAV_HEIGHT }}>
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-4 pt-5 pb-3 flex items-center gap-2">
         <div

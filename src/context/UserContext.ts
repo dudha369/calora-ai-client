@@ -1,8 +1,8 @@
 import { createContext, useContext } from "react";
-import { type IUser } from "../interfaces/IUser";
+import { type User } from "../interfaces/User";
 
 interface UserContextType {
-  user: IUser | undefined;
+  user: User | undefined;
   isLoading: boolean;
 }
 
