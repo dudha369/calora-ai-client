@@ -11,10 +11,12 @@ export const RouterErrorBoundary = () => {
 
   console.error("Router error caught:", error);
 
-  const handleRetry = () => {
-    const isChunkLoadFailed = error?.message?.includes("Failed to fetch dynamically imported module");
+  const isChunkLoadFailed = error?.message?.includes("Failed to fetch dynamically imported module");
+  const isFetchError = error?.message?.includes("Failed to fetch") || error?.message?.includes("Network Error");
+  const isNetworkError = isChunkLoadFailed || isFetchError || !navigator.onLine;
 
-    if (isChunkLoadFailed) {
+  const handleRetry = () => {
+    if (isChunkLoadFailed || !navigator.onLine) {
       window.location.reload();
     } else {
       navigate(location.pathname, { replace: true });
@@ -23,7 +25,7 @@ export const RouterErrorBoundary = () => {
 
   return (
     <ThemeContext.Provider value={theme}>
-      <ErrorScreen onRetry={handleRetry} />
+      <ErrorScreen onRetry={handleRetry} isNetworkError={isNetworkError} />
     </ThemeContext.Provider>
   );
 };

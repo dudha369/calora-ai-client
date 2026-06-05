@@ -1,13 +1,13 @@
 import { createContext, useContext } from "react";
-import { type User } from "../interfaces/User";
+import { type UserData } from "../interfaces/UserData";
 
 interface UserContextType {
-  user: User | undefined;
+  user_data: UserData | undefined;
   isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextType>({
-  user: undefined,
+  user_data: undefined,
   isLoading: true,
 });
 

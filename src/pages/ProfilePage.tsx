@@ -9,7 +9,7 @@ const MENU_ITEMS = [
 ];
 
 export const ProfilePage = () => {
-  const { user } = useUser();
+  const { user_data } = useUser();
   const theme = useTheme();
 
   return (
@@ -29,15 +29,15 @@ export const ProfilePage = () => {
         </div>
         <div>
           <p className="text-lg font-bold" style={{ color: theme.text_color }}>
-            {user?.name ?? "Пользователь"}
+            {user_data?.user.full_name ?? "Пользователь"}
           </p>
           <p className="text-sm" style={{ color: theme.hint_color }}>
-            ID: {user?.id ?? "—"}
+            ID: {user_data?.user.telegram_id ?? "—"}
           </p>
           <p className="text-xs mt-1" style={{ color: theme.hint_color }}>
             В приложении с{" "}
-            {user?.created_at
-              ? new Date(user.created_at).toLocaleDateString("ru-RU", { month: "long", year: "numeric" })
+            {user_data?.user.created_at
+              ? new Date(user_data.user.created_at).toLocaleDateString("ru-RU", { month: "long", year: "numeric" })
               : "—"}
           </p>
         </div>

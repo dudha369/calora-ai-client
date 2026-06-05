@@ -7,19 +7,21 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  error: Error | null;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
+    error: null,
   };
 
-  public static getDerivedStateFromError(_: Error): State {
-    return { hasError: true };
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error in lazy chunk loading:", error, errorInfo);
+    console.error("Uncaught error in component tree:", error, errorInfo);
   }
 
   private handleRetry = () => {
@@ -28,7 +30,15 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      return <ErrorScreen onRetry={this.handleRetry} />;
+      const errorMsg = this.state.error?.message || "";
+
+      const isNetworkError =
+        !navigator.onLine ||
+        errorMsg.includes("Failed to fetch") ||
+        errorMsg.includes("Network Error") ||
+        errorMsg.includes("dynamically imported module");
+
+      return <ErrorScreen onRetry={this.handleRetry} isNetworkError={isNetworkError} />;
     }
 
     return this.props.children;

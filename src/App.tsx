@@ -4,7 +4,7 @@ import { Outlet, Navigate, useLocation, useNavigation } from "react-router-dom";
 
 import { useQuery } from "react-query";
 import { request } from "./api/request";
-import type { UserResponse } from "./interfaces/User";
+import type { UserData } from "./interfaces/UserData";
 
 import { useTelegram } from "./hooks/useTelegram.ts";
 import { useTelegramLanguage } from './hooks/useTelegramLanguage';
@@ -15,17 +15,17 @@ import { ScannerProvider } from "./providers/ScannerProvider.tsx";
 import logoUrl from './assets/favicon.svg'
 
 export function App(){
-  const { ready, safeTop, theme } = useTelegram();
+  const { ready, safeTop, safeBottom, theme } = useTelegram();
   const minTopToLabel = 26 + 10;
   useTelegramLanguage();
   const location = useLocation();
   const navigation = useNavigation();
 
-  const { data: user, isLoading: isUserLoading } = useQuery({
+  const { data: user_data, isLoading: isUserLoading } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const res = await request<UserResponse>("users/get");
-      return res.data.user;
+      const res = await request<UserData>("users/get/me");
+      return res.data;
     },
     enabled: ready,
   });
@@ -33,7 +33,7 @@ export function App(){
   const isBooting = !ready || isUserLoading;
   const isNavigating = navigation.state === "loading";
 
-  if (!isBooting && user?.needs_onboarding && location.pathname !== "/onboarding") {
+  if (!isBooting && user_data?.needs_onboarding && location.pathname !== "/onboarding") {
     return <Navigate to="/onboarding" replace />;
   }
 
@@ -50,7 +50,7 @@ export function App(){
         {(isBooting || isNavigating) && <LoadingScreen />}
 
         {!isBooting && (
-          <UserContext.Provider value={{ user, isLoading: false }}>
+          <UserContext.Provider value={{ user_data, isLoading: false }}>
             <ScannerProvider>
               {(safeTop >= minTopToLabel) && (
                 <header
@@ -70,7 +70,7 @@ export function App(){
                 <Outlet />
               </main>
 
-              {location.pathname !== "/onboarding" && <NavigationBar />}
+              {location.pathname !== "/onboarding" && <NavigationBar safeBottom={safeBottom}/>}
             </ScannerProvider>
           </UserContext.Provider>
         )}

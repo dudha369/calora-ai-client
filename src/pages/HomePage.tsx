@@ -19,9 +19,9 @@ const Skeleton = ({ className }: { className?: string }) => {
 };
 
 export const HomePage = () => {
-  const { user } = useUser();
+  const { user_data } = useUser();
   const theme = useTheme();
-  const firstName = user?.name ?? "аноним";
+  const firstName = user_data?.user.full_name ?? "аноним";
 
   const {
     dates,

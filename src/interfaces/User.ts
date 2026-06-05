@@ -1,11 +1,10 @@
 export interface User {
-  id: number;
+  telegram_id: number;
+  full_name: string;
+  username: string | null;
+  language_code: string;
+  current_streak: number;
+  max_streak: number;
+  quests_completed : number;
   created_at: string;
-  name: string;
-  needs_onboarding: boolean;
-  onboarding_step: number;
-}
-
-export interface UserResponse {
-  user: User;
 }

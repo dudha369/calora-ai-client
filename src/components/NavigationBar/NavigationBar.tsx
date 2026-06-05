@@ -5,7 +5,11 @@ import { useTheme } from "../../context/ThemeContext";
 
 const ICON_SIZE: number = 24;
 
-export const NavigationBar = () => {
+interface NavigationBarProps {
+  safeBottom: number;
+}
+
+export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
   const theme = useTheme();
 
   return (
@@ -13,7 +17,12 @@ export const NavigationBar = () => {
       className="w-full shrink-0"
       style={{ backgroundColor: theme.secondary_bg_color }}
     >
-      <div className="mx-auto w-full max-w-screen-sm pb-2">
+      <div
+        className="mx-auto w-full max-w-screen-sm"
+        style={{
+          paddingBottom: (safeBottom) ? 8 : 0,
+        }}
+      >
         <nav className="flex h-16 items-center justify-evenly">
           <NavItem to="/" icon={<House size={ICON_SIZE} />} label="Home" />
           <NavItem to="/analytics" icon={<ChartNoAxesColumn size={ICON_SIZE} />} label="Analytics" />
