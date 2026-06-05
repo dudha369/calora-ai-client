@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { themeParams } from "@tma.js/sdk-react";
+import { themeParams } from "@telegram-apps/sdk-react";
 import { getValidTheme } from "../utils/getValidTheme";
 import type { Theme } from "../interfaces/Theme";
 

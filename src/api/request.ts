@@ -1,5 +1,5 @@
 import axios from "axios";
-import { initData } from "@tma.js/sdk-react";
+import { initData } from "@telegram-apps/sdk-react";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 

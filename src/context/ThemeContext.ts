@@ -6,7 +6,7 @@ const DEFAULT_THEME: Theme = {
   text_color: "#000000",
   hint_color: "#707579",
   link_color: "#3390ec",
-  button_color: "#3390ec",
+  button_color: "#90EE90",
   button_text_color: "#ffffff",
   secondary_bg_color: "#f4f4f5",
   header_bg_color: "#ffffff",

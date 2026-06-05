@@ -5,7 +5,7 @@
   --tg-text-color: #000000;
   --tg-hint-color: #707579;
   --tg-link-color: #3390ec;
-  --tg-button-color: #3390ec;
+  --tg-button-color: #90EE90;
   --tg-button-text-color: #ffffff;
   --tg-secondary-bg-color: #f4f4f5;
   --tg-header-bg-color: #ffffff;
@@ -18,26 +18,26 @@
 }
 
 @layer base {
-    *,
-    *::before,
-    *::after {
-        box-sizing: border-box;
-        padding: 0;
-        margin: 0;
-    }
+  *,
+  *::before,
+  *::after {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+  }
 
-    html,
-    body,
-    #root {
-        height: 100%;
-    }
+  html,
+  body,
+  #root {
+    height: 100%;
 
-  body {
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
 
     -webkit-user-select: none;
     user-select: none;
+
+    touch-action: none;
   }
 
   ::-webkit-scrollbar {

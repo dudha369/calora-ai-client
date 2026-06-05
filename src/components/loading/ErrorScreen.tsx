@@ -36,7 +36,7 @@ export const ErrorScreen = ({ onRetry }: ErrorScreenProps) => {
 
       <button
         onClick={onRetry}
-        className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-medium transition-all active:scale-95"
+        className="flex items-center gap-2 mt-4 px-6 py-2.5 rounded-xl text-sm font-medium transition-transform active:scale-95"
         style={{
           backgroundColor: theme.button_color,
           color: theme.button_text_color,

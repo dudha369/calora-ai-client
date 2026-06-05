@@ -11,13 +11,17 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
-    "@tma.js/sdk-react": "^3.0.19",
+    "@telegram-apps/sdk": "^3.11.8",
+    "@telegram-apps/sdk-react": "^3.3.9",
     "@zxing/browser": "^0.2.0",
     "@zxing/library": "^0.22.0",
     "axios": "^1.16.1",
+    "embla-carousel-react": "^8.6.0",
+    "i18next": "^26.3.1",
     "lucide-react": "^1.14.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.8",
     "react-query": "^3.39.3",
     "react-router-dom": "^7.15.0",
     "tailwindcss": "^4.2.4"

@@ -10,7 +10,7 @@ export const NavigationBar = () => {
 
   return (
     <footer
-      className="fixed bottom-0 left-0 z-10 w-full"
+      className="w-full shrink-0"
       style={{ backgroundColor: theme.secondary_bg_color }}
     >
       <div className="mx-auto w-full max-w-screen-sm pb-2">

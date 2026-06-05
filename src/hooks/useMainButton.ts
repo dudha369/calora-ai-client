@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { mainButton } from '@tma.js/sdk-react';
+import { mainButton } from '@telegram-apps/sdk-react';
 import { useTelegram } from './useTelegram';
 import type { MainButtonOptions } from '../interfaces/MainButtonOptions.ts'
 
@@ -18,39 +18,31 @@ export function useMainButton({
 
   useEffect(() => {
     if (!ready) return;
-    try {
-      if (!mainButton.isMounted()) mainButton.mount();
-      mainButton.show();
-    } catch {}
+    if (!mainButton.isMounted()) mainButton.mount();
+    mainButton.setParams({ isVisible: true });
 
     return () => {
-      try {
-        mainButton.hide();
-        if (mainButton.isMounted()) mainButton.unmount();
-      } catch {}
+      mainButton.setParams({ isVisible: false });
+      if (mainButton.isMounted()) mainButton.unmount();
     };
   }, [ready]);
 
   useEffect(() => {
     if (!ready) return;
-    try {
-      return mainButton.onClick(() => onClickRef.current());
-    } catch {}
+    return mainButton.onClick(() => onClickRef.current());
   }, [ready]);
 
   useEffect(() => {
     if (!ready) return;
-    try { mainButton.setText(text); } catch {}
+    mainButton.setParams({ text });
   }, [ready, text]);
 
   useEffect(() => {
     if (!ready) return;
-    try {
-      if (isEnabled && !isLoading) {
-        mainButton.enable();
-      } else {
-        mainButton.disable();
-      }
-    } catch {}
+    if (isEnabled && !isLoading) {
+      mainButton.setParams({ isEnabled: true });
+    } else {
+      mainButton.setParams({ isEnabled: false });
+    }
   }, [ready, isEnabled, isLoading]);
 }

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { init, initData, viewport, themeParams } from "@tma.js/sdk-react";
+import { init, initData, viewport, themeParams } from "@telegram-apps/sdk-react";
 import { isMobileDevice } from "../utils/device";
 
 function requestSafeAreaUpdate() {
