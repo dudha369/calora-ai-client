@@ -24,7 +24,7 @@ export function App(){
   const { data: user_data, isLoading: isUserLoading } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      const res = await request<UserData>("users/get/me");
+      const res = await request<UserData>("users/me");
       return res.data;
     },
     enabled: ready,
