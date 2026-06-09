@@ -80,7 +80,7 @@ export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
         <img
           src="/qr_code.png"
           alt="QR-код бота"
-          className="w-40 h-40 rounded-2xl mt-2"
+          className="w-48 h-50 mt-2"
         />
       )}
 
