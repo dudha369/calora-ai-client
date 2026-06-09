@@ -4,6 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { TelegramRootProvider } from "./providers/TelegramRootProvider";
+import { ThemeProvider } from "./providers/ThemeProvider";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -18,7 +19,9 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <TelegramRootProvider>
-      <RouterProvider router={router} />
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </TelegramRootProvider>
   </QueryClientProvider>
 );

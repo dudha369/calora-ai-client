@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
-import { useTelegram } from '../../../hooks/useTelegram';
+import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
 const OPTIONS = [
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const Step8Restrictions = ({ data, onChange }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const [selected, setSelected] = useState<string[]>(data.dietary_restrictions ?? []);
   const [allergyNote, setAllergyNote] = useState(data.allergy_note ?? '');
 

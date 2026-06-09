@@ -1,8 +1,6 @@
 import { useRouteError, useNavigate, useLocation } from "react-router-dom";
 import { ErrorScreen } from "./ErrorScreen";
 import type { ErrorType } from "./ErrorScreen";
-import { useTelegram } from "../../hooks/useTelegram";
-import ThemeContext from "../../context/ThemeContext";
 
 function classifyRouteError(error: unknown): ErrorType {
   const msg = (error as Error)?.message || "";
@@ -16,7 +14,6 @@ export const RouterErrorBoundary = () => {
   const error = useRouteError();
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme } = useTelegram();
 
   console.error("Router error caught:", error);
 
@@ -30,9 +27,5 @@ export const RouterErrorBoundary = () => {
     }
   };
 
-  return (
-    <ThemeContext.Provider value={theme}>
-      <ErrorScreen errorType={errorType} onRetry={handleRetry} />
-    </ThemeContext.Provider>
-  );
+  return <ErrorScreen errorType={errorType} onRetry={handleRetry} />;
 };

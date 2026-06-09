@@ -1,5 +1,6 @@
 import type { ThemeParams } from "telegram-web-app";
 import type { Theme, ThemeMode } from "../interfaces/Theme";
+import { makeContrast } from "./colors";
 
 const LIGHT: Theme = {
   bg_color: "#ffffff",
@@ -27,7 +28,7 @@ const DARK: Theme = {
   button_text_color: "#ffffff",
   secondary_bg_color: "#232323",
   header_bg_color: "#171717",
-  section_bg_color: "#171717",
+  section_bg_color: "#232323",
   section_header_text_color: "#98989d",
   subtitle_text_color: "#98989d",
   destructive_text_color: "#ff453a",
@@ -49,8 +50,7 @@ function isDarkTheme(bgColor: string): boolean {
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
 }
 
 function buildTelegramTheme(params?: ThemeParams): Theme {
@@ -58,26 +58,48 @@ function buildTelegramTheme(params?: ThemeParams): Theme {
   const base = dark ? DARK : LIGHT;
 
   return {
-    bg_color: normalizeHex(params?.bg_color, base.bg_color),
-    text_color: normalizeHex(params?.text_color, base.text_color),
-    hint_color: normalizeHex(params?.hint_color, base.hint_color),
-    link_color: normalizeHex(params?.link_color, base.link_color),
-    button_color: normalizeHex(params?.button_color, base.button_color),
-    button_text_color: normalizeHex(params?.button_text_color, base.button_text_color),
-    secondary_bg_color: normalizeHex(params?.secondary_bg_color, base.secondary_bg_color),
-    header_bg_color: normalizeHex(params?.header_bg_color, base.header_bg_color),
-    section_bg_color: normalizeHex(params?.section_bg_color, base.section_bg_color),
-    section_header_text_color: normalizeHex(params?.section_header_text_color, base.section_header_text_color),
-    subtitle_text_color: normalizeHex(params?.subtitle_text_color, base.subtitle_text_color),
-    destructive_text_color: normalizeHex(params?.destructive_text_color, base.destructive_text_color),
-    accent_text_color: normalizeHex(params?.accent_text_color, base.accent_text_color),
-    section_separator_color: normalizeHex(params?.section_separator_color, base.section_separator_color),
+    bg_color:                    normalizeHex(params?.bg_color,                    base.bg_color),
+    text_color:                  normalizeHex(params?.text_color,                  base.text_color),
+    hint_color:                  normalizeHex(params?.hint_color,                  base.hint_color),
+    link_color:                  normalizeHex(params?.link_color,                  base.link_color),
+    button_color:                normalizeHex(params?.button_color,                base.button_color),
+    button_text_color:           normalizeHex(params?.button_text_color,           base.button_text_color),
+    secondary_bg_color:          normalizeHex(params?.secondary_bg_color,          base.secondary_bg_color),
+    header_bg_color:             normalizeHex(params?.header_bg_color,             base.header_bg_color),
+    section_bg_color:            normalizeHex(params?.section_bg_color,            base.section_bg_color),
+    section_header_text_color:   normalizeHex(params?.section_header_text_color,   base.section_header_text_color),
+    subtitle_text_color:         normalizeHex(params?.subtitle_text_color,         base.subtitle_text_color),
+    destructive_text_color:      normalizeHex(params?.destructive_text_color,      base.destructive_text_color),
+    accent_text_color:           normalizeHex(params?.accent_text_color,           base.accent_text_color),
+    section_separator_color:     normalizeHex(params?.section_separator_color,     base.section_separator_color),
   };
+}
+
+export function normalizeTheme(theme: Theme): Theme {
+  let { section_bg_color, secondary_bg_color } = theme;
+  const { bg_color } = theme;
+
+  const sectionMatchesBg   = section_bg_color   === bg_color;
+  const secondaryMatchesBg = secondary_bg_color === bg_color;
+
+  if (sectionMatchesBg && secondaryMatchesBg) {
+    const contrast = makeContrast(bg_color);
+    return { ...theme, section_bg_color: contrast, secondary_bg_color: contrast };
+  }
+
+  if (sectionMatchesBg) {
+    section_bg_color = secondary_bg_color;
+  }
+
+  if (secondaryMatchesBg) {
+    secondary_bg_color = section_bg_color;
+  }
+
+  return { ...theme, section_bg_color, secondary_bg_color };
 }
 
 export const getValidTheme = (params: ThemeParams | undefined, mode: ThemeMode): Theme => {
   if (mode === "light") return LIGHT;
-  if (mode === "dark") return DARK;
-  // "telegram" | "auto" — both use Telegram theme params
-  return buildTelegramTheme(params);
+  else if (mode === "dark")  return DARK;
+  return normalizeTheme(buildTelegramTheme(params));
 };

@@ -1,8 +1,8 @@
 import { Sprout } from 'lucide-react';
-import { useTelegram } from '../../hooks/useTelegram';
+import { useTheme } from '../../context/ThemeContext';
 
 export const LoadingScreen = () => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
 
   return (
     <div

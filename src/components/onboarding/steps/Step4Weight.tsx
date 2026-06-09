@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
-import { useTelegram } from '../../../hooks/useTelegram';
+import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData, WeightUnit } from '../../../interfaces/Onboarding';
 
 const KG_MIN = 30;
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const Step4Weight = ({ data, onChange }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const [kg, setKg] = useState(data.weight ?? KG_DEFAULT);
   const [unit, setUnit] = useState<WeightUnit>(data.weight_unit ?? 'kg');
 

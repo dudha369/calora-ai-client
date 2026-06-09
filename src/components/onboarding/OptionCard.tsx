@@ -1,4 +1,4 @@
-import { useTelegram } from '../../hooks/useTelegram';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   label: string;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const OptionCard = ({ label, description, isSelected, onClick }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   return (
     <button
       onClick={onClick}

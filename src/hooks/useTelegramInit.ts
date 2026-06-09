@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { init, initData, viewport, themeParams } from "@telegram-apps/sdk-react";
+import { init, initData, viewport, themeParams, cloudStorage } from "@telegram-apps/sdk-react";
 import { isMobileDevice } from "../utils/device";
 
 function requestSafeAreaUpdate() {
@@ -21,6 +21,9 @@ export function useTelegramInit(onReady: () => void) {
         init();
         initData.restore();
         themeParams.mount();
+
+        try { cloudStorage.mount(); } catch {}
+
         await viewport.mount();
         viewport.expand();
 

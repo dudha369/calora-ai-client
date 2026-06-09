@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { useTelegram } from '../../hooks/useTelegram';
+import { useTheme } from '../../context/ThemeContext';
 
 interface Props {
   title: string;
@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const StepShell = ({ title, subtitle, children }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   return (
     <div className="flex flex-col gap-6 px-4 pt-6 pb-8">
       <div>

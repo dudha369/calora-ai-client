@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
-import { useTelegram } from '../../../hooks/useTelegram';
+import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export const Step6TargetWeight = ({ data, onChange }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const [raw, setRaw] = useState(data.target_weight?.toString() ?? '');
 
   const isLose = data.goal === 'lose';

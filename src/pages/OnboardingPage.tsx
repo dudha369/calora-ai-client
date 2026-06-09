@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from 'react-query';
 import { cloudStorage } from '@telegram-apps/sdk-react';
 
+import { useTheme } from '../context/ThemeContext';
 import { useTelegram } from '../hooks/useTelegram';
 import { useMainButton } from '../hooks/useMainButton';
 import { useBackButton } from '../hooks/useBackButton';
@@ -87,7 +88,8 @@ const INITIAL_DATA: Partial<OnboardingData> = {
 };
 
 export const OnboardingPage = () => {
-  const { safeTop, safeBottom, theme } = useTelegram();
+  const { safeTop, safeBottom} = useTelegram()
+  const theme = useTheme();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 

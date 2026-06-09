@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
-import { useTelegram } from '../../../hooks/useTelegram';
+import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
 const OPTIONS = [
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const Step10Medical = ({ data, onChange }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const [selected, setSelected] = useState<string[]>(data.medical_conditions ?? []);
 
   const toggle = (opt: string) => {

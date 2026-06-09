@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
-import { useTelegram } from '../../../hooks/useTelegram';
+import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData, WaterTrack } from '../../../interfaces/Onboarding';
 
 // weight(kg) × 33 ml — standard recommendation
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const Step9Water = ({ data, onChange }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const autoGoal = calcAuto(data.weight);
 
   const [track, setTrack] = useState<WaterTrack | undefined>(data.water_track);

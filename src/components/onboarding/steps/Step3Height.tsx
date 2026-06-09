@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
-import { useTelegram } from '../../../hooks/useTelegram';
+import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData, HeightUnit } from '../../../interfaces/Onboarding';
 
 const CM_MIN = 140;
@@ -20,7 +20,7 @@ interface Props {
 }
 
 export const Step3Height = ({ data, onChange }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const [cm, setCm] = useState(data.height ?? CM_DEFAULT);
   const [unit, setUnit] = useState<HeightUnit>(data.height_unit ?? 'cm');
 

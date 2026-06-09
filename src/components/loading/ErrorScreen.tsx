@@ -1,5 +1,5 @@
 import type { ElementType } from "react";
-import { useTelegram } from "../../hooks/useTelegram";
+import { useTheme } from '../../context/ThemeContext';
 import { WifiOff, RefreshCw, AlertTriangle, ShieldAlert, Lock } from "lucide-react";
 
 /**
@@ -35,7 +35,7 @@ const CONFIG: Record<
   no_telegram: {
     Icon: ShieldAlert,
     title: "Ошибка аутентификации",
-    subtitle: "Откройте приложение через Telegram",
+    subtitle: "Откройте приложение через <a href='https://t.me/CaloraAIBot'>Telegram</a>",
     showRetry: false,
   },
   access_denied: {
@@ -47,7 +47,7 @@ const CONFIG: Record<
 };
 
 export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const { Icon, title, subtitle, showRetry } = CONFIG[errorType];
 
   return (
@@ -75,14 +75,6 @@ export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
           {subtitle}
         </p>
       </div>
-
-      {errorType === "no_telegram" && (
-        <img
-          src="/qr_code.png"
-          alt="QR-код бота"
-          className="w-48 h-50 mt-2"
-        />
-      )}
 
       {showRetry && onRetry && (
         <button

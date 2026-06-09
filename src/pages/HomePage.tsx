@@ -9,7 +9,6 @@ import { CalendarPicker } from "../components/CalendarPicker";
 import { useDateStrip }   from "../hooks/useDateStrip";
 import { stats }          from "../api/stats";
 import { toApiDate, startOfDay } from "../utils/date";
-import {makeContrast} from "../utils/colors.ts";
 
 const Skeleton = ({ className }: { className?: string }) => {
   const theme = useTheme();
@@ -25,18 +24,9 @@ export const HomePage = () => {
   const { user_data } = useUser();
   const theme = useTheme();
 
-  const contrast_color =
-    theme.section_bg_color === theme.bg_color ?
-      theme.secondary_bg_color === theme.bg_color ?
-        makeContrast(theme.bg_color)
-        : theme.secondary_bg_color
-      : theme.section_bg_color;
-
-
   const { dates, selectedDate, selectedDateStr, isToday, monthKey, today, selectDate } =
     useDateStrip();
 
-  // Статистика за выбранный день
   const { isLoading: statsLoading } = useQuery({
     queryKey:         ["stats", "daily", selectedDateStr],
     queryFn:          async () => (await stats.getDaily(selectedDateStr)).data,
@@ -44,7 +34,6 @@ export const HomePage = () => {
     keepPreviousData: true,
   });
 
-  // Активные даты для окраски ячеек карусели
   const rangeFrom = toApiDate(dates[0]);
   const rangeTo   = toApiDate(dates[dates.length - 1]);
 
@@ -60,51 +49,33 @@ export const HomePage = () => {
   );
 
   const createdAt = user_data?.user.created_at;
-
-  const minDate = useMemo(
-    () =>
-      createdAt
-        ? startOfDay(new Date(createdAt))
-        : today,
+  const minDate   = useMemo(
+    () => (createdAt ? startOfDay(new Date(createdAt)) : today),
     [createdAt, today],
   );
 
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  const handleCalendarSelect = (date: Date) => {
-    selectDate(date);
-    setCalendarOpen(false);
-  };
-
   return (
     <div className="flex flex-col gap-2 px-4 pt-5">
-
       <section className="flex px-1 justify-between">
         <div className="flex gap-1 items-center">
           <span
             className="text-2xl leading-none font-semibold tracking-wide"
-            style={{
-              color: theme.text_color,
-            }}
+            style={{ color: theme.text_color }}
           >
             Calora AI
           </span>
           <Sprout className="text-[#90EE90]" size={22} />
         </div>
 
-
         <div className="flex items-center gap-2">
           <div
             className="flex items-center gap-0.5 px-2 rounded-2xl"
-            style={{
-              backgroundColor: contrast_color,
-              color: theme.text_color,
-            }}
+            style={{ backgroundColor: theme.section_bg_color, color: theme.text_color }}
           >
             <Flame size={18} />
-            <span className="text-lg">
-              {user_data?.user.current_streak ?? 0}
-            </span>
+            <span className="text-lg">{user_data?.user.current_streak ?? 0}</span>
           </div>
 
           <button
@@ -157,11 +128,10 @@ export const HomePage = () => {
           value={selectedDate}
           minDate={minDate}
           maxDate={today}
-          onSelect={handleCalendarSelect}
+          onSelect={(date) => { selectDate(date); setCalendarOpen(false); }}
           onClose={() => setCalendarOpen(false)}
         />
       )}
-
     </div>
   );
 };

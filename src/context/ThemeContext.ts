@@ -1,25 +1,35 @@
 import { createContext, useContext } from "react";
-import type { Theme } from "../interfaces/Theme";
+import type { Theme, ThemeMode } from "../interfaces/Theme";
+import { getValidTheme } from "../utils/getValidTheme";
 
-const DEFAULT_THEME: Theme = {
-  bg_color: "#ffffff",
-  text_color: "#000000",
-  hint_color: "#707579",
-  link_color: "#3390ec",
-  button_color: "#90EE90",
-  button_text_color: "#ffffff",
-  secondary_bg_color: "#f4f4f5",
-  header_bg_color: "#ffffff",
-  section_bg_color: "#ffffff",
-  section_header_text_color: "#707579",
-  subtitle_text_color: "#707579",
-  destructive_text_color: "#ff3b30",
-  accent_text_color: "#3390ec",
-  section_separator_color: "#d9d9d9",
+export interface ThemeContextValue {
+  theme:   Theme;
+  mode:    ThemeMode;
+  setMode: (mode: ThemeMode) => Promise<void>;
+}
+
+const DEFAULT_VALUE: ThemeContextValue = {
+  theme:   getValidTheme(undefined, "light"),
+  mode:    "telegram",
+  setMode: async () => {},
 };
 
-const ThemeContext = createContext<Theme>(DEFAULT_THEME);
+const ThemeContext = createContext<ThemeContextValue>(DEFAULT_VALUE);
 
-export const useTheme = () => useContext(ThemeContext);
+/**
+ * Хук для получения текущей темы.
+ * Обратно совместим: по-прежнему возвращает Theme,
+ * поэтому все существующие компоненты не нужно трогать.
+ */
+export const useTheme = (): Theme => useContext(ThemeContext).theme;
+
+/**
+ * Хук для чтения и изменения режима темы.
+ * Используется на странице настроек.
+ */
+export const useThemeMode = () => {
+  const { mode, setMode } = useContext(ThemeContext);
+  return { mode, setMode };
+};
 
 export default ThemeContext;

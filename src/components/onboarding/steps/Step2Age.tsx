@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
-import { useTelegram } from '../../../hooks/useTelegram';
+import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
 const MIN = 13;
@@ -12,7 +12,7 @@ interface Props {
 }
 
 export const Step2Age = ({ data, onChange }: Props) => {
-  const { theme } = useTelegram();
+  const theme = useTheme();
   const [raw, setRaw] = useState(data.age?.toString() ?? '');
 
   const handleChange = (val: string) => {
