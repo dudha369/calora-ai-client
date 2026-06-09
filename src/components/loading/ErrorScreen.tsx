@@ -1,19 +1,54 @@
-import { useTelegram } from "../../hooks/useTelegram.ts";
-import { WifiOff, RefreshCw, AlertTriangle } from "lucide-react";
+import type { ElementType } from "react";
+import { useTelegram } from "../../hooks/useTelegram";
+import { WifiOff, RefreshCw, AlertTriangle, ShieldAlert, Lock } from "lucide-react";
+
+/**
+ * errorType values:
+ *  - "network"       — no internet / chunk load failed
+ *  - "general"       — unexpected runtime error
+ *  - "no_telegram"   — opened outside Telegram (401 / no initData)
+ *  - "access_denied" — user is not on the whitelist (403)
+ */
+export type ErrorType = "network" | "general" | "no_telegram" | "access_denied";
 
 interface ErrorScreenProps {
-  onRetry: () => void;
-  isNetworkError: boolean;
+  errorType: ErrorType;
+  onRetry?: () => void;
 }
 
-export const ErrorScreen = ({ onRetry, isNetworkError }: ErrorScreenProps) => {
-  const { theme } = useTelegram();
+const CONFIG: Record<
+  ErrorType,
+  { Icon: ElementType; title: string; subtitle: string; showRetry: boolean }
+> = {
+  network: {
+    Icon: WifiOff,
+    title: "Ошибка подключения",
+    subtitle: "Проверьте интернет-соединение",
+    showRetry: true,
+  },
+  general: {
+    Icon: AlertTriangle,
+    title: "Непредвиденная ошибка",
+    subtitle: "Что-то пошло не так. Попробуйте еще раз.",
+    showRetry: true,
+  },
+  no_telegram: {
+    Icon: ShieldAlert,
+    title: "Ошибка аутентификации",
+    subtitle: "Откройте приложение через Telegram",
+    showRetry: false,
+  },
+  access_denied: {
+    Icon: Lock,
+    title: "Нет доступа",
+    subtitle: "У вас нет доступа к этому приложению",
+    showRetry: false,
+  },
+};
 
-  const Icon = isNetworkError ? WifiOff : AlertTriangle;
-  const title = isNetworkError ? "Ошибка подключения" : "Непредвиденная ошибка";
-  const subtitle = isNetworkError
-    ? "Проверьте интернет-соединение"
-    : "Что-то пошло не так. Попробуйте еще раз.";
+export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
+  const { theme } = useTelegram();
+  const { Icon, title, subtitle, showRetry } = CONFIG[errorType];
 
   return (
     <div
@@ -41,17 +76,27 @@ export const ErrorScreen = ({ onRetry, isNetworkError }: ErrorScreenProps) => {
         </p>
       </div>
 
-      <button
-        onClick={onRetry}
-        className="flex items-center gap-2 mt-6 px-6 py-2.5 rounded-xl text-base leading-none font-medium transition-transform duration-300 active:scale-95"
-        style={{
-          backgroundColor: theme.button_color,
-          color: theme.button_text_color,
-        }}
-      >
-        <RefreshCw size={16} />
-        Повторить
-      </button>
+      {errorType === "no_telegram" && (
+        <img
+          src="/qr_code.png"
+          alt="QR-код бота"
+          className="w-40 h-40 rounded-2xl mt-2"
+        />
+      )}
+
+      {showRetry && onRetry && (
+        <button
+          onClick={onRetry}
+          className="flex items-center gap-2 mt-6 px-6 py-2.5 rounded-xl text-base leading-none font-medium transition-transform duration-300 active:scale-95"
+          style={{
+            backgroundColor: theme.button_color,
+            color: theme.button_text_color,
+          }}
+        >
+          <RefreshCw size={16} />
+          Повторить
+        </button>
+      )}
     </div>
   );
 };

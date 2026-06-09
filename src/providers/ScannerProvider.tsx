@@ -1,8 +1,8 @@
 import { useRef, useCallback, type ReactNode } from "react";
-import { ScannerContext } from "../context/ScannerContext.ts";
+import ScannerContext from "../context/ScannerContext";
 
 
-export const ScannerProvider = ({ children }: { children: ReactNode }) => {
+export default function ScannerProvider({ children }: { children: ReactNode }) {
   const captureRef = useRef<(() => void) | null>(null);
 
   const registerCapture = useCallback((fn: () => void) => {

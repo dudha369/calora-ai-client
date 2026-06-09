@@ -1,39 +1,28 @@
 import { LoadingScreen } from "./components/loading/LoadingScreen";
+import { ErrorScreen } from "./components/loading/ErrorScreen";
 import { NavigationBar } from "./components/NavigationBar/NavigationBar";
 import { Outlet, Navigate, useLocation, useNavigation } from "react-router-dom";
 
-import { useQuery } from "react-query";
-import { request } from "./api/request";
-import type { UserData } from "./interfaces/UserData";
-
-import { useTelegram } from "./hooks/useTelegram.ts";
-import { useTelegramLanguage } from './hooks/useTelegramLanguage';
+import { useTelegram } from "./hooks/useTelegram";
+import { useTelegramLanguage } from "./hooks/useTelegramLanguage";
+import { useUserSession } from "./hooks/useUserSession";
 import ThemeContext from "./context/ThemeContext";
 import UserContext from "./context/UserContext";
-import { ScannerProvider } from "./providers/ScannerProvider.tsx";
+import ScannerProvider from "./providers/ScannerProvider";
 
-import logoUrl from './assets/favicon.svg'
-
-export function App(){
+export function App() {
   const { ready, safeTop, safeBottom, theme } = useTelegram();
-  const minTopToLabel = 26 + 10;
   useTelegramLanguage();
+
   const location = useLocation();
   const navigation = useNavigation();
+  const session = useUserSession(ready);
 
-  const { data: user_data, isLoading: isUserLoading } = useQuery({
-    queryKey: ["user"],
-    queryFn: async () => {
-      const res = await request<UserData>("users/me");
-      return res.data;
-    },
-    enabled: ready,
-  });
-
-  const isBooting = !ready || isUserLoading;
-  const isNavigating = navigation.state === "loading";
-
-  if (!isBooting && user_data?.needs_onboarding && location.pathname !== "/onboarding") {
+  if (
+    session.status === "ready" &&
+    session.userData?.needs_onboarding &&
+    location.pathname !== "/onboarding"
+  ) {
     return <Navigate to="/onboarding" replace />;
   }
 
@@ -47,33 +36,25 @@ export function App(){
           paddingTop: safeTop,
         }}
       >
-        {(isBooting || isNavigating) && <LoadingScreen />}
-
-        {!isBooting && (
-          <UserContext.Provider value={{ user_data, isLoading: false }}>
+        {session.status === "booting" || navigation.state === "loading" ? (
+          <LoadingScreen />
+        ) : session.status === "auth_error" ? (
+          <ErrorScreen errorType="no_telegram" />
+        ) : session.status === "access_denied" ? (
+          <ErrorScreen errorType="access_denied" />
+        ) : session.status === "ready" ? (
+          <UserContext.Provider value={{ user_data: session.userData, isLoading: false }}>
             <ScannerProvider>
-              {(safeTop >= minTopToLabel) && (
-                <header
-                  className="fixed flex gap-px items-center top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full"
-                  style={{
-                    top: safeTop - minTopToLabel,
-                    backgroundColor: theme.button_color,
-                    color: theme.button_text_color,
-                  }}
-                >
-                  <img src={logoUrl} height={24} width={24} />
-                  <span className="text-sm leading-none font-semibold tracking-wide uppercase px-1">Calora AI</span>
-                </header>
-              )}
-
-              <main className="flex-1 overflow-y-auto">
+              <main className="flex-1 overflow-y-auto flex flex-col relative">
                 <Outlet />
               </main>
 
-              {location.pathname !== "/onboarding" && <NavigationBar safeBottom={safeBottom}/>}
+              {location.pathname !== "/onboarding" && (
+                <NavigationBar safeBottom={safeBottom} />
+              )}
             </ScannerProvider>
           </UserContext.Provider>
-        )}
+        ) : null}
       </div>
     </ThemeContext.Provider>
   );

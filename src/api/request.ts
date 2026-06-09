@@ -4,6 +4,7 @@ import { initData } from "@telegram-apps/sdk-react";
 type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL;
+const DEBUG_INIT_DATA = import.meta.env.VITE_DEBUG_INIT_DATA ?? "";
 
 export const request = async <T = unknown>(
   endpoint: string,
@@ -14,7 +15,7 @@ export const request = async <T = unknown>(
     url: `${SERVER_API_URL}/${endpoint}`,
     method,
     headers: {
-      initData: initData.raw() ?? "",
+      initData: initData.raw() || DEBUG_INIT_DATA,
       Accept: "application/json",
       "Content-Type": "application/json",
     },

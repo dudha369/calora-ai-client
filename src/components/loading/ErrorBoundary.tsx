@@ -1,5 +1,6 @@
 import { Component, type ReactNode, type ErrorInfo } from "react";
 import { ErrorScreen } from "./ErrorScreen";
+import type { ErrorType } from "./ErrorScreen";
 
 interface Props {
   children: ReactNode;
@@ -8,6 +9,19 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+}
+
+function classifyError(error: Error | null): ErrorType {
+  const msg = error?.message || "";
+  if (
+    !navigator.onLine ||
+    msg.includes("Failed to fetch") ||
+    msg.includes("Network Error") ||
+    msg.includes("dynamically imported module")
+  ) {
+    return "network";
+  }
+  return "general";
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -30,15 +44,12 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      const errorMsg = this.state.error?.message || "";
-
-      const isNetworkError =
-        !navigator.onLine ||
-        errorMsg.includes("Failed to fetch") ||
-        errorMsg.includes("Network Error") ||
-        errorMsg.includes("dynamically imported module");
-
-      return <ErrorScreen onRetry={this.handleRetry} isNetworkError={isNetworkError} />;
+      return (
+        <ErrorScreen
+          errorType={classifyError(this.state.error)}
+          onRetry={this.handleRetry}
+        />
+      );
     }
 
     return this.props.children;

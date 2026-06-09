@@ -1,4 +1,6 @@
 import { createContext } from "react";
-import type { ScannerContextValue } from "../interfaces/ScannerContextValue.ts";
+import type { ScannerContextValue } from "../interfaces/ScannerContextValue";
 
-export const ScannerContext = createContext<ScannerContextValue | null>(null)
+const ScannerContext = createContext<ScannerContextValue | null>(null)
+
+export default ScannerContext;

@@ -2,7 +2,7 @@ import { type ReactNode, useState } from "react";
 import { useTelegramInit } from "../hooks/useTelegramInit";
 import { useTelegramTheme } from "../hooks/useTelegramTheme";
 import { useTelegramLayout } from "../hooks/useTelegramLayout";
-import { TelegramContext } from "../context/TelegramContext.ts";
+import { TelegramContext } from "../context/TelegramContext";
 
 export function TelegramRootProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);

@@ -1,7 +1,8 @@
 import { NavItem } from "./NavItem";
-import { FabButton } from "./FabButton.tsx";
+import { FabButton } from "./FabButton";
 import { House, ChartNoAxesColumn, Plus, Camera, Sparkles, User } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
+import {makeContrast} from "../../utils/colors.ts";
 
 const ICON_SIZE: number = 24;
 
@@ -12,10 +13,17 @@ interface NavigationBarProps {
 export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
   const theme = useTheme();
 
+  const navbar_color =
+    theme.secondary_bg_color === theme.bg_color ?
+      theme.section_bg_color === theme.bg_color ?
+        makeContrast(theme.bg_color)
+        : theme.section_bg_color
+      : theme.secondary_bg_color;
+
   return (
     <footer
       className="w-full shrink-0"
-      style={{ backgroundColor: theme.secondary_bg_color }}
+      style={{ backgroundColor: navbar_color }}
     >
       <div
         className="mx-auto w-full max-w-screen-sm"
@@ -32,6 +40,7 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
             icon={<Plus size={ICON_SIZE + 8} />}
             activeIcon={<Camera size={ICON_SIZE + 8} />}
             label="Scanner"
+            navbarColor={navbar_color}
           />
 
           <NavItem to="/ai" icon={<Sparkles size={ICON_SIZE} />} label="AI" />

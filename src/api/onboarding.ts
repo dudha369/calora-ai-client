@@ -10,4 +10,8 @@ export const onboarding = {
 
   complete: () =>
     request('onboarding/complete', 'POST'),
+
+  /** DEBUG: сбрасывает профиль, цели и черновик. После вызова — нужен онбординг. */
+  reset: () =>
+    request('onboarding/reset', 'DELETE'),
 };

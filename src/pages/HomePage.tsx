@@ -1,12 +1,15 @@
-import { useMemo } from "react";
-import { useQuery } from "react-query";
+import { useMemo, useState } from "react";
+import { useQuery }     from "react-query";
+import { Sprout, Flame, CalendarDays } from "lucide-react";
 
-import { useUser }       from "../context/UserContext";
-import { useTheme }      from "../context/ThemeContext";
-import { DateStrip }     from "../components/DateStrip/DateStrip";
-import { useDateStrip }  from "../hooks/useDateStrip";
-import { stats }         from "../api/stats";
-import { toApiDate }     from "../utils/date";
+import { useUser }        from "../context/UserContext";
+import { useTheme }       from "../context/ThemeContext";
+import { DateStrip }      from "../components/DateStrip/DateStrip";
+import { CalendarPicker } from "../components/CalendarPicker";
+import { useDateStrip }   from "../hooks/useDateStrip";
+import { stats }          from "../api/stats";
+import { toApiDate, startOfDay } from "../utils/date";
+import {makeContrast} from "../utils/colors.ts";
 
 const Skeleton = ({ className }: { className?: string }) => {
   const theme = useTheme();
@@ -21,18 +24,19 @@ const Skeleton = ({ className }: { className?: string }) => {
 export const HomePage = () => {
   const { user_data } = useUser();
   const theme = useTheme();
-  const firstName = user_data?.user.full_name ?? "аноним";
 
-  const {
-    dates,
-    selectedDate,
-    selectedDateStr,
-    isToday,
-    monthKey,
-    today,
-    selectDate,
-  } = useDateStrip();
+  const contrast_color =
+    theme.section_bg_color === theme.bg_color ?
+      theme.secondary_bg_color === theme.bg_color ?
+        makeContrast(theme.bg_color)
+        : theme.secondary_bg_color
+      : theme.section_bg_color;
 
+
+  const { dates, selectedDate, selectedDateStr, isToday, monthKey, today, selectDate } =
+    useDateStrip();
+
+  // Статистика за выбранный день
   const { isLoading: statsLoading } = useQuery({
     queryKey:         ["stats", "daily", selectedDateStr],
     queryFn:          async () => (await stats.getDaily(selectedDateStr)).data,
@@ -40,6 +44,7 @@ export const HomePage = () => {
     keepPreviousData: true,
   });
 
+  // Активные даты для окраски ячеек карусели
   const rangeFrom = toApiDate(dates[0]);
   const rangeTo   = toApiDate(dates[dates.length - 1]);
 
@@ -54,41 +59,77 @@ export const HomePage = () => {
     [activeDatesData],
   );
 
-  const dateLabel = isToday
-    ? new Date().toLocaleDateString("ru-RU", {
-      weekday: "long",
-      day:     "numeric",
-      month:   "long",
-    })
-    : selectedDate.toLocaleDateString("ru-RU", {
-      weekday: "long",
-      day:     "numeric",
-      month:   "long",
-    });
+  const createdAt = user_data?.user.created_at;
+
+  const minDate = useMemo(
+    () =>
+      createdAt
+        ? startOfDay(new Date(createdAt))
+        : today,
+    [createdAt, today],
+  );
+
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
+  const handleCalendarSelect = (date: Date) => {
+    selectDate(date);
+    setCalendarOpen(false);
+  };
 
   return (
-    <div className="flex flex-col gap-5 pt-5">
-      <section className="px-4">
-        <p className="text-sm capitalize" style={{ color: theme.hint_color }}>
-          {dateLabel}
-        </p>
-        <h1 className="text-2xl font-bold mt-0.5" style={{ color: theme.text_color }}>
-          Привет, {firstName} 👋
-        </h1>
+    <div className="flex flex-col gap-2 px-4 pt-5">
+
+      <section className="flex px-1 justify-between">
+        <div className="flex gap-1 items-center">
+          <span
+            className="text-2xl leading-none font-semibold tracking-wide"
+            style={{
+              color: theme.text_color,
+            }}
+          >
+            Calora AI
+          </span>
+          <Sprout className="text-[#90EE90]" size={22} />
+        </div>
+
+
+        <div className="flex items-center gap-2">
+          <div
+            className="flex items-center gap-0.5 px-2 rounded-2xl"
+            style={{
+              backgroundColor: contrast_color,
+              color: theme.text_color,
+            }}
+          >
+            <Flame size={18} />
+            <span className="text-lg">
+              {user_data?.user.current_streak ?? 0}
+            </span>
+          </div>
+
+          <button
+            onClick={() => setCalendarOpen(true)}
+            className="flex items-center rounded-xl transition-opacity active:opacity-60"
+            style={{ color: theme.hint_color }}
+          >
+            <CalendarDays size={24} />
+          </button>
+        </div>
       </section>
 
-      <section className="px-4">
+      <section className="flex flex-col gap-2">
         <DateStrip
           key={monthKey}
           dates={dates}
           selectedDate={selectedDate}
           today={today}
+          minDate={minDate}
           datesWithData={datesWithData}
           onSelect={selectDate}
         />
       </section>
 
-      <section className="px-4">
+      <section>
         {statsLoading ? (
           <div className="flex flex-col gap-3">
             <Skeleton className="h-32" />
@@ -100,13 +141,9 @@ export const HomePage = () => {
             </div>
           </div>
         ) : (
-          // TODO: когда начнете выводить данные, используйте объект dailyStats (например: dailyStats?.calories)
           <div
             className="rounded-2xl p-4 text-center text-sm"
-            style={{
-              backgroundColor: theme.section_bg_color,
-              color:           theme.hint_color,
-            }}
+            style={{ backgroundColor: theme.section_bg_color, color: theme.hint_color }}
           >
             {isToday
               ? "Данные за сегодня появятся здесь"
@@ -114,6 +151,17 @@ export const HomePage = () => {
           </div>
         )}
       </section>
+
+      {calendarOpen && (
+        <CalendarPicker
+          value={selectedDate}
+          minDate={minDate}
+          maxDate={today}
+          onSelect={handleCalendarSelect}
+          onClose={() => setCalendarOpen(false)}
+        />
+      )}
+
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { mainButton } from '@telegram-apps/sdk-react';
 import { useTelegram } from './useTelegram';
-import type { MainButtonOptions } from '../interfaces/MainButtonOptions.ts'
+import type { MainButtonOptions } from '../interfaces/MainButtonOptions'
 
 export function useMainButton({
   text,
