@@ -57,48 +57,50 @@ export const HomePage = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-2 px-4 pt-5">
-      <section className="flex px-1 justify-between">
-        <div className="flex gap-1 items-center">
-          <span
-            className="text-2xl leading-none font-semibold tracking-wide"
-            style={{ color: theme.text_color }}
-          >
-            Calora AI
-          </span>
-          <Sprout className="text-[#90EE90]" size={22} />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <div
-            className="flex items-center gap-0.5 px-2 rounded-2xl"
-            style={{ backgroundColor: theme.section_bg_color, color: theme.text_color }}
-          >
-            <Flame size={18} />
-            <span className="text-lg">{user_data?.user.current_streak ?? 0}</span>
+    <div className="flex flex-col gap-4 px-4 pt-5">
+      <header className="flex flex-col gap-2">
+        <section className="flex px-1 justify-between text-xl">
+          <div className="flex gap-1 items-center">
+            <span
+              className="leading-none font-semibold tracking-wide"
+              style={{ color: theme.text_color }}
+            >
+              Calora AI
+            </span>
+            <Sprout className="text-[#90EE90]"/>
           </div>
 
-          <button
-            onClick={() => setCalendarOpen(true)}
-            className="flex items-center rounded-xl transition-opacity active:opacity-60"
-            style={{ color: theme.hint_color }}
-          >
-            <CalendarDays size={24} />
-          </button>
-        </div>
-      </section>
+          <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-0.5 px-2 rounded-2xl"
+              style={{ backgroundColor: theme.section_bg_color, color: theme.text_color }}
+            >
+              <Flame size={18} />
+              <span className="text-lg px-1">{user_data?.user.current_streak ?? 0}</span>
+            </div>
 
-      <section className="flex flex-col gap-2">
-        <DateStrip
-          key={monthKey}
-          dates={dates}
-          selectedDate={selectedDate}
-          today={today}
-          minDate={minDate}
-          datesWithData={datesWithData}
-          onSelect={selectDate}
-        />
-      </section>
+            <button
+              onClick={() => setCalendarOpen(true)}
+              className="flex items-center rounded-xl transition-opacity active:opacity-60"
+              style={{ color: theme.hint_color }}
+            >
+              <CalendarDays size={24} />
+            </button>
+          </div>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <DateStrip
+            key={monthKey}
+            dates={dates}
+            selectedDate={selectedDate}
+            today={today}
+            minDate={minDate}
+            datesWithData={datesWithData}
+            onSelect={selectDate}
+          />
+        </section>
+      </header>
 
       <section>
         {statsLoading ? (

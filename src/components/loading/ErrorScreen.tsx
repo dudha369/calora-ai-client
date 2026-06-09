@@ -1,4 +1,4 @@
-import type { ElementType } from "react";
+import type { ElementType, ReactNode } from "react";
 import { useTheme } from '../../context/ThemeContext';
 import { WifiOff, RefreshCw, AlertTriangle, ShieldAlert, Lock } from "lucide-react";
 
@@ -18,7 +18,7 @@ interface ErrorScreenProps {
 
 const CONFIG: Record<
   ErrorType,
-  { Icon: ElementType; title: string; subtitle: string; showRetry: boolean }
+  { Icon: ElementType; title: string; subtitle: ReactNode; showRetry: boolean }
 > = {
   network: {
     Icon: WifiOff,
@@ -35,7 +35,19 @@ const CONFIG: Record<
   no_telegram: {
     Icon: ShieldAlert,
     title: "Ошибка аутентификации",
-    subtitle: "Откройте приложение через <a href='https://t.me/CaloraAIBot'>Telegram</a>",
+    subtitle: (
+      <>
+        Откройте приложение через{" "}
+        <a
+          href="https://t.me/CaloraAIBot"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ textDecoration: "underline" }}
+        >
+          Telegram
+        </a>
+      </>
+    ),
     showRetry: false,
   },
   access_denied: {
