@@ -1,24 +1,16 @@
-import { useMemo, useState } from "react";
-import { useQuery }     from "react-query";
+import { useMemo, useState }           from "react";
+import { useQuery }                    from "react-query";
 import { Sprout, Flame, CalendarDays } from "lucide-react";
 
-import { useUser }        from "../context/UserContext";
-import { useTheme }       from "../context/ThemeContext";
-import { DateStrip }      from "../components/DateStrip/DateStrip";
-import { CalendarPicker } from "../components/CalendarPicker";
-import { useDateStrip }   from "../hooks/useDateStrip";
-import { stats }          from "../api/stats";
+import { useUser }               from "../context/UserContext";
+import { useTheme }              from "../context/ThemeContext";
+import { DateStrip }             from "../components/DateStrip/DateStrip";
+import { CalendarPicker }        from "../components/DateStrip/CalendarPicker";
+import { Skeleton }              from "../components/Skeleton";
+import { ProgressArc }           from "../components/ProgressArc";
+import { useDateStrip }          from "../hooks/useDateStrip";
+import { stats }                 from "../api/stats";
 import { toApiDate, startOfDay } from "../utils/date";
-
-const Skeleton = ({ className }: { className?: string }) => {
-  const theme = useTheme();
-  return (
-    <div
-      className={`rounded-xl animate-pulse ${className ?? ""}`}
-      style={{ backgroundColor: theme.secondary_bg_color }}
-    />
-  );
-};
 
 export const HomePage = () => {
   const { user_data } = useUser();
@@ -27,7 +19,7 @@ export const HomePage = () => {
   const { dates, selectedDate, selectedDateStr, isToday, monthKey, today, selectDate } =
     useDateStrip();
 
-  const { isLoading: statsLoading } = useQuery({
+  const { data, isLoading: statsLoading } = useQuery({
     queryKey:         ["stats", "daily", selectedDateStr],
     queryFn:          async () => (await stats.getDaily(selectedDateStr)).data,
     staleTime:        5 * 60 * 1000,
@@ -57,7 +49,7 @@ export const HomePage = () => {
   const [calendarOpen, setCalendarOpen] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-5">
+    <div className="flex flex-col gap-4 px-4 pt-1">
       <header className="flex flex-col gap-2">
         <section className="flex px-1 justify-between text-xl">
           <div className="flex gap-1 items-center">
@@ -67,16 +59,16 @@ export const HomePage = () => {
             >
               Calora AI
             </span>
-            <Sprout className="text-[#90EE90]"/>
+            <Sprout className="text-[#90EE90]" size={20} />
           </div>
 
           <div className="flex items-center gap-2">
             <div
-              className="flex items-center gap-0.5 px-2 rounded-2xl"
+              className="flex items-center gap-1 pl-1.5 pr-2.25 rounded-2xl"
               style={{ backgroundColor: theme.section_bg_color, color: theme.text_color }}
             >
-              <Flame size={18} />
-              <span className="text-lg px-1">{user_data?.user.current_streak ?? 0}</span>
+              <Flame stroke="red" fill="orange" size={18} />
+              <span className="text-lg">{user_data?.user.current_streak ?? 0}</span>
             </div>
 
             <button
@@ -89,7 +81,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        <section className="flex flex-col gap-2">
+        <section>
           <DateStrip
             key={monthKey}
             dates={dates}
@@ -102,7 +94,7 @@ export const HomePage = () => {
         </section>
       </header>
 
-      <section>
+      <div>
         {statsLoading ? (
           <div className="flex flex-col gap-3">
             <Skeleton className="h-32" />
@@ -114,16 +106,40 @@ export const HomePage = () => {
             </div>
           </div>
         ) : (
-          <div
-            className="rounded-2xl p-4 text-center text-sm"
-            style={{ backgroundColor: theme.section_bg_color, color: theme.hint_color }}
-          >
-            {isToday
-              ? "Данные за сегодня появятся здесь"
-              : `${selectedDate.getDate()} ${selectedDate.toLocaleDateString("ru-RU", { month: "long" })}`}
+          <div className="flex flex-col gap-4">
+            <div
+              className="flex flex-col w-full rounded-3xl"
+              style={{
+                backgroundColor: theme.section_bg_color,
+              }}
+            >
+              <div className="h-50">
+                <ProgressArc
+                  value={data?.calories ?? 0}
+                  max={data?.calories_goal ?? 3000}
+                  radius={50}
+                  strokeWidth={7}
+                />
+              </div>
+              <>
+                PFC
+              </>
+            </div>
+
+            <div>
+              {data?.has_data ? (
+                <div>
+
+                </div>
+              ) : (
+                isToday
+                ? "Данные за сегодня появятся здесь"
+                : `${selectedDate.getDate()} ${selectedDate.toLocaleDateString("ru-RU", { month: "long" })}`
+              )}
+            </div>
           </div>
         )}
-      </section>
+      </div>
 
       {calendarOpen && (
         <CalendarPicker

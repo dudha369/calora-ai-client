@@ -27,8 +27,8 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
 
           <FabButton
             to="/scanner"
-            icon={      <Plus   size={ICON_SIZE + 8} />}
-            activeIcon={<Camera size={ICON_SIZE + 8} />}
+            icon={      <Plus   strokeWidth={3.5} size={ICON_SIZE + 12} />}
+            activeIcon={<Camera strokeWidth={2.5} size={ICON_SIZE + 8} />}
             label="Scanner"
             navbarColor={theme.secondary_bg_color}
           />

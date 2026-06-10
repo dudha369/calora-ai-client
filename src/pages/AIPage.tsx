@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { useTheme } from "../context/ThemeContext";
-import { Send, Sparkles } from "lucide-react";
+import { useTheme }                    from "../context/ThemeContext";
+import { Send, Sparkles }              from "lucide-react";
 
 type Message = { role: "user" | "ai"; text: string };
 
@@ -108,7 +108,7 @@ export const AIPage = () => {
 
       {/* Input */}
       <div
-        className="px-4 py-3 flex gap-2"
+        className="px-4 pt-3 pb-4.5 flex gap-2"
         style={{ borderTop: `1px solid ${theme.section_separator_color}` }}
       >
         <input

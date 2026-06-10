@@ -37,15 +37,8 @@ const CONFIG: Record<
     title: "Ошибка аутентификации",
     subtitle: (
       <>
-        Откройте приложение через{" "}
-        <a
-          href="https://t.me/CaloraAIBot"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ textDecoration: "underline" }}
-        >
-          Telegram
-        </a>
+        Откройте приложение через
+        <a href="https://t.me/CaloraAIBot" style={{ textDecoration: "underline" }}> Telegram</a>
       </>
     ),
     showRetry: false,

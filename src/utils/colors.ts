@@ -49,7 +49,7 @@ function parseColor(hex: string): Color {
 }
 
 /**
- * Генерирует контрастный цвет для navbar
+ * Генерирует контрастный цвет для исходного
  */
 export function makeContrast(bgHex: string, shift = 20) {
   const { h, s, l, yiq } = parseColor(bgHex);
@@ -62,4 +62,30 @@ export function makeContrast(bgHex: string, shift = 20) {
   }
 
   return `hsl(${h}, ${s}%, ${newL}%)`;
+}
+
+/**
+ * Добавляет прозрачность цвету
+ */
+export function withOpacity(color: string, alpha: number) {
+  if (!color) return color;
+  if (color.startsWith("rgba(") || color.startsWith("rgb(")) return color;
+  if (!color.startsWith("#")) return color;
+
+  let hex = color.slice(1);
+
+  if (hex.length === 3) {
+    hex = hex
+    .split("")
+    .map((ch) => ch + ch)
+    .join("");
+  }
+
+  if (hex.length !== 6) return color;
+
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }

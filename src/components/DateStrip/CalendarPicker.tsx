@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { useTheme } from "../context/ThemeContext";
-import { isSameDay, startOfDay } from "../utils/date";
+import { useTheme } from "../../context/ThemeContext";
+import { isSameDay, startOfDay } from "../../utils/date";
 
 // ── Константы ────────────────────────────────────────────────────────────────
 

@@ -1,7 +1,6 @@
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
 import { User, Trash2 } from "lucide-react";
-import {useDebugReset} from "../hooks/useDebugReset";
 import { initData } from "@telegram-apps/sdk-react";
 import { Section } from "../components/Section";
 import { SectionItem } from "../components/SectionItem";
@@ -9,7 +8,6 @@ import { SectionItem } from "../components/SectionItem";
 export const ProfilePage = () => {
   const { user_data } = useUser();
   const theme = useTheme();
-  const { debugProps } = useDebugReset();
 
   const photo_url = initData.user()?.photo_url;
 
@@ -17,7 +15,6 @@ export const ProfilePage = () => {
     <div className="flex flex-col gap-6">
       <section className="pt-6 flex flex-col items-center gap-1">
         <button
-          {...debugProps}
           className="absolute top-5 right-5 rounded-full p-2"
           style={{
             backgroundColor: `${theme.destructive_text_color}15`,

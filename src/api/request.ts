@@ -11,14 +11,16 @@ export const request = async <T = unknown>(
   method: Method = "GET",
   data?: unknown
 ): Promise<{ data: T }> => {
-  return await axios.request({
+  const isFormData = data instanceof FormData;
+
+  return await axios.request<T>({
     url: `${SERVER_API_URL}/${endpoint}`,
     method,
     headers: {
       initData: initData.raw() || DEBUG_INIT_DATA,
       Accept: "application/json",
-      "Content-Type": "application/json",
+      ...(!isFormData && { "Content-Type": "application/json" }),
     },
-    data: data ? JSON.stringify(data) : undefined,
+    data: isFormData ? data : data !== undefined ? JSON.stringify(data) : undefined,
   });
 };

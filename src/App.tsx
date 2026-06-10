@@ -29,7 +29,7 @@ export function App() {
 
   return (
     <div
-      className="flex h-dvh flex-col relative"
+      className="flex h-dvh flex-col relative" // max-w-screen-sm
       style={{
         backgroundColor: theme.bg_color,
         color: theme.text_color,
