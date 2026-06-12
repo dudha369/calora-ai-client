@@ -1,7 +1,5 @@
-import { request } from "./request";
-import { toApiDate } from "../utils/date";
-
-// ── Response types ────────────────────────────────────────────────────────────
+import { request } from './request';
+import { toApiDate } from '../utils/date';
 
 export interface FoodDish {
   name: string;
@@ -28,8 +26,6 @@ export interface FoodAnalysisResult {
   photo_key: string | null;
 }
 
-// ── Request types ─────────────────────────────────────────────────────────────
-
 export interface FoodItemPayload {
   food_name: string;
   portion_g: number;
@@ -45,32 +41,31 @@ export interface CreateLogPayload {
   photo_key?: string | null;
 }
 
-// ── API ───────────────────────────────────────────────────────────────────────
+export interface BarcodeLogPayload {
+  log_date: string;
+  items: FoodItemPayload[];
+}
 
 export const food = {
-  /**
-   * POST /api/food/analyze
-   * Отправляет фото на бэкенд, получает КБЖУ через Gemini Vision.
-   */
   analyze: (file: File) => {
     const form = new FormData();
-    form.append("file", file);
-    return request<FoodAnalysisResult>("food/analyze", "POST", form);
+    form.append('file', file);
+    return request<FoodAnalysisResult>('food/analyze', 'POST', form);
   },
 
-  /** POST /api/food/log — сохраняет запись еды */
-  // createLog: (payload: CreateLogPayload) =>
-  //   request("food/log", "POST", payload),
-  createLog: (_: CreateLogPayload) => _,
+  /** POST /api/food/log — сохраняет запись еды (с фото или без) */
+  createLog: (payload: CreateLogPayload) =>
+    request('food/log', 'POST', payload),
+
+  /** POST /api/food/log-barcode — запись по штрихкоду, всегда без фото (B2 не используется) */
+  logBarcode: (payload: BarcodeLogPayload) =>
+    request('food/log-barcode', 'POST', payload),
 
   /** GET /api/food/:date — все записи за дату */
-  getByDate: (date: string) =>
-    request(`food/${date}`),
+  getByDate: (date: string) => request(`food/${date}`),
 
   /** DELETE /api/food/:id — удалить запись */
-  deleteLog: (logId: number) =>
-    request(`food/${logId}`, "DELETE"),
+  deleteLog: (logId: number) => request(`food/${logId}`, 'DELETE'),
 };
 
-/** Сегодняшняя дата в формате YYYY-MM-DD для поля log_date */
 export const todayApiDate = (): string => toApiDate(new Date());

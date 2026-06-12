@@ -5,6 +5,6 @@ export interface User {
   language_code: string;
   current_streak: number;
   max_streak: number;
-  quests_completed : number;
+  quests_completed: number;
   created_at: string;
 }

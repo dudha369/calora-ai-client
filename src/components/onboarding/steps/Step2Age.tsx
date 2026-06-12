@@ -22,10 +22,12 @@ export const Step2Age = ({ data, onChange }: Props) => {
     onChange({ age: valid ? n : undefined }, valid);
   };
 
-  const hasError = raw !== '' && (() => {
-    const n = parseInt(raw, 10);
-    return isNaN(n) || n < MIN || n > MAX;
-  })();
+  const hasError =
+    raw !== '' &&
+    (() => {
+      const n = parseInt(raw, 10);
+      return isNaN(n) || n < MIN || n > MAX;
+    })();
 
   return (
     <StepShell
@@ -37,17 +39,22 @@ export const Step2Age = ({ data, onChange }: Props) => {
           type="number"
           inputMode="numeric"
           value={raw}
-          onChange={e => handleChange(e.target.value)}
+          onChange={(e) => handleChange(e.target.value)}
           placeholder="Например, 25"
-          className="w-full p-4 rounded-2xl text-lg font-medium outline-none"
+          className="w-full rounded-2xl p-4 text-lg font-medium outline-none"
           style={{
             backgroundColor: theme.section_bg_color,
             color: theme.text_color,
             border: `1.5px solid ${hasError ? '#ff3b30' : theme.section_separator_color}`,
           }}
         />
-        <p className="text-sm px-1" style={{ color: hasError ? '#ff3b30' : theme.hint_color }}>
-          {hasError ? `Введи возраст от ${MIN} до ${MAX} лет` : `От ${MIN} до ${MAX} лет`}
+        <p
+          className="px-1 text-sm"
+          style={{ color: hasError ? '#ff3b30' : theme.hint_color }}
+        >
+          {hasError
+            ? `Введи возраст от ${MIN} до ${MAX} лет`
+            : `От ${MIN} до ${MAX} лет`}
         </p>
       </div>
     </StepShell>

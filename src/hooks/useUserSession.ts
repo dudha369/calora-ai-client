@@ -1,16 +1,16 @@
-import { useMemo } from "react";
-import { useQuery } from "react-query";
-import { initData } from "@telegram-apps/sdk-react";
-import { request } from "../api/request";
-import type { UserData } from "../interfaces/UserData";
+import { useMemo } from 'react';
+import { useQuery } from 'react-query';
+import { initData } from '@telegram-apps/sdk-react';
+import { request } from '../api/request';
+import type { UserData } from '../interfaces/UserData';
 
 export type SessionState =
-  | { status: "booting" }
-  | { status: "auth_error" }
-  | { status: "access_denied" }
-  | { status: "ready"; userData: UserData | undefined };
+  | { status: 'booting' }
+  | { status: 'auth_error' }
+  | { status: 'access_denied' }
+  | { status: 'ready'; userData: UserData | undefined };
 
-const DEBUG_INIT_DATA = import.meta.env.VITE_DEBUG_INIT_DATA ?? "";
+const DEBUG_INIT_DATA = import.meta.env.VITE_DEBUG_INIT_DATA ?? '';
 
 function isTelegramContext(ready: boolean): boolean {
   if (!ready) return true;
@@ -18,7 +18,7 @@ function isTelegramContext(ready: boolean): boolean {
 
   try {
     const raw = initData.raw();
-    return typeof raw === "string" && raw.length > 0;
+    return typeof raw === 'string' && raw.length > 0;
   } catch {
     return false;
   }
@@ -32,9 +32,9 @@ export function useUserSession(ready: boolean): SessionState {
   const inTelegram = useMemo(() => isTelegramContext(ready), [ready]);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["user"],
+    queryKey: ['user'],
     queryFn: async () => {
-      const res = await request<UserData>("users/me");
+      const res = await request<UserData>('users/me');
       return res.data;
     },
     enabled: ready && inTelegram,
@@ -45,9 +45,10 @@ export function useUserSession(ready: boolean): SessionState {
     },
   });
 
-  if (!ready || (inTelegram && isLoading)) return { status: "booting" };
-  if (!inTelegram || getApiStatus(error) === 401) return { status: "auth_error" };
-  if (getApiStatus(error) === 403) return { status: "access_denied" };
+  if (!ready || (inTelegram && isLoading)) return { status: 'booting' };
+  if (!inTelegram || getApiStatus(error) === 401)
+    return { status: 'auth_error' };
+  if (getApiStatus(error) === 403) return { status: 'access_denied' };
 
-  return { status: "ready", userData: data };
+  return { status: 'ready', userData: data };
 }

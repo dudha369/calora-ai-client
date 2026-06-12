@@ -1,39 +1,35 @@
-import {useTheme} from "../context/ThemeContext.ts";
+import { useTheme } from '../../context/ThemeContext.ts';
 
-interface ProgressArcProps {
-  value: number;
-  max: number;
+interface CaloriesArcProps {
+  value?: number;
+  max?: number;
   radius: number;
   strokeWidth: number;
 }
 
-export function ProgressArc({
-                              value,
-                              max,
-                              radius,
-                              strokeWidth,
-                            }: ProgressArcProps) {
-
+export function CaloriesArc({
+  value = 0,
+  max = 0,
+  radius,
+  strokeWidth,
+}: CaloriesArcProps) {
   const theme = useTheme();
 
   const arcLength = Math.PI * radius;
   const progress = Math.min(value / max, 1);
   const offset = arcLength - progress * arcLength;
 
-  // 1. Вычисляем точные размеры viewBox, чтобы линия любой толщины поместилась целиком
-  const width = (radius * 2) + strokeWidth;
+  const width = radius * 2 + strokeWidth;
   const height = radius + strokeWidth;
 
-  // 2. Находим идеальный центр, чтобы арка стояла ровно
   const cx = width / 2;
-  const cy = radius + (strokeWidth / 2);
+  const cy = radius + strokeWidth / 2;
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-full">
-
+    <div className="relative flex h-full w-full flex-col items-center justify-center">
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full max-w-70 h-auto drop-shadow-sm"
+        className="h-auto w-full max-w-70"
       >
         <path
           d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
@@ -61,16 +57,16 @@ export function ProgressArc({
         />
       </svg>
 
-      <div className="absolute flex flex-col items-center top-3/4 -translate-y-3/4 left-1/2 -translate-x-1/2">
+      <div className="absolute top-2/3 left-1/2 flex -translate-x-1/2 -translate-y-2/3 flex-col items-center">
         <span
           className="text-[42px] font-semibold tracking-wide"
           style={{
-            color: theme.text_color
+            color: theme.text_color,
           }}
         >
-          {max - value}
+          {Math.max(max - value, 0)}
         </span>
-        <span className="text-lg mt-1" style={{ color: theme.subtitle_text_color }}>
+        <span className="text-lg" style={{ color: theme.subtitle_text_color }}>
           calories remaining
         </span>
       </div>

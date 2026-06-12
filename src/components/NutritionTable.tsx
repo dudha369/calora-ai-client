@@ -1,4 +1,4 @@
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from '../context/ThemeContext';
 
 export interface NutritionRow {
   label: string;
@@ -23,14 +23,14 @@ export const NutritionTable = ({ rows }: NutritionTableProps) => {
 
   return (
     <div
-      className="rounded-2xl mt-3 overflow-hidden divide-y divide-(--tg-section-separator-color)"
+      className="mt-3 divide-y divide-(--tg-section-separator-color) overflow-hidden rounded-2xl"
       style={{ backgroundColor: theme.section_bg_color }}
     >
       {rows.map((row) => (
         <div
           key={row.label}
           className={`flex items-center justify-between px-4 py-2.5 ${
-            row.primary ? "font-semibold text-base" : "text-sm"
+            row.primary ? 'text-base font-semibold' : 'text-sm'
           }`}
           style={{ color: theme.text_color }}
         >

@@ -12,10 +12,16 @@ export const StepShell = ({ title, subtitle, children }: Props) => {
   return (
     <div className="flex flex-col gap-6 px-4 pt-6 pb-8">
       <div>
-        <h2 className="text-2xl font-bold leading-tight" style={{ color: theme.text_color }}>
+        <h2
+          className="text-2xl leading-tight font-bold"
+          style={{ color: theme.text_color }}
+        >
           {title}
         </h2>
-        <p className="text-sm mt-1.5 leading-relaxed" style={{ color: theme.hint_color }}>
+        <p
+          className="mt-1.5 text-sm leading-relaxed"
+          style={{ color: theme.hint_color }}
+        >
           {subtitle}
         </p>
       </div>

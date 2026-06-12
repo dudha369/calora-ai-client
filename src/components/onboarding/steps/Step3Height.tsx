@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
 import { useTheme } from '../../../context/ThemeContext';
-import type { OnboardingData, HeightUnit } from '../../../interfaces/Onboarding';
+import type {
+  OnboardingData,
+  HeightUnit,
+} from '../../../interfaces/Onboarding';
 
 const CM_MIN = 140;
 const CM_MAX = 220;
@@ -47,16 +50,25 @@ export const Step3Height = ({ data, onChange }: Props) => {
       <div className="flex flex-col gap-5">
         {/* Value + unit toggle */}
         <div className="flex items-center justify-between">
-          <span className="text-5xl font-bold tabular-nums" style={{ color: theme.text_color }}>
+          <span
+            className="text-5xl font-bold tabular-nums"
+            style={{ color: theme.text_color }}
+          >
             {unit === 'cm' ? `${cm}` : cmToFeet(cm)}
-            <span className="text-2xl font-normal ml-1" style={{ color: theme.hint_color }}>
+            <span
+              className="ml-1 text-2xl font-normal"
+              style={{ color: theme.hint_color }}
+            >
               {unit === 'cm' ? 'см' : ''}
             </span>
           </span>
           <button
             onClick={toggleUnit}
-            className="px-3 py-1.5 rounded-xl text-sm font-medium"
-            style={{ backgroundColor: theme.section_bg_color, color: theme.button_color }}
+            className="rounded-xl px-3 py-1.5 text-sm font-medium"
+            style={{
+              backgroundColor: theme.section_bg_color,
+              color: theme.button_color,
+            }}
           >
             {unit === 'cm' ? '→ Футы' : '→ См'}
           </button>
@@ -69,11 +81,14 @@ export const Step3Height = ({ data, onChange }: Props) => {
             min={CM_MIN}
             max={CM_MAX}
             value={cm}
-            onChange={e => handleSlider(Number(e.target.value))}
-            className="w-full h-2 rounded-full cursor-pointer appearance-none"
+            onChange={(e) => handleSlider(Number(e.target.value))}
+            className="h-2 w-full cursor-pointer appearance-none rounded-full"
             style={{ accentColor: theme.button_color }}
           />
-          <div className="flex justify-between text-xs" style={{ color: theme.hint_color }}>
+          <div
+            className="flex justify-between text-xs"
+            style={{ color: theme.hint_color }}
+          >
             <span>{CM_MIN} см</span>
             <span>{CM_MAX} см</span>
           </div>

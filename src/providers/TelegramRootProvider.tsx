@@ -1,7 +1,7 @@
-import { type ReactNode, useState } from "react";
-import { useTelegramInit } from "../hooks/useTelegramInit";
-import { useTelegramLayout } from "../hooks/useTelegramLayout";
-import { TelegramContext } from "../context/TelegramContext";
+import { type ReactNode, useState } from 'react';
+import { useTelegramInit } from '../hooks/useTelegramInit';
+import { useTelegramLayout } from '../hooks/useTelegramLayout';
+import { TelegramContext } from '../context/TelegramContext';
 
 export function TelegramRootProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
@@ -10,7 +10,9 @@ export function TelegramRootProvider({ children }: { children: ReactNode }) {
   useTelegramInit(() => setReady(true));
 
   return (
-    <TelegramContext.Provider value={{ ready, safeTop: top, safeBottom: bottom }}>
+    <TelegramContext.Provider
+      value={{ ready, safeTop: top, safeBottom: bottom }}
+    >
       {children}
     </TelegramContext.Provider>
   );

@@ -8,7 +8,7 @@ interface Props {
 }
 
 const OPTIONS: { value: Gender; label: string }[] = [
-  { value: 'male',   label: '♂ Мужской' },
+  { value: 'male', label: '♂ Мужской' },
   { value: 'female', label: '♀ Женский' },
 ];
 
@@ -18,7 +18,7 @@ export const Step1Gender = ({ data, onChange }: Props) => (
     subtitle="Влияет на расчёт базового обмена веществ — у мужчин и женщин разные коэффициенты BMR"
   >
     <div className="flex flex-col gap-3">
-      {OPTIONS.map(opt => (
+      {OPTIONS.map((opt) => (
         <OptionCard
           key={opt.value}
           label={opt.label}

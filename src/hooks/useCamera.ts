@@ -1,7 +1,13 @@
-import { type RefObject, useRef, useState, useCallback, useEffect } from "react";
+import {
+  type RefObject,
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+} from 'react';
 
-export type FacingMode = "user" | "environment";
-export type CameraMethod = "stream" | "input";
+export type FacingMode = 'user' | 'environment';
+export type CameraMethod = 'stream' | 'input';
 
 export interface CameraState {
   isReady: boolean;
@@ -25,7 +31,7 @@ export interface UseCameraReturn extends CameraState {
 function isIOS(): boolean {
   return (
     /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
   );
 }
 
@@ -38,9 +44,9 @@ export function useCamera(): UseCameraReturn {
   const [isReady, setIsReady] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [facingMode, setFacingMode] = useState<FacingMode>("environment");
+  const [facingMode, setFacingMode] = useState<FacingMode>('environment');
 
-  const method: CameraMethod = isIOS() ? "input" : "stream";
+  const method: CameraMethod = isIOS() ? 'input' : 'stream';
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -56,7 +62,7 @@ export function useCamera(): UseCameraReturn {
 
   const startCamera = useCallback(
     async (facing: FacingMode = facingMode) => {
-      if (method === "input") return;
+      if (method === 'input') return;
 
       setError(null);
       stopCamera();
@@ -83,12 +89,12 @@ export function useCamera(): UseCameraReturn {
         const msg =
           err instanceof Error
             ? err.message
-            : "Не удалось получить доступ к камере";
+            : 'Не удалось получить доступ к камере';
         setError(msg);
         setIsStreaming(false);
       }
     },
-    [facingMode, method, stopCamera]
+    [facingMode, method, stopCamera],
   );
 
   const openInputCamera = useCallback(() => {
@@ -96,7 +102,7 @@ export function useCamera(): UseCameraReturn {
   }, []);
 
   const switchCamera = useCallback(async () => {
-    const next: FacingMode = facingMode === "user" ? "environment" : "user";
+    const next: FacingMode = facingMode === 'user' ? 'environment' : 'user';
     await startCamera(next);
   }, [facingMode, startCamera]);
 
@@ -111,8 +117,8 @@ export function useCamera(): UseCameraReturn {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    video.addEventListener("loadedmetadata", handleVideoReady);
-    return () => video.removeEventListener("loadedmetadata", handleVideoReady);
+    video.addEventListener('loadedmetadata', handleVideoReady);
+    return () => video.removeEventListener('loadedmetadata', handleVideoReady);
   }, [handleVideoReady]);
 
   useEffect(() => () => stopCamera(), [stopCamera]);
@@ -125,12 +131,12 @@ export function useCamera(): UseCameraReturn {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    return canvas.toDataURL("image/jpeg", 0.92);
+    return canvas.toDataURL('image/jpeg', 0.92);
   }, [isReady]);
 
   return {

@@ -1,6 +1,6 @@
-import { Component, type ReactNode, type ErrorInfo } from "react";
-import { ErrorScreen } from "./ErrorScreen";
-import type { ErrorType } from "./ErrorScreen";
+import { Component, type ReactNode, type ErrorInfo } from 'react';
+import { ErrorScreen } from './ErrorScreen';
+import type { ErrorType } from './ErrorScreen';
 
 interface Props {
   children: ReactNode;
@@ -12,16 +12,16 @@ interface State {
 }
 
 function classifyError(error: Error | null): ErrorType {
-  const msg = error?.message || "";
+  const msg = error?.message || '';
   if (
     !navigator.onLine ||
-    msg.includes("Failed to fetch") ||
-    msg.includes("Network Error") ||
-    msg.includes("dynamically imported module")
+    msg.includes('Failed to fetch') ||
+    msg.includes('Network Error') ||
+    msg.includes('dynamically imported module')
   ) {
-    return "network";
+    return 'network';
   }
-  return "general";
+  return 'general';
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -35,7 +35,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error in component tree:", error, errorInfo);
+    console.error('Uncaught error in component tree:', error, errorInfo);
   }
 
   private handleRetry = () => {

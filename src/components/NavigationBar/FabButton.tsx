@@ -1,8 +1,13 @@
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { useRef, type ReactNode, type MouseEvent, type ChangeEvent } from "react";
-import { useTheme } from "../../context/ThemeContext";
-import { useScanner } from "../../hooks/useScanner";
-import { isIOSDevice } from "../../utils/isIOSDevice"
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  useRef,
+  type ReactNode,
+  type MouseEvent,
+  type ChangeEvent,
+} from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import { useScanner } from '../../hooks/useScanner';
+import { isIOSDevice } from '../../utils/isIOSDevice';
 
 interface FabButtonProps {
   to: string;
@@ -12,7 +17,13 @@ interface FabButtonProps {
   navbarColor: string;
 }
 
-export const FabButton = ({ to, icon, activeIcon, label, navbarColor }: FabButtonProps) => {
+export const FabButton = ({
+  to,
+  icon,
+  activeIcon,
+  label,
+  navbarColor,
+}: FabButtonProps) => {
   const theme = useTheme();
   const { triggerCapture } = useScanner();
   const navigate = useNavigate();
@@ -33,7 +44,7 @@ export const FabButton = ({ to, icon, activeIcon, label, navbarColor }: FabButto
     };
     reader.readAsDataURL(file);
 
-    if (e.target) e.target.value = "";
+    if (e.target) e.target.value = '';
   };
 
   const handleClick = (e: MouseEvent) => {
@@ -66,7 +77,7 @@ export const FabButton = ({ to, icon, activeIcon, label, navbarColor }: FabButto
         to={to}
         title={label}
         onClick={handleClick}
-        className="flex -translate-y-3 items-center justify-center w-16 h-16 rounded-full"
+        className="flex h-16 w-16 -translate-y-3 items-center justify-center rounded-full"
         style={{
           color: theme.button_text_color,
           backgroundColor: theme.button_color,
@@ -75,16 +86,24 @@ export const FabButton = ({ to, icon, activeIcon, label, navbarColor }: FabButto
       >
         {({ isActive }) => (
           <span className="relative flex items-center justify-center">
-            <span className={`transition-all duration-300 ${
-              isActive ? "opacity-0 scale-50 rotate-90" : "opacity-100 scale-100 rotate-0"
-            }`}>
+            <span
+              className={`transition-all duration-300 ${
+                isActive
+                  ? 'scale-50 rotate-90 opacity-0'
+                  : 'scale-100 rotate-0 opacity-100'
+              }`}
+            >
               {icon}
             </span>
 
             {activeIcon && (
-              <span className={`absolute transition-all duration-300 ${
-                isActive ? "opacity-100 scale-100 rotate-0" : "opacity-0 scale-50 -rotate-90"
-              }`}>
+              <span
+                className={`absolute transition-all duration-300 ${
+                  isActive
+                    ? 'scale-100 rotate-0 opacity-100'
+                    : 'scale-50 -rotate-90 opacity-0'
+                }`}
+              >
                 {activeIcon}
               </span>
             )}

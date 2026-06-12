@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { viewport } from "@telegram-apps/sdk-react";
+import { useEffect, useState } from 'react';
+import { viewport } from '@telegram-apps/sdk-react';
 
 type Safe = { top: number; bottom: number };
 

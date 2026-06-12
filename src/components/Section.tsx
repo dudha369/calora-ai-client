@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { useTheme } from "../context/ThemeContext";
+import type { ReactNode } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
 interface SectionProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ export const Section = ({ children }: SectionProps) => {
 
   return (
     <div
-      className="flex flex-col mx-4 rounded-3xl divide-y divide-(--tg-section-separator-color)"
+      className="mx-4 flex flex-col divide-y divide-(--tg-section-separator-color) rounded-3xl"
       style={{ backgroundColor: theme.section_bg_color }}
     >
       {children}

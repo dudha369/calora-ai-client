@@ -1,7 +1,7 @@
-import { useTheme } from "../../context/ThemeContext";
-import { withOpacity } from "../../utils/colors";
+import { useTheme } from '../../context/ThemeContext';
+import { withOpacity } from '../../utils/colors';
 
-const DAY_NAMES = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"] as const;
+const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] as const;
 
 interface Props {
   date: Date;
@@ -9,83 +9,82 @@ interface Props {
   isToday: boolean;
   isFuture: boolean;
   isBeforeMin: boolean;
-  hasData: boolean | undefined;
   onClick: () => void;
-  visibleCount: number;
+  itemWidth: number;
 }
 
 export const DateStripItem = ({
-                                date,
-                                isSelected,
-                                isToday,
-                                isFuture,
-                                isBeforeMin,
-                                hasData,
-                                onClick,
-                                visibleCount,
-                              }: Props) => {
+  date,
+  isSelected,
+  isToday,
+  isFuture,
+  isBeforeMin,
+  onClick,
+  itemWidth,
+}: Props) => {
   const theme = useTheme();
   const isDisabled = isFuture || isBeforeMin;
-
-  const selectedBg = withOpacity(theme.button_color, 0.14);
-  const selectedBorder = withOpacity(theme.button_color, 0.95);
-  const dataLine = withOpacity(theme.button_color, 0.95);
-  const todayDot = withOpacity(theme.button_color, 0.95);
 
   const weekday = DAY_NAMES[date.getDay()];
   const day = date.getDate();
 
-  const showDataLine = Boolean(hasData) && !isSelected;
-  const showTodayDot = isToday && !isSelected;
+  let bg: string;
+  let border: string;
+  let numColor: string;
+  let nameColor: string;
+
+  if (isSelected) {
+    // Заливка accent-цветом + контрастный текст — самый заметный элемент.
+    // Покрывает и "today + selected": solid-граница, как и требовалось.
+    bg = theme.button_color;
+    border = `2px solid ${theme.button_color}`;
+    numColor = theme.button_text_color;
+    nameColor = withOpacity(theme.button_text_color, 0.7);
+  } else if (isDisabled) {
+    bg = withOpacity(theme.text_color, 0.04);
+    border = '2px solid transparent';
+    numColor = withOpacity(theme.text_color, 0.25);
+    nameColor = withOpacity(theme.text_color, 0.25);
+  } else if (isToday) {
+    // Today (не выбран): визуально обычный доступный день —
+    // text_color/hint_color, без button_color и без opacity.
+    // Единственный маркер — пунктирная рамка того же text_color.
+    bg = 'transparent';
+    border = `2px dashed ${theme.text_color}`;
+    numColor = theme.text_color;
+    nameColor = theme.hint_color;
+  } else {
+    bg = 'transparent';
+    border = '2px solid transparent';
+    numColor = theme.text_color;
+    nameColor = theme.hint_color;
+  }
 
   return (
     <button
-      type="button"
       onClick={onClick}
       disabled={isDisabled}
-      className="flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-all duration-150 active:scale-[0.98] active:opacity-80"
+      className="flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150 enabled:active:scale-[0.97]"
       style={{
-        flex: `0 0 calc((100% - ${(visibleCount - 1) * 4}px) / ${visibleCount})`,
-        minWidth: 52,
-        maxWidth: 64,
-        height: 72,
-        cursor: isDisabled ? "default" : "pointer",
-        backgroundColor: isSelected ? selectedBg : "transparent",
-        border: isSelected ? `2px solid ${selectedBorder}` : "2px solid transparent",
-        opacity: isDisabled ? 0.35 : 1,
+        width: itemWidth,
+        height: 60,
+        backgroundColor: bg,
+        border,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
       }}
     >
       <span
         className="text-[13px] leading-none font-medium"
-        style={{
-          color: isSelected ? theme.text_color : theme.hint_color,
-        }}
+        style={{ color: nameColor }}
       >
         {weekday}
       </span>
-
       <span
         className="text-[27px] leading-none font-semibold tracking-[-0.03em]"
-        style={{
-          color: theme.text_color,
-        }}
+        style={{ color: numColor }}
       >
         {day}
       </span>
-
-      <div className="h-1.5 flex items-start justify-center">
-        {showDataLine ? (
-          <div
-            className="h-0.75 w-5.5 rounded-full"
-            style={{ backgroundColor: dataLine }}
-          />
-        ) : showTodayDot ? (
-          <div
-            className="h-2.25 w-2.25 rounded-full"
-            style={{ backgroundColor: todayDot }}
-          />
-        ) : null}
-      </div>
     </button>
   );
 };

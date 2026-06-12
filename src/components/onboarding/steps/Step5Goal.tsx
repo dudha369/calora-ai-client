@@ -8,9 +8,21 @@ interface Props {
 }
 
 const OPTIONS: { value: Goal; label: string; description: string }[] = [
-  { value: 'lose',     label: '🔥 Похудеть',              description: 'Дефицит калорий, акцент на кардио и питании' },
-  { value: 'maintain', label: '⚖️ Поддержать вес',         description: 'Баланс — удерживать текущую форму' },
-  { value: 'gain',     label: '💪 Набрать мышечную массу', description: 'Профицит калорий, акцент на белке и силовых' },
+  {
+    value: 'lose',
+    label: '🔥 Похудеть',
+    description: 'Дефицит калорий, акцент на кардио и питании',
+  },
+  {
+    value: 'maintain',
+    label: '⚖️ Поддержать вес',
+    description: 'Баланс — удерживать текущую форму',
+  },
+  {
+    value: 'gain',
+    label: '💪 Набрать мышечную массу',
+    description: 'Профицит калорий, акцент на белке и силовых',
+  },
 ];
 
 export const Step5Goal = ({ data, onChange }: Props) => (
@@ -19,7 +31,7 @@ export const Step5Goal = ({ data, onChange }: Props) => (
     subtitle="Определяет дефицит или профицит калорий и основной акцент приложения"
   >
     <div className="flex flex-col gap-3">
-      {OPTIONS.map(opt => (
+      {OPTIONS.map((opt) => (
         <OptionCard
           key={opt.value}
           label={opt.label}
@@ -28,7 +40,11 @@ export const Step5Goal = ({ data, onChange }: Props) => (
           onClick={() =>
             onChange(
               // если меняем цель на «поддержать» — сбрасываем желаемый вес
-              { goal: opt.value, target_weight: opt.value === 'maintain' ? undefined : data.target_weight },
+              {
+                goal: opt.value,
+                target_weight:
+                  opt.value === 'maintain' ? undefined : data.target_weight,
+              },
               true,
             )
           }

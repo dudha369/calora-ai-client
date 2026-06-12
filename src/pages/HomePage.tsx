@@ -1,47 +1,48 @@
-import { useMemo, useState }           from "react";
-import { useQuery }                    from "react-query";
-import { Sprout, Flame, CalendarDays } from "lucide-react";
+import { useMemo, useState } from 'react';
+import { useQuery } from 'react-query';
+import { Sprout, Flame, CalendarDays } from 'lucide-react';
 
-import { useUser }               from "../context/UserContext";
-import { useTheme }              from "../context/ThemeContext";
-import { DateStrip }             from "../components/DateStrip/DateStrip";
-import { CalendarPicker }        from "../components/DateStrip/CalendarPicker";
-import { Skeleton }              from "../components/Skeleton";
-import { ProgressArc }           from "../components/ProgressArc";
-import { useDateStrip }          from "../hooks/useDateStrip";
-import { stats }                 from "../api/stats";
-import { toApiDate, startOfDay } from "../utils/date";
+import { useUser } from '../context/UserContext';
+import { useTheme } from '../context/ThemeContext';
+import { DateStrip } from '../components/DateStrip/DateStrip';
+import { CalendarPicker } from '../components/DateStrip/CalendarPicker';
+import { Skeleton } from '../components/Skeleton';
+import { CaloriesArc } from '../components/NutritionStats/CaloriesArc';
+import { NutritionCard } from '../components/NutritionStats/NutritionCard';
+import { AddLogBanner } from '../components/NutritionStats/AddLogBanner';
+import { useDateStrip } from '../hooks/useDateStrip';
+import { stats } from '../api/stats';
+import { startOfDay } from '../utils/date';
+import { getFlameColor } from '../utils/getFlameColor';
 
 export const HomePage = () => {
   const { user_data } = useUser();
+  const currentStreak = user_data?.user.current_streak ?? 0;
+  const flameColorProps = getFlameColor(currentStreak);
+  const createdAt = user_data?.user.created_at;
+
   const theme = useTheme();
 
-  const { dates, selectedDate, selectedDateStr, isToday, monthKey, today, selectDate } =
-    useDateStrip();
+  const {
+    dates,
+    selectedDate,
+    selectedDateStr,
+    monthKey,
+    today,
+    selectDate,
+    selectDateExternal, // ← для CalendarPicker
+    pendingScrollDate, // ← передаём в DateStrip
+    clearPendingScroll, // ← передаём в DateStrip
+  } = useDateStrip();
 
   const { data, isLoading: statsLoading } = useQuery({
-    queryKey:         ["stats", "daily", selectedDateStr],
-    queryFn:          async () => (await stats.getDaily(selectedDateStr)).data,
-    staleTime:        5 * 60 * 1000,
+    queryKey: ['stats', 'daily', selectedDateStr],
+    queryFn: async () => (await stats.getDaily(selectedDateStr)).data,
+    staleTime: 5 * 60 * 1000,
     keepPreviousData: true,
   });
 
-  const rangeFrom = toApiDate(dates[0]);
-  const rangeTo   = toApiDate(dates[dates.length - 1]);
-
-  const { data: activeDatesData } = useQuery({
-    queryKey:  ["stats", "active-dates", rangeFrom, rangeTo],
-    queryFn:   async () => (await stats.getActiveDates(rangeFrom, rangeTo)).data,
-    staleTime: 10 * 60 * 1000,
-  });
-
-  const datesWithData = useMemo(
-    () => (activeDatesData ? new Set<string>(activeDatesData.dates) : undefined),
-    [activeDatesData],
-  );
-
-  const createdAt = user_data?.user.created_at;
-  const minDate   = useMemo(
+  const minDate = useMemo(
     () => (createdAt ? startOfDay(new Date(createdAt)) : today),
     [createdAt, today],
   );
@@ -51,10 +52,10 @@ export const HomePage = () => {
   return (
     <div className="flex flex-col gap-4 px-4 pt-1">
       <header className="flex flex-col gap-2">
-        <section className="flex px-1 justify-between text-xl">
-          <div className="flex gap-1 items-center">
+        <section className="flex h-6 justify-between px-1">
+          <div className="flex items-center gap-1">
             <span
-              className="leading-none font-semibold tracking-wide"
+              className="text-2xl leading-none font-semibold tracking-wide"
               style={{ color: theme.text_color }}
             >
               Calora AI
@@ -62,13 +63,16 @@ export const HomePage = () => {
             <Sprout className="text-[#90EE90]" size={20} />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <div
-              className="flex items-center gap-1 pl-1.5 pr-2.25 rounded-2xl"
-              style={{ backgroundColor: theme.section_bg_color, color: theme.text_color }}
+              className="flex items-center gap-1 rounded-2xl pr-2.25 pl-1.5"
+              style={{
+                backgroundColor: theme.section_bg_color,
+                color: theme.text_color,
+              }}
             >
-              <Flame stroke="red" fill="orange" size={18} />
-              <span className="text-lg">{user_data?.user.current_streak ?? 0}</span>
+              <Flame {...flameColorProps} size={18} />
+              <span className="text-lg">{currentStreak}</span>
             </div>
 
             <button
@@ -88,57 +92,65 @@ export const HomePage = () => {
             selectedDate={selectedDate}
             today={today}
             minDate={minDate}
-            datesWithData={datesWithData}
             onSelect={selectDate}
+            pendingScrollDate={pendingScrollDate}
+            onScrollConsumed={clearPendingScroll}
           />
         </section>
       </header>
 
-      <div>
-        {statsLoading ? (
+      <div className="flex flex-col gap-4">
+        <div
+          className="flex h-70 w-full flex-col rounded-3xl"
+          style={{
+            backgroundColor: theme.section_bg_color,
+          }}
+        >
+          <div className="h-50">
+            <CaloriesArc
+              value={data?.calories}
+              max={data?.calories_goal}
+              radius={50}
+              strokeWidth={5}
+            />
+          </div>
+          <div className="flex items-center justify-center gap-6">
+            <NutritionCard
+              title="Protein"
+              value={data?.protein_g}
+              max={data?.protein_goal_g}
+            />
+            <NutritionCard
+              title="Fat"
+              value={data?.fat_g}
+              max={data?.fat_goal_g}
+            />
+            <NutritionCard
+              title="Carbs"
+              value={data?.carbs_g}
+              max={data?.carbs_goal_g}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span
+            className="text-lg font-[750] tracking-wide"
+            style={{
+              color: theme.subtitle_text_color,
+            }}
+          >
+            Daily Meals
+          </span>
+
           <div className="flex flex-col gap-3">
-            <Skeleton className="h-32" />
-            <div className="grid grid-cols-2 gap-3">
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
-            </div>
+            {statsLoading ? (
+              <Skeleton className="h-36" />
+            ) : (
+              <div>{data?.has_data ? <div></div> : <AddLogBanner />}</div>
+            )}
           </div>
-        ) : (
-          <div className="flex flex-col gap-4">
-            <div
-              className="flex flex-col w-full rounded-3xl"
-              style={{
-                backgroundColor: theme.section_bg_color,
-              }}
-            >
-              <div className="h-50">
-                <ProgressArc
-                  value={data?.calories ?? 0}
-                  max={data?.calories_goal ?? 3000}
-                  radius={50}
-                  strokeWidth={7}
-                />
-              </div>
-              <>
-                PFC
-              </>
-            </div>
-
-            <div>
-              {data?.has_data ? (
-                <div>
-
-                </div>
-              ) : (
-                isToday
-                ? "Данные за сегодня появятся здесь"
-                : `${selectedDate.getDate()} ${selectedDate.toLocaleDateString("ru-RU", { month: "long" })}`
-              )}
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       {calendarOpen && (
@@ -146,7 +158,10 @@ export const HomePage = () => {
           value={selectedDate}
           minDate={minDate}
           maxDate={today}
-          onSelect={(date) => { selectDate(date); setCalendarOpen(false); }}
+          onSelect={(date) => {
+            selectDateExternal(date);
+            setCalendarOpen(false);
+          }}
           onClose={() => setCalendarOpen(false)}
         />
       )}

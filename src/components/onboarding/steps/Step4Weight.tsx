@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { StepShell } from '../StepShell';
 import { useTheme } from '../../../context/ThemeContext';
-import type { OnboardingData, WeightUnit } from '../../../interfaces/Onboarding';
+import type {
+  OnboardingData,
+  WeightUnit,
+} from '../../../interfaces/Onboarding';
 
 const KG_MIN = 30;
 const KG_MAX = 200;
@@ -44,16 +47,25 @@ export const Step4Weight = ({ data, onChange }: Props) => {
     >
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between">
-          <span className="text-5xl font-bold tabular-nums" style={{ color: theme.text_color }}>
+          <span
+            className="text-5xl font-bold tabular-nums"
+            style={{ color: theme.text_color }}
+          >
             {displayValue}
-            <span className="text-2xl font-normal ml-1" style={{ color: theme.hint_color }}>
+            <span
+              className="ml-1 text-2xl font-normal"
+              style={{ color: theme.hint_color }}
+            >
               {displayUnit}
             </span>
           </span>
           <button
             onClick={toggleUnit}
-            className="px-3 py-1.5 rounded-xl text-sm font-medium"
-            style={{ backgroundColor: theme.section_bg_color, color: theme.button_color }}
+            className="rounded-xl px-3 py-1.5 text-sm font-medium"
+            style={{
+              backgroundColor: theme.section_bg_color,
+              color: theme.button_color,
+            }}
           >
             {unit === 'kg' ? '→ Фунты' : '→ Кг'}
           </button>
@@ -65,11 +77,14 @@ export const Step4Weight = ({ data, onChange }: Props) => {
             min={KG_MIN}
             max={KG_MAX}
             value={kg}
-            onChange={e => handleSlider(Number(e.target.value))}
-            className="w-full h-2 rounded-full cursor-pointer appearance-none"
+            onChange={(e) => handleSlider(Number(e.target.value))}
+            className="h-2 w-full cursor-pointer appearance-none rounded-full"
             style={{ accentColor: theme.button_color }}
           />
-          <div className="flex justify-between text-xs" style={{ color: theme.hint_color }}>
+          <div
+            className="flex justify-between text-xs"
+            style={{ color: theme.hint_color }}
+          >
             <span>{KG_MIN} кг</span>
             <span>{KG_MAX} кг</span>
           </div>

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { backButton } from "@telegram-apps/sdk-react";
+import { useEffect, useRef } from 'react';
+import { backButton } from '@telegram-apps/sdk-react';
 
 export const useBackButton = (onBack: () => void, enabled: boolean) => {
   const onBackRef = useRef(onBack);

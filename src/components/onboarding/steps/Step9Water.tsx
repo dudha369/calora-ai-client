@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
 import { useTheme } from '../../../context/ThemeContext';
-import type { OnboardingData, WaterTrack } from '../../../interfaces/Onboarding';
+import type {
+  OnboardingData,
+  WaterTrack,
+} from '../../../interfaces/Onboarding';
 
 // weight(kg) × 33 ml — standard recommendation
 const calcAuto = (weight?: number) => (weight ? Math.round(weight * 33) : 2000);
@@ -21,9 +24,11 @@ export const Step9Water = ({ data, onChange }: Props) => {
 
   const emit = (t: WaterTrack, goalStr: string) => {
     const goal =
-      t === 'auto' ? autoGoal :
-      t === 'manual' ? (parseFloat(goalStr) || undefined) :
-      undefined;
+      t === 'auto'
+        ? autoGoal
+        : t === 'manual'
+          ? parseFloat(goalStr) || undefined
+          : undefined;
 
     const valid = t !== 'manual' || (!!goal && goal > 0);
     onChange({ water_track: t, water_goal: goal }, valid);
@@ -40,9 +45,21 @@ export const Step9Water = ({ data, onChange }: Props) => {
   };
 
   const OPTIONS: { value: WaterTrack; label: string; description: string }[] = [
-    { value: 'auto',   label: '💧 Да, рассчитай норму', description: `На основе твоего веса (~${autoGoal} мл/день)` },
-    { value: 'manual', label: '✏️ Да, введу свою норму', description: 'Укажу сам сколько хочу выпивать' },
-    { value: 'none',   label: '🚫 Нет, не нужно',        description: 'Не хочу отслеживать воду' },
+    {
+      value: 'auto',
+      label: '💧 Да, рассчитай норму',
+      description: `На основе твоего веса (~${autoGoal} мл/день)`,
+    },
+    {
+      value: 'manual',
+      label: '✏️ Да, введу свою норму',
+      description: 'Укажу сам сколько хочу выпивать',
+    },
+    {
+      value: 'none',
+      label: '🚫 Нет, не нужно',
+      description: 'Не хочу отслеживать воду',
+    },
   ];
 
   return (
@@ -51,7 +68,7 @@ export const Step9Water = ({ data, onChange }: Props) => {
       subtitle="Помогает не забывать пить в течение дня. Норма = вес × 33 мл"
     >
       <div className="flex flex-col gap-3">
-        {OPTIONS.map(opt => (
+        {OPTIONS.map((opt) => (
           <OptionCard
             key={opt.value}
             label={opt.label}
@@ -67,9 +84,9 @@ export const Step9Water = ({ data, onChange }: Props) => {
               type="number"
               inputMode="numeric"
               value={rawGoal}
-              onChange={e => handleGoalInput(e.target.value)}
+              onChange={(e) => handleGoalInput(e.target.value)}
               placeholder="Например, 2000"
-              className="w-full p-4 rounded-2xl text-lg font-medium outline-none pr-24"
+              className="w-full rounded-2xl p-4 pr-24 text-lg font-medium outline-none"
               style={{
                 backgroundColor: theme.section_bg_color,
                 color: theme.text_color,
@@ -77,7 +94,7 @@ export const Step9Water = ({ data, onChange }: Props) => {
               }}
             />
             <span
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium"
+              className="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium"
               style={{ color: theme.hint_color }}
             >
               мл / день

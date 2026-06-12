@@ -14,7 +14,9 @@ export const Step6TargetWeight = ({ data, onChange }: Props) => {
 
   const isLose = data.goal === 'lose';
   const unitLabel = data.weight_unit === 'lbs' ? 'фунт' : 'кг';
-  const currentDisplay = data.weight ? `Текущий вес: ${data.weight} ${unitLabel}` : '';
+  const currentDisplay = data.weight
+    ? `Текущий вес: ${data.weight} ${unitLabel}`
+    : '';
 
   const handleChange = (val: string) => {
     setRaw(val);
@@ -23,10 +25,12 @@ export const Step6TargetWeight = ({ data, onChange }: Props) => {
     onChange({ target_weight: valid ? n : undefined }, valid);
   };
 
-  const hasError = raw !== '' && (() => {
-    const n = parseFloat(raw);
-    return isNaN(n) || n <= 0;
-  })();
+  const hasError =
+    raw !== '' &&
+    (() => {
+      const n = parseFloat(raw);
+      return isNaN(n) || n <= 0;
+    })();
 
   return (
     <StepShell
@@ -39,9 +43,9 @@ export const Step6TargetWeight = ({ data, onChange }: Props) => {
             type="number"
             inputMode="decimal"
             value={raw}
-            onChange={e => handleChange(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
             placeholder={isLose ? 'Например, 65' : 'Например, 85'}
-            className="w-full p-4 rounded-2xl text-lg font-medium outline-none pr-20"
+            className="w-full rounded-2xl p-4 pr-20 text-lg font-medium outline-none"
             style={{
               backgroundColor: theme.section_bg_color,
               color: theme.text_color,
@@ -49,14 +53,14 @@ export const Step6TargetWeight = ({ data, onChange }: Props) => {
             }}
           />
           <span
-            className="absolute right-4 top-1/2 -translate-y-1/2 font-medium"
+            className="absolute top-1/2 right-4 -translate-y-1/2 font-medium"
             style={{ color: theme.hint_color }}
           >
             {unitLabel}
           </span>
         </div>
         {hasError && (
-          <p className="text-sm px-1" style={{ color: '#ff3b30' }}>
+          <p className="px-1 text-sm" style={{ color: '#ff3b30' }}>
             Введи корректный вес
           </p>
         )}

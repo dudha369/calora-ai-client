@@ -1,5 +1,5 @@
-import { type ChangeEvent } from "react";
-import type { UseCameraReturn } from "../hooks/useCamera";
+import { type ChangeEvent } from 'react';
+import type { UseCameraReturn } from '../hooks/useCamera';
 
 interface CameraViewProps {
   camera: UseCameraReturn;
@@ -17,11 +17,15 @@ interface CameraViewProps {
  * Всегда монтирует скрытые <canvas> и <input> — они нужны для логики
  * в useCamera / useScannerCapture вне зависимости от видимого состояния.
  */
-export const CameraView = ({ camera, photo, onFileChange }: CameraViewProps) => {
+export const CameraView = ({
+  camera,
+  photo,
+  onFileChange,
+}: CameraViewProps) => {
   const { videoRef, canvasRef, inputRef, method, error, startCamera } = camera;
 
   return (
-    <div className="relative flex-1 w-full overflow-hidden">
+    <div className="relative w-full flex-1 overflow-hidden">
       {/* Скрытые утилиты — всегда в DOM */}
       <canvas ref={canvasRef} className="hidden" />
       <input
@@ -35,23 +39,20 @@ export const CameraView = ({ camera, photo, onFileChange }: CameraViewProps) => 
 
       {/* Баннер ошибки камеры */}
       {error && !photo && (
-        <div className="absolute top-4 left-4 right-4 z-10 bg-red-500/80 text-white p-3 rounded-xl text-sm flex items-center justify-between">
-          <span className="flex-1 mr-2">{error}</span>
-          <button
-            className="underline shrink-0"
-            onClick={() => startCamera()}
-          >
+        <div className="absolute top-4 right-4 left-4 z-10 flex items-center justify-between rounded-xl bg-red-500/80 p-3 text-sm text-white">
+          <span className="mr-2 flex-1">{error}</span>
+          <button className="shrink-0 underline" onClick={() => startCamera()}>
             Повторить
           </button>
         </div>
       )}
 
       {/* Стрим (не-iOS): скрываем через CSS а не unmount — камера продолжает работать */}
-      {method === "stream" && (
+      {method === 'stream' && (
         <video
           ref={videoRef}
-          className={`w-full h-full object-cover transition-opacity duration-200 ${
-            photo ? "opacity-0 absolute inset-0 -z-10" : "opacity-100"
+          className={`h-full w-full object-cover transition-opacity duration-200 ${
+            photo ? 'absolute inset-0 -z-10 opacity-0' : 'opacity-100'
           }`}
           playsInline
           muted
@@ -60,9 +61,9 @@ export const CameraView = ({ camera, photo, onFileChange }: CameraViewProps) => 
       )}
 
       {/* iOS-плейсхолдер */}
-      {method === "input" && !photo && (
+      {method === 'input' && !photo && (
         <div className="flex h-full items-center justify-center px-8">
-          <p className="text-center text-sm opacity-50 leading-relaxed">
+          <p className="text-center text-sm leading-relaxed opacity-50">
             Нажми кнопку ниже, чтобы сфотографировать блюдо или штрихкод
           </p>
         </div>
@@ -72,7 +73,7 @@ export const CameraView = ({ camera, photo, onFileChange }: CameraViewProps) => 
       {photo && (
         <img
           src={photo}
-          className="w-full h-full object-cover"
+          className="h-full w-full object-cover"
           alt="Захваченное фото"
         />
       )}

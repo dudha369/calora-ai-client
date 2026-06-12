@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { ModalWindow } from "./ModalWindow";
-import { NutritionTable, type NutritionRow } from "./NutritionTable";
-import type { ProductData } from "../types/productData";
-import { useTheme } from "../context/ThemeContext";
+import { useState } from 'react';
+import { ModalWindow } from './ModalWindow';
+import { NutritionTable, type NutritionRow } from './NutritionTable';
+import type { ProductData } from '../types/productData';
+import { useTheme } from '../context/ThemeContext';
 
 interface BarcodeResultModalProps {
   product: ProductData | null;
@@ -14,8 +14,8 @@ const DEFAULT_PORTION_G = 100;
 
 /** Пересчитывает нутриент из per100g на заданный вес */
 const scale = (value: number | null, factor: number): string => {
-  if (value == null) return "—";
-  return `${(value * factor).toFixed(1).replace(/\.0$/, "")}`;
+  if (value == null) return '—';
+  return `${(value * factor).toFixed(1).replace(/\.0$/, '')}`;
 };
 
 /**
@@ -28,10 +28,10 @@ const scale = (value: number | null, factor: number): string => {
  * родителю не нужно знать об этой детали.
  */
 export const BarcodeResultModal = ({
-                                     product,
-                                     onConfirm,
-                                     onClose,
-                                   }: BarcodeResultModalProps) => {
+  product,
+  onConfirm,
+  onClose,
+}: BarcodeResultModalProps) => {
   const theme = useTheme();
   const [portionG, setPortionG] = useState(
     product?.servingSizeG ?? DEFAULT_PORTION_G,
@@ -53,7 +53,7 @@ export const BarcodeResultModal = ({
     return (
       <ModalWindow title="Штрихкод найден" onClose={onClose}>
         <p
-          className="text-sm text-center mt-3 mb-1"
+          className="mt-3 mb-1 text-center text-sm"
           style={{ color: theme.hint_color }}
         >
           Продукт не найден в базе Open Food Facts.
@@ -68,10 +68,14 @@ export const BarcodeResultModal = ({
   const p = product.per100g;
 
   const rows: NutritionRow[] = [
-    { label: "Калории",   value: `${Math.round((p.calories ?? 0) * factor)} ккал`, primary: true },
-    { label: "Белки",     value: `${scale(p.protein, factor)} г` },
-    { label: "Жиры",      value: `${scale(p.fat, factor)} г` },
-    { label: "Углеводы",  value: `${scale(p.carbs, factor)} г` },
+    {
+      label: 'Калории',
+      value: `${Math.round((p.calories ?? 0) * factor)} ккал`,
+      primary: true,
+    },
+    { label: 'Белки', value: `${scale(p.protein, factor)} г` },
+    { label: 'Жиры', value: `${scale(p.fat, factor)} г` },
+    { label: 'Углеводы', value: `${scale(p.carbs, factor)} г` },
   ];
 
   return (
@@ -84,20 +88,20 @@ export const BarcodeResultModal = ({
     >
       {/* Название и бренд */}
       <p
-        className="text-sm font-medium text-center mt-1"
+        className="mt-1 text-center text-sm font-medium"
         style={{ color: theme.text_color }}
       >
         {product.name}
       </p>
       {product.brand && (
-        <p className="text-xs text-center" style={{ color: theme.hint_color }}>
+        <p className="text-center text-xs" style={{ color: theme.hint_color }}>
           {product.brand}
         </p>
       )}
 
       {/* Поле порции */}
-      <div className="flex items-center gap-2 mt-3">
-        <span className="text-sm shrink-0" style={{ color: theme.hint_color }}>
+      <div className="mt-3 flex items-center gap-2">
+        <span className="shrink-0 text-sm" style={{ color: theme.hint_color }}>
           Порция:
         </span>
 
@@ -110,14 +114,14 @@ export const BarcodeResultModal = ({
             onChange={(e) =>
               setPortionG(Math.max(1, Math.round(Number(e.target.value))))
             }
-            className="w-full py-2 pl-3 pr-7 rounded-xl text-sm outline-none"
+            className="w-full rounded-xl py-2 pr-7 pl-3 text-sm outline-none"
             style={{
               backgroundColor: theme.secondary_bg_color,
               color: theme.text_color,
             }}
           />
           <span
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs pointer-events-none"
+            className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs"
             style={{ color: theme.hint_color }}
           >
             г
@@ -128,7 +132,7 @@ export const BarcodeResultModal = ({
         {product.servingSizeG != null && (
           <button
             onClick={() => setPortionG(product.servingSizeG!)}
-            className="shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-medium"
+            className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium"
             style={{
               backgroundColor: `${theme.button_color}20`,
               color: theme.button_color,

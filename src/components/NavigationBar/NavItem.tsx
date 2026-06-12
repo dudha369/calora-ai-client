@@ -1,6 +1,6 @@
-import { NavLink } from "react-router-dom";
-import type { ReactNode } from "react";
-import { useTheme } from "../../context/ThemeContext";
+import { NavLink } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { useTheme } from '../../context/ThemeContext';
 
 interface NavigationBarItemProps {
   to: string;
@@ -15,7 +15,7 @@ export const NavItem = ({ to, icon, label }: NavigationBarItemProps) => {
     <NavLink
       to={to}
       title={label}
-      className="flex-1 h-full max-w-16 transition-colors duration-200 ease-in-out"
+      className="h-full max-w-16 flex-1 transition-colors duration-200 ease-in-out"
       style={({ isActive }) => ({
         color: isActive ? theme.text_color : theme.hint_color,
       })}

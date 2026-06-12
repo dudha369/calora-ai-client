@@ -12,7 +12,7 @@ export const OnboardingProgress = ({ current, total }: Props) => {
   return (
     <div className="px-4 pt-4 pb-1">
       <div
-        className="w-full h-1 rounded-full overflow-hidden"
+        className="h-1 w-full overflow-hidden rounded-full"
         style={{ backgroundColor: theme.secondary_bg_color }}
       >
         <div
@@ -20,7 +20,10 @@ export const OnboardingProgress = ({ current, total }: Props) => {
           style={{ width: `${pct}%`, backgroundColor: theme.button_color }}
         />
       </div>
-      <p className="text-xs mt-1.5 text-right tabular-nums" style={{ color: theme.hint_color }}>
+      <p
+        className="mt-1.5 text-right text-xs tabular-nums"
+        style={{ color: theme.hint_color }}
+      >
         {current + 1} / {total}
       </p>
     </div>

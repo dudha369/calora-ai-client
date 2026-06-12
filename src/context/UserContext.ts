@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react";
-import { type UserData } from "../interfaces/UserData";
+import { createContext, useContext } from 'react';
+import { type UserData } from '../interfaces/UserData';
 
 interface UserContextType {
   user_data: UserData | undefined;

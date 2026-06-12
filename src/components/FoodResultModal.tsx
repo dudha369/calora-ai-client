@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { ModalWindow } from "./ModalWindow";
-import { NutritionTable, type NutritionRow } from "./NutritionTable";
-import type { FoodAnalysisResult } from "../api/food";
-import { useTheme } from "../context/ThemeContext";
+import { useState } from 'react';
+import { ModalWindow } from './ModalWindow';
+import { NutritionTable, type NutritionRow } from './NutritionTable';
+import type { FoodAnalysisResult } from '../api/food';
+import { useTheme } from '../context/ThemeContext';
 
 interface FoodResultModalProps {
   result: FoodAnalysisResult;
@@ -10,7 +10,7 @@ interface FoodResultModalProps {
   onClose: () => void;
 }
 
-const fmt = (n: number) => n.toFixed(1).replace(/\.0$/, "");
+const fmt = (n: number) => n.toFixed(1).replace(/\.0$/, '');
 
 /**
  * Модальное окно результата AI-анализа еды.
@@ -24,10 +24,10 @@ const fmt = (n: number) => n.toFixed(1).replace(/\.0$/, "");
  * только после успешного нажатия «Добавить».
  */
 export const FoodResultModal = ({
-                                  result,
-                                  onConfirm,
-                                  onClose,
-                                }: FoodResultModalProps) => {
+  result,
+  onConfirm,
+  onClose,
+}: FoodResultModalProps) => {
   const theme = useTheme();
   const [isConfirming, setIsConfirming] = useState(false);
 
@@ -41,10 +41,14 @@ export const FoodResultModal = ({
   };
 
   const totalRows: NutritionRow[] = [
-    { label: "Итого калорий", value: `${result.total.calories} ккал`, primary: true },
-    { label: "Белки",         value: `${fmt(result.total.protein_g)} г` },
-    { label: "Жиры",          value: `${fmt(result.total.fat_g)} г` },
-    { label: "Углеводы",      value: `${fmt(result.total.carbs_g)} г` },
+    {
+      label: 'Итого калорий',
+      value: `${result.total.calories} ккал`,
+      primary: true,
+    },
+    { label: 'Белки', value: `${fmt(result.total.protein_g)} г` },
+    { label: 'Жиры', value: `${fmt(result.total.fat_g)} г` },
+    { label: 'Углеводы', value: `${fmt(result.total.carbs_g)} г` },
   ];
 
   const hasManyDishes = result.dishes.length > 1;
@@ -66,7 +70,7 @@ export const FoodResultModal = ({
               className="flex items-center justify-between px-1 py-0.5"
             >
               <span
-                className="text-sm truncate max-w-[60%]"
+                className="max-w-[60%] truncate text-sm"
                 style={{ color: theme.text_color }}
               >
                 {dish.name}
@@ -82,7 +86,7 @@ export const FoodResultModal = ({
       {/* Одно блюдо — показываем название подзаголовком */}
       {!hasManyDishes && result.dishes[0] && (
         <p
-          className="text-sm text-center mt-1"
+          className="mt-1 text-center text-sm"
           style={{ color: theme.hint_color }}
         >
           {result.dishes[0].name} · {result.dishes[0].portion_g} г
@@ -94,7 +98,7 @@ export const FoodResultModal = ({
       {/* Предупреждение о низкой уверенности Gemini */}
       {result.ask_user && result.portion_note && (
         <p
-          className="text-xs mt-2.5 text-center px-1 leading-relaxed"
+          className="mt-2.5 px-1 text-center text-xs leading-relaxed"
           style={{ color: theme.hint_color }}
         >
           ⚠️ {result.portion_note}

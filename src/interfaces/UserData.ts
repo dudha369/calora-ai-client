@@ -1,6 +1,6 @@
-import type { User } from "./User";
-import type { Profile } from "./Profile";
-import type { Goal } from "./Goal";
+import type { User } from './User';
+import type { Profile } from './Profile';
+import type { Goal } from './Goal';
 
 export interface UserData {
   user: User;

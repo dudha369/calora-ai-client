@@ -1,16 +1,16 @@
-import { createContext, useContext } from "react";
-import type { Theme, ThemeMode } from "../interfaces/Theme";
-import { getValidTheme } from "../utils/getValidTheme";
+import { createContext, useContext } from 'react';
+import type { Theme, ThemeMode } from '../interfaces/Theme';
+import { getValidTheme } from '../utils/getValidTheme';
 
 export interface ThemeContextValue {
-  theme:   Theme;
-  mode:    ThemeMode;
+  theme: Theme;
+  mode: ThemeMode;
   setMode: (mode: ThemeMode) => Promise<void>;
 }
 
 const DEFAULT_VALUE: ThemeContextValue = {
-  theme:   getValidTheme(undefined, "light"),
-  mode:    "telegram",
+  theme: getValidTheme(undefined, 'light'),
+  mode: 'telegram',
   setMode: async () => {},
 };
 

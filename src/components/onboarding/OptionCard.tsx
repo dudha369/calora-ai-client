@@ -7,23 +7,36 @@ interface Props {
   onClick: () => void;
 }
 
-export const OptionCard = ({ label, description, isSelected, onClick }: Props) => {
+export const OptionCard = ({
+  label,
+  description,
+  isSelected,
+  onClick,
+}: Props) => {
   const theme = useTheme();
   return (
     <button
       onClick={onClick}
-      className="w-full text-left p-4 rounded-2xl border transition-all duration-150 active:scale-[0.98]"
+      className="w-full rounded-2xl border p-4 text-left transition-all duration-150 active:scale-[0.98]"
       style={{
-        backgroundColor: isSelected ? theme.button_color : theme.section_bg_color,
-        borderColor: isSelected ? theme.button_color : theme.section_separator_color,
+        backgroundColor: isSelected
+          ? theme.button_color
+          : theme.section_bg_color,
+        borderColor: isSelected
+          ? theme.button_color
+          : theme.section_separator_color,
         color: isSelected ? theme.button_text_color : theme.text_color,
       }}
     >
       <span className="font-semibold">{label}</span>
       {description && (
         <p
-          className="text-xs mt-0.5 leading-relaxed"
-          style={{ color: isSelected ? `${theme.button_text_color}B3` : theme.hint_color }}
+          className="mt-0.5 text-xs leading-relaxed"
+          style={{
+            color: isSelected
+              ? `${theme.button_text_color}B3`
+              : theme.hint_color,
+          }}
         >
           {description}
         </p>

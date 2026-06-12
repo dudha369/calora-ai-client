@@ -15,4 +15,4 @@ export interface Theme {
   section_separator_color: string;
 }
 
-export type ThemeMode = "telegram" | "auto" | "light" | "dark";
+export type ThemeMode = 'telegram' | 'auto' | 'light' | 'dark';

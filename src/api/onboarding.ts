@@ -1,17 +1,14 @@
 import { request } from './request';
-import type { OnboardingData, OnboardingProgress } from '../interfaces/Onboarding';
+import type {
+  OnboardingData,
+  OnboardingProgress,
+} from '../interfaces/Onboarding';
 
 export const onboarding = {
-  getProgress: () =>
-    request<OnboardingProgress>('onboarding/progress'),
+  getProgress: () => request<OnboardingProgress>('onboarding/progress'),
 
   saveStep: (step: number, data: Partial<OnboardingData>) =>
     request('onboarding/step', 'POST', { step, ...data }),
 
-  complete: () =>
-    request('onboarding/complete', 'POST'),
-
-  /** DEBUG: сбрасывает профиль, цели и черновик. После вызова — нужен онбординг. */
-  reset: () =>
-    request('onboarding/reset', 'DELETE'),
+  complete: () => request('onboarding/complete', 'POST'),
 };

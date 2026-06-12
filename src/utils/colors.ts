@@ -1,8 +1,8 @@
 interface Color {
-  h: number,
-  s: number,
-  l: number,
-  yiq: number
+  h: number;
+  s: number;
+  l: number;
+  yiq: number;
 }
 
 /**
@@ -11,7 +11,11 @@ interface Color {
 function parseColor(hex: string): Color {
   hex = hex.replace(/^#/, '');
   // На случай коротких hex-кодов вроде #fff
-  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  if (hex.length === 3)
+    hex = hex
+      .split('')
+      .map((c) => c + c)
+      .join('');
 
   let r = parseInt(hex.substring(0, 2), 16);
   let g = parseInt(hex.substring(2, 4), 16);
@@ -21,11 +25,16 @@ function parseColor(hex: string): Color {
   const yiq = (r * 299 + g * 587 + b * 114) / 1000;
 
   // Переводим в доли для HSL
-  r /= 255; g /= 255; b /= 255;
-  let max = Math.max(r, g, b), min = Math.min(r, g, b);
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  let max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
 
   // ИНИЦИАЛИЗАЦИЯ: сразу задаем h и s равными 0
-  let h = 0, s = 0, l = (max + min) / 2;
+  let h = 0,
+    s = 0,
+    l = (max + min) / 2;
 
   // Если max === min, то h и s уже равны 0 по умолчанию,
   // поэтому нам нужно обрабатывать только случай, когда они не равны
@@ -33,9 +42,15 @@ function parseColor(hex: string): Color {
     let d = max - min;
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
     switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
     }
     h /= 6;
   }
@@ -44,7 +59,7 @@ function parseColor(hex: string): Color {
     h: Math.round(h * 360),
     s: Math.round(s * 100),
     l: Math.round(l * 100),
-    yiq: yiq
+    yiq: yiq,
   };
 }
 
@@ -65,27 +80,15 @@ export function makeContrast(bgHex: string, shift = 20) {
 }
 
 /**
- * Добавляет прозрачность цвету
+ * Накладывает alpha-канал на HEX-цвет через 8-значный hex (#RRGGBBAA).
+ * Используется вместо строковой конкатенации "${color}B3", которая
+ * ломается для не-hex значений и не работает с rgb()/hsl().
  */
-export function withOpacity(color: string, alpha: number) {
-  if (!color) return color;
-  if (color.startsWith("rgba(") || color.startsWith("rgb(")) return color;
-  if (!color.startsWith("#")) return color;
-
-  let hex = color.slice(1);
-
-  if (hex.length === 3) {
-    hex = hex
-    .split("")
-    .map((ch) => ch + ch)
-    .join("");
-  }
-
-  if (hex.length !== 6) return color;
-
-  const r = Number.parseInt(hex.slice(0, 2), 16);
-  const g = Number.parseInt(hex.slice(2, 4), 16);
-  const b = Number.parseInt(hex.slice(4, 6), 16);
-
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+export function withOpacity(hex: string, opacity: number): string {
+  const clamped = Math.round(Math.min(1, Math.max(0, opacity)) * 255);
+  const alphaHex = clamped.toString(16).padStart(2, '0');
+  const normalized = hex.startsWith('#') ? hex : `#${hex}`;
+  // Если уже есть alpha-канал (9 символов) — заменяем последние 2
+  const base = normalized.length === 9 ? normalized.slice(0, 7) : normalized;
+  return `${base}${alphaHex}`;
 }

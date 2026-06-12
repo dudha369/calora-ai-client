@@ -4,9 +4,9 @@ import {
   useRef,
   useCallback,
   type ChangeEvent,
-} from "react";
-import { useCamera, type UseCameraReturn } from "./useCamera";
-import { useScanner } from "./useScanner";
+} from 'react';
+import { useCamera, type UseCameraReturn } from './useCamera';
+import { useScanner } from './useScanner';
 
 export interface UseScannerCaptureReturn {
   photo: string | null;
@@ -34,7 +34,8 @@ export function useScannerCapture(
   const consumedExternalRef = useRef<string | null>(externalPhoto);
 
   const camera = useCamera();
-  const { method, startCamera, stopCamera, takePhoto, openInputCamera } = camera;
+  const { method, startCamera, stopCamera, takePhoto, openInputCamera } =
+    camera;
 
   // Держим актуальный takePhoto в ref чтобы useEffect с registerCapture
   // не пересоздавался при каждом рендере камеры
@@ -55,7 +56,7 @@ export function useScannerCapture(
 
   // ── Управление камерой: включаем стрим только без фото ───────────────────
   useEffect(() => {
-    if (!photo && method === "stream") {
+    if (!photo && method === 'stream') {
       startCamera();
     } else {
       stopCamera();
@@ -71,7 +72,7 @@ export function useScannerCapture(
       if (photo) {
         // Есть фото → retake
         setPhoto(null);
-      } else if (method === "stream") {
+      } else if (method === 'stream') {
         const dataUrl = takePhotoRef.current();
         if (dataUrl) setPhoto(dataUrl);
       } else {
@@ -91,7 +92,7 @@ export function useScannerCapture(
     reader.onload = () => setPhoto(reader.result as string);
     reader.readAsDataURL(file);
     // Сбрасываем value — иначе onChange не сработает при выборе того же файла
-    e.target.value = "";
+    e.target.value = '';
   }, []);
 
   return { photo, clearPhoto, handleFileChange, camera };

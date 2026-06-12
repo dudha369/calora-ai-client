@@ -20,15 +20,19 @@ interface Props {
 
 export const Step10Medical = ({ data, onChange }: Props) => {
   const theme = useTheme();
-  const [selected, setSelected] = useState<string[]>(data.medical_conditions ?? []);
+  const [selected, setSelected] = useState<string[]>(
+    data.medical_conditions ?? [],
+  );
 
   const toggle = (opt: string) => {
     let next: string[];
     if (opt === NONE) {
       next = selected.includes(NONE) ? [] : [NONE];
     } else {
-      const without = selected.filter(s => s !== NONE);
-      next = without.includes(opt) ? without.filter(s => s !== opt) : [...without, opt];
+      const without = selected.filter((s) => s !== NONE);
+      next = without.includes(opt)
+        ? without.filter((s) => s !== opt)
+        : [...without, opt];
     }
     setSelected(next);
     onChange({ medical_conditions: next }, true);
@@ -40,39 +44,51 @@ export const Step10Medical = ({ data, onChange }: Props) => {
       subtitle="Только для точности рекомендаций ИИ. Данные не передаются третьим лицам. Можно пропустить"
     >
       <div className="flex flex-col gap-3">
-        {OPTIONS.map(opt => {
+        {OPTIONS.map((opt) => {
           const active = selected.includes(opt);
           return (
             <button
               key={opt}
               onClick={() => toggle(opt)}
-              className="w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all duration-150"
+              className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all duration-150"
               style={{
-                backgroundColor: active ? theme.button_color : theme.section_bg_color,
+                backgroundColor: active
+                  ? theme.button_color
+                  : theme.section_bg_color,
                 color: active ? theme.button_text_color : theme.text_color,
                 border: `1px solid ${active ? theme.button_color : theme.section_separator_color}`,
               }}
             >
               {/* Custom checkbox */}
               <span
-                className="size-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center"
+                className="flex size-5 flex-shrink-0 items-center justify-center rounded-full border-2"
                 style={{
-                  borderColor: active ? theme.button_text_color : theme.hint_color,
-                  backgroundColor: active ? theme.button_text_color : 'transparent',
+                  borderColor: active
+                    ? theme.button_text_color
+                    : theme.hint_color,
+                  backgroundColor: active
+                    ? theme.button_text_color
+                    : 'transparent',
                 }}
               >
                 {active && (
                   <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                    <path d="M1 4L3.5 6.5L9 1" stroke={theme.button_color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    <path
+                      d="M1 4L3.5 6.5L9 1"
+                      stroke={theme.button_color}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 )}
               </span>
-              <span className="font-medium text-sm">{opt}</span>
+              <span className="text-sm font-medium">{opt}</span>
             </button>
           );
         })}
       </div>
-      <p className="text-xs px-1 -mt-2" style={{ color: theme.hint_color }}>
+      <p className="-mt-2 px-1 text-xs" style={{ color: theme.hint_color }}>
         ⚠️ Используется только для фильтрации советов ИИ
       </p>
     </StepShell>

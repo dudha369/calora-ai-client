@@ -9,7 +9,7 @@ export const LoadingScreen = () => {
       className="fixed inset-0 z-999 backdrop-blur-sm"
       style={{ backgroundColor: `${theme.bg_color}D9` }}
     >
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <Sprout
           className="animate-pulse"
           style={{ color: theme.hint_color }}
@@ -17,7 +17,7 @@ export const LoadingScreen = () => {
         />
       </div>
       <p
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-6 text-sm font-medium tracking-widest uppercase"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-6 text-sm font-medium tracking-widest uppercase"
         style={{ color: theme.hint_color }}
       >
         Loading…

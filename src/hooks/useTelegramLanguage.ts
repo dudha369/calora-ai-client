@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import {cloudStorage, initData } from '@telegram-apps/sdk-react';
+import { cloudStorage, initData } from '@telegram-apps/sdk-react';
 import i18n, { SUPPORTED_LANGUAGES, type AppLanguage } from '../i18n';
 
 function normalizeLanguage(lang: string | undefined): AppLanguage {
