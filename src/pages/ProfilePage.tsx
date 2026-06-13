@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import { User, Trash2 } from 'lucide-react';

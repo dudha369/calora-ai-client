@@ -24,6 +24,9 @@ export const request = async <T = unknown>(
       Accept: "application/json",
       ...(isFormData ? {} : { "Content-Type": "application/json" }),
     },
-    data: isFormData ? data : data ? JSON.stringify(data) : undefined,
+    // axios автоматически сериализует объекты в JSON при
+    // Content-Type: application/json — ручной JSON.stringify не нужен.
+    // FormData передаём как есть.
+    data: isFormData ? data : data,
   });
 };

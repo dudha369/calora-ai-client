@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { useScannerCapture } from '../hooks/useScannerCapture';
 import { useFoodAnalysis } from '../hooks/useFoodAnalysis';
@@ -39,9 +39,9 @@ export const ScannerPage = () => {
 
   const invalidateFoodQueries = () => {
     const date = todayApiDate();
-    queryClient.invalidateQueries(['food', date]);
-    queryClient.invalidateQueries(['stats', 'daily', date]);
-    queryClient.invalidateQueries(['stats', 'active-dates']);
+    queryClient.invalidateQueries({ queryKey: ['food', date] });
+    queryClient.invalidateQueries({ queryKey: ['stats', 'daily', date] });
+    queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
   };
 
   /** Подтверждение находки по штрихкоду → POST /api/food/log-barcode */

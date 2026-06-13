@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { decodeBarcode } from '../utils/decodeBarcode';
 import { fetchProductByBarcode } from '../api/openfoodfacts';
 import { food } from '../api/food';
+import { compressImage } from '../utils/compressImage';
 import type { FoodAnalyzeResponse } from '../interfaces/api/food';
 import type { ProductData } from '../types/productData';
 
@@ -65,8 +66,12 @@ export function useFoodAnalysis(photo: string | null): AnalysisStatus {
           return;
         }
 
-        // Шаг 2: AI анализ через бэкенд
-        const file = dataUrlToFile(photo);
+        // Шаг 2: сжимаем изображение (1280px, JPEG 80%) чтобы уменьшить трафик
+        const compressed = await compressImage(photo);
+        if (cancelled) return;
+
+        // Шаг 3: AI анализ через бэкенд
+        const file = dataUrlToFile(compressed);
         const { data } = await food.analyze(file);
         if (!cancelled) setStatus({ kind: 'food', result: data });
       } catch (err) {

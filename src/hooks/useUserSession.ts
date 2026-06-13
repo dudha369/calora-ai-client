@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { initData } from '@telegram-apps/sdk-react';
 import { request } from '../api/request';
 import type { UserData } from '../interfaces/UserData';
