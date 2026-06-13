@@ -2,7 +2,7 @@ import './i18n';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './router';
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TelegramRootProvider } from './providers/TelegramRootProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { ErrorBoundary } from './components/loading/ErrorBoundary';

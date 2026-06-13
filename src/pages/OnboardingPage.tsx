@@ -1,6 +1,6 @@
 import { type JSX, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from 'react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { cloudStorage } from '@telegram-apps/sdk-react';
 
 import { useTheme } from '../context/ThemeContext';
@@ -244,7 +244,7 @@ export const OnboardingPage = () => {
 
       if (isLast) {
         await onboarding.complete();
-        queryClient.invalidateQueries('user');
+        queryClient.invalidateQueries({ queryKey: ['user'] });
         navigate('/', { replace: true });
       } else {
         // Пушим текущий шаг в историю перед переходом вперёд

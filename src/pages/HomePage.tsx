@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Sprout, Flame, CalendarDays } from 'lucide-react';
 
 import { useUser } from '../context/UserContext';
@@ -68,9 +68,9 @@ export const HomePage = () => {
     onSuccess: () => {
       // Инвалидируем список записей, дневную статистику и точки активности —
       // удаление могло убрать последнюю запись дня.
-      queryClient.invalidateQueries(['food', selectedDateStr]);
-      queryClient.invalidateQueries(['stats', 'daily', selectedDateStr]);
-      queryClient.invalidateQueries(['stats', 'active-dates']);
+      queryClient.invalidateQueries({ queryKey: ['food', selectedDateStr] });
+      queryClient.invalidateQueries({ queryKey: ['stats', 'daily', selectedDateStr] });
+      queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
     },
   });
 
