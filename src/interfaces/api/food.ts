@@ -32,8 +32,8 @@ export interface NutritionTotals {
 export interface FoodLogBase {
   id: number;
   user_id: number;
-  log_date: string;   // YYYY-MM-DD
-  logged_at: string;  // ISO datetime (UTC)
+  log_date: string; // YYYY-MM-DD
+  logged_at: string; // ISO datetime (UTC)
   photo_url: string | null;
   total_calories: number;
   total_protein_g: number;
@@ -79,6 +79,11 @@ export interface FoodItemIn {
   protein_g: number;
   fat_g: number;
   carbs_g: number;
+}
+
+export interface BarcodeLogIn {
+  log_date: string; // YYYY-MM-DD
+  items: FoodItemIn[];
 }
 
 export interface FoodLogIn {
