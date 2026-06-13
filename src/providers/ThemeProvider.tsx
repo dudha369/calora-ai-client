@@ -67,11 +67,24 @@ function applyThemeToCss(theme: Theme): void {
 // ─── Хелперы чтения текущих Telegram params ───────────────────────────────────
 
 function safeThemeParams() {
+  // 1. Пробуем SDK (@telegram-apps/sdk-react)
   try {
-    return themeParams.state();
+    const state = themeParams.state();
+    if (state && state.bg_color) return state;
   } catch {
-    return undefined;
+    // SDK не инициализирован или mount() не вызван — fallback ниже
   }
+
+  // 2. Fallback: нативный Telegram WebApp API (работает всегда внутри Mini App)
+  try {
+    const tp = (window as { Telegram?: { WebApp?: { themeParams?: Record<string, string> } } })
+      .Telegram?.WebApp?.themeParams;
+    if (tp && tp.bg_color) return tp;
+  } catch {
+    // Не в Telegram — вернём undefined
+  }
+
+  return undefined;
 }
 
 // ─── ThemeProvider ────────────────────────────────────────────────────────────
