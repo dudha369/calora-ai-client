@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { ModalWindow } from './ModalWindow';
 import { NutritionTable, type NutritionRow } from './NutritionTable';
-import type { FoodAnalysisResult } from '../api/food';
+import type { FoodAnalyzeResponse } from '../interfaces/api/food';
 import { useTheme } from '../context/ThemeContext';
 
 interface FoodResultModalProps {
-  result: FoodAnalysisResult;
-  onConfirm: (result: FoodAnalysisResult) => Promise<void>;
+  result: FoodAnalyzeResponse;
+  onConfirm: (result: FoodAnalyzeResponse) => Promise<void>;
   onClose: () => void;
 }
 

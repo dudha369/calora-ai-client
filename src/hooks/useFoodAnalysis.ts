@@ -2,7 +2,8 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { decodeBarcode } from '../utils/decodeBarcode';
 import { fetchProductByBarcode } from '../api/openfoodfacts';
-import { food, type FoodAnalysisResult } from '../api/food';
+import { food } from '../api/food';
+import type { FoodAnalyzeResponse } from '../interfaces/api/food';
 import type { ProductData } from '../types/productData';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -24,7 +25,7 @@ export type AnalysisStatus =
   | { kind: 'idle' }
   | { kind: 'analyzing' }
   | { kind: 'barcode'; product: ProductData | null }
-  | { kind: 'food'; result: FoodAnalysisResult }
+  | { kind: 'food'; result: FoodAnalyzeResponse }
   | { kind: 'error'; message: string };
 
 // ── Hook ──────────────────────────────────────────────────────────────────────

@@ -1,17 +1,19 @@
 import { useMemo, useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { Sprout, Flame, CalendarDays } from 'lucide-react';
 
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import { DateStrip } from '../components/DateStrip/DateStrip';
 import { CalendarPicker } from '../components/DateStrip/CalendarPicker';
+import { FoodLogList } from '../components/FoodLog/FoodLogList';
 import { Skeleton } from '../components/Skeleton';
 import { CaloriesArc } from '../components/NutritionStats/CaloriesArc';
 import { NutritionCard } from '../components/NutritionStats/NutritionCard';
 import { AddLogBanner } from '../components/NutritionStats/AddLogBanner';
 import { useDateStrip } from '../hooks/useDateStrip';
 import { stats } from '../api/stats';
+import { food } from '../api/food';
 import { startOfDay } from '../utils/date';
 import { getFlameColor } from '../utils/getFlameColor';
 
@@ -22,6 +24,7 @@ export const HomePage = () => {
   const createdAt = user_data?.user.created_at;
 
   const theme = useTheme();
+  const queryClient = useQueryClient();
 
   const {
     dates,
@@ -48,6 +51,28 @@ export const HomePage = () => {
   );
 
   const [calendarOpen, setCalendarOpen] = useState(false);
+
+  const { data: foodData, isLoading: foodLoading } = useQuery({
+    queryKey: ['food', selectedDateStr],
+    queryFn: async () => (await food.getByDate(selectedDateStr)).data,
+    staleTime: 60 * 1000,
+    keepPreviousData: true,
+  });
+
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const { mutate: deleteLog } = useMutation({
+    mutationFn: (logId: number) => food.remove(logId),
+    onMutate: (logId: number) => setDeletingId(logId),
+    onSettled: () => setDeletingId(null),
+    onSuccess: () => {
+      // Инвалидируем список записей, дневную статистику и точки активности —
+      // удаление могло убрать последнюю запись дня.
+      queryClient.invalidateQueries(['food', selectedDateStr]);
+      queryClient.invalidateQueries(['stats', 'daily', selectedDateStr]);
+      queryClient.invalidateQueries(['stats', 'active-dates']);
+    },
+  });
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-1">
@@ -147,7 +172,26 @@ export const HomePage = () => {
             {statsLoading ? (
               <Skeleton className="h-36" />
             ) : (
-              <div>{data?.has_data ? <div></div> : <AddLogBanner />}</div>
+              <div>
+                {data?.has_data ? (
+                  <div className="flex flex-col gap-2">
+                    <p
+                      className="px-1 text-sm font-semibold"
+                      style={{ color: theme.text_color }}
+                    >
+                      Приёмы пищи
+                    </p>
+                    <FoodLogList
+                      logs={foodData?.logs}
+                      isLoading={foodLoading}
+                      deletingId={deletingId}
+                      onDelete={deleteLog}
+                    />
+                  </div>
+                ) : (
+                  <AddLogBanner />
+                )}
+              </div>
             )}
           </div>
         </div>
