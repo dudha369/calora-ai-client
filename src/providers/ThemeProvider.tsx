@@ -112,7 +112,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Реагируем на смену темы Telegram (пользователь переключил Dark Mode)
     const unsub = themeParams.state.sub(update);
     return unsub;
-  }, [mode]);
+  }, [mode, ready]);
 
   // ── Публичный сеттер: обновляет состояние + пишет в CloudStorage ──────────
   const setMode = useCallback(async (newMode: ThemeMode) => {
