@@ -4,6 +4,7 @@ import ThemeContext from '../context/ThemeContext';
 import { getValidTheme } from '../utils/getValidTheme';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Theme, ThemeMode } from '../interfaces/Theme';
+import type { ThemeParams } from 'telegram-web-app';
 
 // ─── CloudStorage: ключ и интерфейс настроек ─────────────────────────────────
 
@@ -67,22 +68,18 @@ function applyThemeToCss(theme: Theme): void {
 // ─── Хелперы чтения текущих Telegram params ───────────────────────────────────
 
 function safeThemeParams() {
-  // 1. Пробуем SDK (@telegram-apps/sdk-react)
+  // 1. Пробуем SDK
   try {
     const state = themeParams.state();
     if (state && state.bg_color) return state;
-  } catch {
-    // SDK не инициализирован или mount() не вызван — fallback ниже
-  }
+  } catch {}
 
-  // 2. Fallback: нативный Telegram WebApp API (работает всегда внутри Mini App)
+  // 2. Fallback: нативный Telegram WebApp API
   try {
-    const tp = (window as { Telegram?: { WebApp?: { themeParams?: Record<string, string> } } })
-      .Telegram?.WebApp?.themeParams;
-    if (tp && tp.bg_color) return tp;
-  } catch {
-    // Не в Telegram — вернём undefined
-  }
+    const w = window as unknown as Record<string, any>;
+    const tp = w.Telegram?.WebApp?.themeParams;
+    if (tp && tp.bg_color) return tp as ThemeParams;
+  } catch {}
 
   return undefined;
 }
