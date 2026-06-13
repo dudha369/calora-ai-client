@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { Sprout, Flame, CalendarDays } from 'lucide-react';
 
 import { useUser } from '../context/UserContext';
@@ -14,6 +14,8 @@ import { AddLogBanner } from '../components/NutritionStats/AddLogBanner';
 import { useDateStrip } from '../hooks/useDateStrip';
 import { stats } from '../api/stats';
 import { food } from '../api/food';
+import type { DailyStats } from '../interfaces/api/stats';
+import type { FoodByDateResponse } from '../interfaces/api/food';
 import { startOfDay } from '../utils/date';
 import { getFlameColor } from '../utils/getFlameColor';
 
@@ -38,11 +40,11 @@ export const HomePage = () => {
     clearPendingScroll, // ← передаём в DateStrip
   } = useDateStrip();
 
-  const { data, isLoading: statsLoading } = useQuery({
+  const { data, isLoading: statsLoading } = useQuery<DailyStats>({
     queryKey: ['stats', 'daily', selectedDateStr],
     queryFn: async () => (await stats.getDaily(selectedDateStr)).data,
     staleTime: 5 * 60 * 1000,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   const minDate = useMemo(
@@ -52,11 +54,11 @@ export const HomePage = () => {
 
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  const { data: foodData, isLoading: foodLoading } = useQuery({
+  const { data: foodData, isLoading: foodLoading } = useQuery<FoodByDateResponse>({
     queryKey: ['food', selectedDateStr],
     queryFn: async () => (await food.getByDate(selectedDateStr)).data,
     staleTime: 60 * 1000,
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
