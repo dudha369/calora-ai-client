@@ -20,7 +20,7 @@ export function useTelegramLanguage() {
         }
 
         // 2. Язык из Telegram-профиля
-        const tgLang = initData?.user()?.language_code;
+        const tgLang = initData?.user()?.languageCode;
         await i18n.changeLanguage(normalizeLanguage(tgLang));
       } catch {
         // CloudStorage недоступен — остаёмся на 'en'

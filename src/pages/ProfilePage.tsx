@@ -19,7 +19,7 @@ export const ProfilePage = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const photo_url = initData.user()?.photo_url;
+  const photo_url = initData.user()?.photoUrl;
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
