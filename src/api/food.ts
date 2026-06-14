@@ -25,6 +25,9 @@ export const food = {
   getByDate: (date: string) => request<FoodByDateResponse>(`food/${date}`),
 
   remove: (logId: number) => request<DeleteResponse>(`food/${logId}`, 'DELETE'),
+
+  deleteOrphanPhoto: (photoKey: string) =>
+    request<DeleteResponse>(`food/photo/${photoKey}`, 'DELETE'),
 };
 
 export const todayApiDate = (): string => toApiDate(new Date());

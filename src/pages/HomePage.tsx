@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  keepPreviousData,
+} from '@tanstack/react-query';
 import { Sprout, Flame, CalendarDays } from 'lucide-react';
 
 import { useUser } from '../context/UserContext';
@@ -54,12 +59,13 @@ export const HomePage = () => {
 
   const [calendarOpen, setCalendarOpen] = useState(false);
 
-  const { data: foodData, isLoading: foodLoading } = useQuery<FoodByDateResponse>({
-    queryKey: ['food', selectedDateStr],
-    queryFn: async () => (await food.getByDate(selectedDateStr)).data,
-    staleTime: 60 * 1000,
-    placeholderData: keepPreviousData,
-  });
+  const { data: foodData, isLoading: foodLoading } =
+    useQuery<FoodByDateResponse>({
+      queryKey: ['food', selectedDateStr],
+      queryFn: async () => (await food.getByDate(selectedDateStr)).data,
+      staleTime: 60 * 1000,
+      placeholderData: keepPreviousData,
+    });
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -71,7 +77,9 @@ export const HomePage = () => {
       // Инвалидируем список записей, дневную статистику и точки активности —
       // удаление могло убрать последнюю запись дня.
       queryClient.invalidateQueries({ queryKey: ['food', selectedDateStr] });
-      queryClient.invalidateQueries({ queryKey: ['stats', 'daily', selectedDateStr] });
+      queryClient.invalidateQueries({
+        queryKey: ['stats', 'daily', selectedDateStr],
+      });
       queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
     },
   });
@@ -175,21 +183,13 @@ export const HomePage = () => {
               <Skeleton className="h-36" />
             ) : (
               <div>
-                {data?.has_data ? (
-                  <div className="flex flex-col gap-2">
-                    <p
-                      className="px-1 text-sm font-semibold"
-                      style={{ color: theme.text_color }}
-                    >
-                      Приёмы пищи
-                    </p>
-                    <FoodLogList
-                      logs={foodData?.logs}
-                      isLoading={foodLoading}
-                      deletingId={deletingId}
-                      onDelete={deleteLog}
-                    />
-                  </div>
+                {data?.has_data && foodData ? (
+                  <FoodLogList
+                    logs={foodData.logs}
+                    isLoading={foodLoading}
+                    deletingId={deletingId}
+                    onDelete={deleteLog}
+                  />
                 ) : (
                   <AddLogBanner />
                 )}

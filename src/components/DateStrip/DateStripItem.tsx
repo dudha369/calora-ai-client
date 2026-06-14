@@ -34,21 +34,16 @@ export const DateStripItem = ({
   let nameColor: string;
 
   if (isSelected) {
-    // Заливка accent-цветом + контрастный текст — самый заметный элемент.
-    // Покрывает и "today + selected": solid-граница, как и требовалось.
     bg = theme.button_color;
     border = `2px solid ${theme.button_color}`;
     numColor = theme.button_text_color;
     nameColor = withOpacity(theme.button_text_color, 0.7);
   } else if (isDisabled) {
-    bg = withOpacity(theme.text_color, 0.04);
+    bg = withOpacity(theme.section_bg_color, 0.6);
     border = '2px solid transparent';
-    numColor = withOpacity(theme.text_color, 0.25);
-    nameColor = withOpacity(theme.text_color, 0.25);
+    numColor = theme.hint_color;
+    nameColor = theme.hint_color;
   } else if (isToday) {
-    // Today (не выбран): визуально обычный доступный день —
-    // text_color/hint_color, без button_color и без opacity.
-    // Единственный маркер — пунктирная рамка того же text_color.
     bg = 'transparent';
     border = `2px dashed ${theme.text_color}`;
     numColor = theme.text_color;

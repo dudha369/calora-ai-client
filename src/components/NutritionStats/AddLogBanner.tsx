@@ -6,7 +6,7 @@ export const AddLogBanner = () => {
 
   return (
     <div
-      className="flex h-auto w-full flex-col items-center justify-center gap-1 rounded-xl py-4"
+      className="flex h-36 w-full flex-col items-center justify-center gap-1 rounded-xl py-4"
       style={{
         backgroundColor: theme.section_bg_color,
       }}
@@ -19,7 +19,7 @@ export const AddLogBanner = () => {
         paperColor={theme.section_separator_color}
       />
       <span
-        className="text-sm"
+        className="text-sm font-medium"
         style={{
           color: theme.subtitle_text_color,
         }}

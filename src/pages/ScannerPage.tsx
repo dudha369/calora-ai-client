@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -27,13 +28,39 @@ export const ScannerPage = () => {
 
   const state = location.state as ScannerLocationState | null;
 
-  // Захват фото (камера/файл) — вся логика уже инкапсулирована в хуке
   const { photo, clearPhoto, handleFileChange, camera } = useScannerCapture(
     state?.photo ?? null,
   );
 
-  // Анализ фото: штрихкод → OpenFoodFacts, иначе → POST /api/food/analyze (Gemini)
   const status = useFoodAnalysis(photo);
+
+  const pendingPhotoKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (status.kind === 'food') {
+      pendingPhotoKeyRef.current = status.result.photo_key;
+    }
+  }, [status]);
+
+  useEffect(() => {
+    return () => {
+      const key = pendingPhotoKeyRef.current;
+      if (key) {
+        food.deleteOrphanPhoto(key).catch(() => {
+          // Молчаливый fail — фото останется в B2, но это некритично.
+          // Периодический cleanup job решит это на уровне инфраструктуры.
+        });
+      }
+    };
+  }, []);
+
+  const deleteOrphanAndClose = (photoKey: string | null | undefined) => {
+    if (photoKey) {
+      food.deleteOrphanPhoto(photoKey).catch(() => {});
+    }
+    pendingPhotoKeyRef.current = null;
+    clearPhoto();
+  };
 
   useBackButton(clearPhoto, !!photo);
 
@@ -44,7 +71,6 @@ export const ScannerPage = () => {
     queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
   };
 
-  /** Подтверждение находки по штрихкоду → POST /api/food/log-barcode */
   const handleBarcodeConfirm = async (
     product: ProductData,
     portionG: number,
@@ -71,8 +97,9 @@ export const ScannerPage = () => {
     navigate('/');
   };
 
-  /** Подтверждение результата AI-анализа → POST /api/food/log */
   const handleFoodConfirm = async (result: FoodAnalyzeResponse) => {
+    pendingPhotoKeyRef.current = null;
+
     await food.log({
       log_date: todayApiDate(),
       items: result.dishes.map((dish) => ({
@@ -123,7 +150,7 @@ export const ScannerPage = () => {
         <FoodResultModal
           result={status.result}
           onConfirm={handleFoodConfirm}
-          onClose={clearPhoto}
+          onClose={() => deleteOrphanAndClose(status.result.photo_key)}
         />
       )}
 
