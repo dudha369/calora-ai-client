@@ -18,6 +18,8 @@ export interface FoodItem {
   protein_g: number;
   fat_g: number;
   carbs_g: number;
+  fiber_g: number;
+  sugar_g: number;
 }
 
 /** Суммарный КБЖУ — используется и в daily_total, и в total анализа фото */
@@ -39,6 +41,8 @@ export interface FoodLogBase {
   total_protein_g: number;
   total_fat_g: number;
   total_carbs_g: number;
+  total_fiber_g: number;
+  total_sugar_g: number;
 }
 
 /** Запись еды с блюдами — то, что отдают GET /api/food/{date} и POST /api/food/log */
@@ -56,6 +60,8 @@ export interface AnalyzedDish {
   protein_g: number;
   fat_g: number;
   carbs_g: number;
+  fiber_g: number;
+  sugar_g: number;
   confidence: number;
 }
 
@@ -79,6 +85,8 @@ export interface FoodItemIn {
   protein_g: number;
   fat_g: number;
   carbs_g: number;
+  fiber_g?: number;
+  sugar_g?: number;
 }
 
 export interface BarcodeLogIn {

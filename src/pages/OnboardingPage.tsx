@@ -9,10 +9,12 @@ import { useMainButton } from '../hooks/useMainButton';
 import { useBackButton } from '../hooks/useBackButton';
 import { onboarding } from '../api/onboarding';
 
+import i18n from '../i18n';
 import { LoadingScreen } from '../components/loading/LoadingScreen';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
+import { Step0Language } from '../components/onboarding/steps/Step0Language';
 import { Step1Gender } from '../components/onboarding/steps/Step1Gender';
-import { Step2Age } from '../components/onboarding/steps/Step2Age';
+import { Step2BirthDate } from '../components/onboarding/steps/Step2BirthDate';
 import { Step3Height } from '../components/onboarding/steps/Step3Height';
 import { Step4Weight } from '../components/onboarding/steps/Step4Weight';
 import { Step5Goal } from '../components/onboarding/steps/Step5Goal';
@@ -34,17 +36,19 @@ const CS_WEIGHT_UNIT = 'units_weight';
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function getActiveSteps(data: Partial<OnboardingData>): number[] {
-  const steps = [1, 2, 3, 4, 5];
+  const steps = [0, 1, 2, 3, 4, 5];
   if (data.goal && data.goal !== 'maintain') steps.push(6);
   return [...steps, 7, 8, 9, 10];
 }
 
 function isStepValid(step: number, data: Partial<OnboardingData>): boolean {
   switch (step) {
+    case 0:
+      return !!data.language;
     case 1:
       return !!data.gender;
     case 2:
-      return typeof data.age === 'number' && data.age >= 13 && data.age <= 90;
+      return !!data.birth_date;
     case 3:
       return typeof data.height === 'number';
     case 4:
@@ -75,10 +79,12 @@ function stepPayload(
   d: Partial<OnboardingData>,
 ): Partial<OnboardingData> {
   switch (step) {
+    case 0:
+      return { language: d.language };
     case 1:
       return { gender: d.gender };
     case 2:
-      return { age: d.age };
+      return { birth_date: d.birth_date };
     case 3:
       return { height: d.height };
     case 4:
@@ -115,6 +121,7 @@ const INITIAL_DATA: Partial<OnboardingData> = {
   weight_unit: 'kg',
   dietary_restrictions: [],
   medical_conditions: [],
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 };
 
 export const OnboardingPage = () => {
@@ -124,8 +131,8 @@ export const OnboardingPage = () => {
   const queryClient = useQueryClient();
 
   const [data, setData] = useState<Partial<OnboardingData>>(INITIAL_DATA);
-  const [step, setStep] = useState(1);
-  const [stepHistory, setStepHistory] = useState<number[]>([]); // ← история шагов для BackButton
+  const [step, setStep] = useState(0);
+  const [stepHistory, setStepHistory] = useState<number[]>([]);
   const [valid, setValid] = useState(false);
   const [initializing, setInitializing] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -169,8 +176,13 @@ export const OnboardingPage = () => {
         const resume = active.includes(savedStep) ? savedStep : active[0];
         setStep(resume);
         setValid(isStepValid(resume, merged));
+
+        // Apply saved language to i18n
+        if (merged.language) {
+          i18n.changeLanguage(merged.language);
+        }
       } catch {
-        setStep(1);
+        setStep(0);
         setValid(false);
       } finally {
         setInitializing(false);
@@ -221,6 +233,11 @@ export const OnboardingPage = () => {
     setSaving(true);
 
     try {
+      // Language step: apply language to i18n immediately
+      if (currentStep === 0 && currentData.language) {
+        await i18n.changeLanguage(currentData.language);
+      }
+
       await onboarding.saveStep(
         currentStep,
         stepPayload(currentStep, currentData),
@@ -243,11 +260,11 @@ export const OnboardingPage = () => {
       const isLast = idx === active.length - 1;
 
       if (isLast) {
+        // Include timezone in the complete call
         await onboarding.complete();
         queryClient.invalidateQueries({ queryKey: ['user'] });
         navigate('/', { replace: true });
       } else {
-        // Пушим текущий шаг в историю перед переходом вперёд
         setStepHistory((h) => [...h, currentStep]);
         const nextStep = active[idx + 1];
         setStep(nextStep);
@@ -278,8 +295,9 @@ export const OnboardingPage = () => {
 
   const props = { data, onChange: handleChange };
   const stepMap: Record<number, JSX.Element> = {
+    0: <Step0Language {...props} />,
     1: <Step1Gender {...props} />,
-    2: <Step2Age {...props} />,
+    2: <Step2BirthDate {...props} />,
     3: <Step3Height {...props} />,
     4: <Step4Weight {...props} />,
     5: <Step5Goal {...props} />,

@@ -6,8 +6,9 @@ export type HeightUnit = 'cm' | 'ft';
 export type WeightUnit = 'kg' | 'lbs';
 
 export interface OnboardingData {
+  language?: string;
   gender?: Gender;
-  age?: number;
+  birth_date?: string; // YYYY-MM-DD
   height?: number;
   height_unit?: HeightUnit;
   weight?: number;
@@ -20,6 +21,7 @@ export interface OnboardingData {
   water_track?: WaterTrack;
   water_goal?: number;
   medical_conditions?: string[];
+  timezone?: string;
 }
 
 export interface OnboardingProgress {

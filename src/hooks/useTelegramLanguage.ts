@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { cloudStorage, initData } from '@telegram-apps/sdk-react';
+import { initData } from '@telegram-apps/sdk-react';
 import i18n, { SUPPORTED_LANGUAGES, type AppLanguage } from '../i18n';
 
 function normalizeLanguage(lang: string | undefined): AppLanguage {
@@ -8,25 +8,18 @@ function normalizeLanguage(lang: string | undefined): AppLanguage {
   return SUPPORTED_LANGUAGES.includes(code) ? code : 'en';
 }
 
+/**
+ * Detects user language from Telegram profile on first load.
+ * During onboarding, user picks language explicitly (Step0Language),
+ * which calls i18n.changeLanguage() directly.
+ */
 export function useTelegramLanguage() {
   useEffect(() => {
-    async function detectAndApplyLanguage() {
-      try {
-        // 1. Приоритет — сохранённый выбор пользователя
-        const saved = await cloudStorage.getItem('app_language');
-        if (saved) {
-          await i18n.changeLanguage(normalizeLanguage(saved));
-          return;
-        }
-
-        // 2. Язык из Telegram-профиля
-        const tgLang = initData?.user()?.languageCode;
-        await i18n.changeLanguage(normalizeLanguage(tgLang));
-      } catch {
-        // CloudStorage недоступен — остаёмся на 'en'
-      }
+    try {
+      const tgLang = initData?.user()?.languageCode;
+      i18n.changeLanguage(normalizeLanguage(tgLang));
+    } catch {
+      // initData not available — stay on 'en'
     }
-
-    detectAndApplyLanguage();
-  }, []); // Запускаем один раз после маунта
+  }, []);
 }
