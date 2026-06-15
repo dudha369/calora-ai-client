@@ -50,6 +50,13 @@ export const router = createBrowserRouter([
                 Component: m.ProfilePage,
               })),
           },
+          {
+            path: 'admin',
+            lazy: () =>
+              import('./pages/admin/AdminPage').then((m) => ({
+                Component: m.AdminPage,
+              })),
+          },
         ],
       },
     ],

@@ -51,9 +51,10 @@ export function App() {
               <Outlet />
             </main>
 
-            {location.pathname !== '/onboarding' && (
-              <NavigationBar safeBottom={safeBottom} />
-            )}
+            {location.pathname !== '/onboarding' &&
+              !location.pathname.startsWith('/admin') && (
+                <NavigationBar safeBottom={safeBottom} />
+              )}
           </ScannerProvider>
         </UserContext.Provider>
       ) : null}
