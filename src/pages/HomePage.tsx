@@ -10,7 +10,7 @@ import { Sprout, Flame, CalendarDays } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import { DateStrip } from '../components/DateStrip/DateStrip';
-import { CalendarPicker } from '../components/DateStrip/CalendarPicker';
+import { Calendar } from '../components/DateStrip/Calendar';
 import { FoodLogList } from '../components/FoodLog/FoodLogList';
 import { Skeleton } from '../components/Skeleton';
 import { CaloriesArc } from '../components/NutritionStats/CaloriesArc';
@@ -85,7 +85,7 @@ export const HomePage = () => {
   });
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-1">
+    <div className="flex flex-col gap-4 px-4 py-1">
       <header className="flex flex-col gap-2">
         <section className="flex h-6 justify-between px-1">
           <div className="flex items-center gap-1">
@@ -200,7 +200,7 @@ export const HomePage = () => {
       </div>
 
       {calendarOpen && (
-        <CalendarPicker
+        <Calendar
           value={selectedDate}
           minDate={minDate}
           maxDate={today}

@@ -1,7 +1,7 @@
 import { type JSX, useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { cloudStorage } from '@telegram-apps/sdk-react';
+import { cloudStorage } from '@tma.js/sdk-react';
 
 import { useTheme } from '../context/ThemeContext';
 import { useTelegram } from '../hooks/useTelegram';
@@ -268,7 +268,10 @@ export const OnboardingPage = () => {
   const isLastStep = stepIndex === activeSteps.length - 1;
 
   useMainButton({
-    text: isLastStep ? 'Завершить ✓' : 'Далее →',
+    text: isLastStep ? 'Завершить' : 'Далее',
+    iconCustomEmojiId: isLastStep
+      ? '5193212401188615252'
+      : '5193191330079062069',
     isEnabled: valid && !saving,
     isLoading: saving,
     onClick: handleNext,

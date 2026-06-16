@@ -1,4 +1,4 @@
-import { cloudStorage } from '@telegram-apps/sdk';
+import { cloudStorage } from '@tma.js/sdk';
 import i18n, { type AppLanguage } from '../i18n';
 
 export async function changeAppLanguage(lang: AppLanguage) {
