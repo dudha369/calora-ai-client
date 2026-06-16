@@ -1,11 +1,10 @@
 // ─── Union-типы значений профиля ─────────────────────────────────────────────
-// Вынесены сюда (а не дублируются в interfaces/api/profile.ts), чтобы у домена
-// и у DTO запроса/ответа была одна и та же "истина" про допустимые значения.
 
 export type Gender = 'male' | 'female';
 export type GoalType = 'lose' | 'maintain' | 'gain';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'extreme';
 export type WaterTrack = 'auto' | 'manual' | 'none';
+export type UnitsPreference = 'metric' | 'imperial';
 
 /**
  * Профиль пользователя — 1:1 с User.
@@ -13,7 +12,7 @@ export type WaterTrack = 'auto' | 'manual' | 'none';
  */
 export interface Profile {
   gender: Gender;
-  age: number;
+  birth_date: string; // YYYY-MM-DD
   height_cm: number;
   weight_kg: number;
   goal_type: GoalType;
@@ -26,4 +25,7 @@ export interface Profile {
   dietary_restrictions: string[];
   allergy_note: string | null;
   medical_conditions: string[];
+  timezone: string;
+  units_preference: UnitsPreference;
+  updated_at: string; // ISO datetime
 }

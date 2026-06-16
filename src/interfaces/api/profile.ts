@@ -1,4 +1,4 @@
-import type { Profile, Gender, GoalType, ActivityLevel, WaterTrack } from '../Profile';
+import type { Profile, Gender, GoalType, ActivityLevel, WaterTrack, UnitsPreference } from '../Profile';
 import type { Goal } from '../Goal';
 
 /**
@@ -7,7 +7,7 @@ import type { Goal } from '../Goal';
  */
 export interface ProfileIn {
   gender: Gender;
-  age: number;
+  birth_date: string; // YYYY-MM-DD
   height_cm: number;
   weight_kg: number;
   goal_type: GoalType;
@@ -20,6 +20,8 @@ export interface ProfileIn {
   dietary_restrictions?: string[];
   allergy_note?: string | null;
   medical_conditions?: string[];
+  timezone?: string;
+  units_preference?: UnitsPreference;
 }
 
 /** Ответ POST/PUT /api/profile — профиль пересчитывается вместе с целями */
