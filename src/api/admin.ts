@@ -102,6 +102,16 @@ export const admin = {
   updateSettings: (settings: Record<string, string>) =>
     request('admin/settings', 'PUT', { settings }),
 
+  getWhitelist: () =>
+    request<{
+      whitelist: {
+        telegram_id: number;
+        full_name: string | null;
+        username: string | null;
+        in_db: boolean;
+      }[];
+      enabled: boolean;
+    }>('admin/whitelist'),
   addToWhitelist: (id: number) => request('admin/whitelist/' + id, 'POST'),
   removeFromWhitelist: (id: number) =>
     request('admin/whitelist/' + id, 'DELETE'),

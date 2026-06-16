@@ -34,7 +34,7 @@ export const DashboardTab = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 overflow-x-hidden">
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-3">
         <StatCard
@@ -267,7 +267,7 @@ function MiniBarChart({
   const max = Math.max(...values, 1);
 
   return (
-    <div className="flex items-end gap-px pt-2" style={{ height: 80 }}>
+    <div className="flex items-end gap-px overflow-hidden pt-2" style={{ height: 80 }}>
       {values.map((v, i) => {
         const h = Math.max((v / max) * 100, 2);
         return (
