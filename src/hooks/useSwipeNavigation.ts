@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, type TouchEvent } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 /**
@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
  *  • iOS  — the camera opens natively via <input capture>, no page visit occurs
  *  • Android — it's a camera screen that shouldn't be entered accidentally via swipe
  */
-const SWIPE_PAGES = ['/', '/analytics', '/ai', '/profile'] as const;
+const SWIPE_PAGES = ['/', '/water', '/analytics', '/profile'] as const;
 type SwipePage = (typeof SWIPE_PAGES)[number];
 
 /** Minimum horizontal distance (px) required to commit a swipe. */
@@ -54,7 +54,7 @@ export function useSwipeNavigation(enabled: boolean) {
   const stateRef = useRef<TouchState | null>(null);
 
   const onTouchStart = useCallback(
-    (e: React.TouchEvent) => {
+    (e: TouchEvent) => {
       if (!enabled) return;
 
       // Respect components that manage their own horizontal gestures
@@ -71,7 +71,7 @@ export function useSwipeNavigation(enabled: boolean) {
     [enabled],
   );
 
-  const onTouchMove = useCallback((e: React.TouchEvent) => {
+  const onTouchMove = useCallback((e: TouchEvent) => {
     const s = stateRef.current;
     if (!s || s.cancelled) return;
 
@@ -86,7 +86,7 @@ export function useSwipeNavigation(enabled: boolean) {
   }, []);
 
   const onTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
+    (e: TouchEvent) => {
       const s = stateRef.current;
       stateRef.current = null;
       if (!s || s.cancelled) return;
