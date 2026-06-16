@@ -1,4 +1,6 @@
 import { request, requestRaw } from './request';
+import type { Profile } from '../interfaces/Profile.ts';
+import type { Goal } from '../interfaces/Goal.ts';
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -61,8 +63,8 @@ export interface AdminQuest {
 
 export interface AdminUserDetail {
   user: AdminUser & { in_whitelist: boolean };
-  profile: Record<string, unknown> | null;
-  goal: Record<string, unknown> | null;
+  profile: Profile | null;
+  goal: Goal | null;
   food_logs: AdminFoodLog[];
   quests: AdminQuest[];
 }
@@ -98,7 +100,8 @@ export const admin = {
   resetUser: (id: number) => request('admin/users/' + id + '/reset', 'POST'),
   deleteUser: (id: number) => request('admin/users/' + id, 'DELETE'),
 
-  getSettings: () => request<{ settings: Record<string, string> }>('admin/settings'),
+  getSettings: () =>
+    request<{ settings: Record<string, string> }>('admin/settings'),
   updateSettings: (settings: Record<string, string>) =>
     request('admin/settings', 'PUT', { settings }),
 
@@ -125,11 +128,12 @@ export const admin = {
     button_text?: string;
     button_url?: string;
     preview?: boolean;
-  }) => request<{ ok: boolean; broadcast_id?: number; recipients?: number }>(
-    'admin/broadcast',
-    'POST',
-    data,
-  ),
+  }) =>
+    request<{ ok: boolean; broadcast_id?: number; recipients?: number }>(
+      'admin/broadcast',
+      'POST',
+      data,
+    ),
 
   getBroadcasts: () =>
     request<{ broadcasts: BroadcastItem[] }>('admin/broadcasts'),

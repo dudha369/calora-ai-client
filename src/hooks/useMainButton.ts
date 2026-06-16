@@ -17,6 +17,7 @@ export function useMainButton({
     onClickRef.current = onClick;
   }, [onClick]);
 
+  // Монтирование кнопки
   useEffect(() => {
     if (!ready) return;
 
@@ -31,6 +32,7 @@ export function useMainButton({
     };
   }, [ready]);
 
+  // Обработчик клика
   useEffect(() => {
     if (!ready) return;
 
@@ -39,8 +41,15 @@ export function useMainButton({
     });
   }, [ready]);
 
+  // Обновление параметров кнопки
   useEffect(() => {
     if (!ready) return;
+
+    if (isLoading) {
+      mainButton.showLoader();
+    } else {
+      mainButton.hideLoader();
+    }
 
     mainButton.setParams({
       text,

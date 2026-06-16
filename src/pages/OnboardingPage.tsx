@@ -179,7 +179,7 @@ export const OnboardingPage = () => {
 
         // Apply saved language to i18n
         if (merged.language) {
-          i18n.changeLanguage(merged.language);
+          await i18n.changeLanguage(merged.language);
         }
       } catch {
         setStep(0);

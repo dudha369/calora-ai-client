@@ -15,12 +15,8 @@ function normalizeLanguage(lang: string | undefined): AppLanguage {
  */
 export function useTelegramLanguage() {
   useEffect(() => {
-    const tgLang = initData?.user()?.languageCode;
-    
-    try {
-      await i18n.changeLanguage(normalizeLanguage(tgLang));
-    } catch {
-      // initData not available — stay on 'en'
-    }
+    const tgLang = initData?.user()?.language_code;
+
+    i18n.changeLanguage(normalizeLanguage(tgLang));
   }, []);
 }

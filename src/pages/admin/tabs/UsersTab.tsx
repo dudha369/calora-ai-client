@@ -94,9 +94,7 @@ export const UsersTab = ({ selectedUserId, onSelectUser }: UsersTabProps) => {
               backgroundColor:
                 filter === f.id ? theme.button_color : theme.section_bg_color,
               color:
-                filter === f.id
-                  ? theme.button_text_color
-                  : theme.hint_color,
+                filter === f.id ? theme.button_text_color : theme.hint_color,
             }}
           >
             {f.label}
@@ -169,13 +167,7 @@ export const UsersTab = ({ selectedUserId, onSelectUser }: UsersTabProps) => {
 
 // ── User row ────────────────────────────────────────────────────────
 
-function UserRow({
-  user,
-  onClick,
-}: {
-  user: AdminUser;
-  onClick: () => void;
-}) {
+function UserRow({ user, onClick }: { user: AdminUser; onClick: () => void }) {
   const theme = useTheme();
   return (
     <button
@@ -287,8 +279,8 @@ function UserDetailView({
   }
 
   const u = data.user;
-  const p = data.profile as Record<string, unknown> | null;
-  const g = data.goal as Record<string, unknown> | null;
+  const p = data.profile;
+  const g = data.goal;
 
   return (
     <div className="flex flex-col gap-3">
@@ -323,7 +315,7 @@ function UserDetailView({
       {p && (
         <DetailSection title="Profile">
           <KV label="Gender" value={String(p.gender)} />
-          <KV label="Age" value={String(p.age)} />
+          <KV label="Birthday" value={String(p.birth_date)} />
           <KV label="Height" value={`${p.height_cm} cm`} />
           <KV label="Weight" value={`${p.weight_kg} kg`} />
           <KV label="Goal" value={String(p.goal_type)} />
@@ -355,10 +347,7 @@ function UserDetailView({
               style={{ borderColor: theme.section_separator_color }}
             >
               <div className="flex items-center justify-between">
-                <span
-                  className="text-xs"
-                  style={{ color: theme.hint_color }}
-                >
+                <span className="text-xs" style={{ color: theme.hint_color }}>
                   {fl.log_date}
                 </span>
                 <span
@@ -386,12 +375,12 @@ function UserDetailView({
       {data.quests.length > 0 && (
         <DetailSection title="Quests">
           {data.quests.map((q, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 py-1.5"
-            >
+            <div key={i} className="flex items-center gap-2 py-1.5">
               <span>{q.icon}</span>
-              <span className="flex-1 text-sm" style={{ color: theme.text_color }}>
+              <span
+                className="flex-1 text-sm"
+                style={{ color: theme.text_color }}
+              >
                 {q.title}
               </span>
               <span
@@ -422,9 +411,7 @@ function UserDetailView({
       <div className="flex flex-col gap-2 pt-2">
         <button
           onClick={() =>
-            u.in_whitelist
-              ? whitelistRemove.mutate()
-              : whitelistAdd.mutate()
+            u.in_whitelist ? whitelistRemove.mutate() : whitelistAdd.mutate()
           }
           disabled={whitelistAdd.isPending || whitelistRemove.isPending}
           className="flex items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-opacity active:opacity-70 disabled:opacity-50"
@@ -525,7 +512,7 @@ function DetailSection({
       style={{ backgroundColor: theme.section_bg_color }}
     >
       <span
-        className="pb-1 text-xs font-semibold uppercase tracking-wider"
+        className="pb-1 text-xs font-semibold tracking-wider uppercase"
         style={{ color: theme.hint_color }}
       >
         {title}
@@ -542,10 +529,7 @@ function KV({ label, value }: { label: string; value: string }) {
       <span className="text-sm" style={{ color: theme.hint_color }}>
         {label}
       </span>
-      <span
-        className="text-sm font-medium"
-        style={{ color: theme.text_color }}
-      >
+      <span className="text-sm font-medium" style={{ color: theme.text_color }}>
         {value}
       </span>
     </div>

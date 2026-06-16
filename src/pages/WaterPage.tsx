@@ -47,7 +47,7 @@ const DRINK_PRESETS = [
 function profileToInput(p: Profile): ProfileIn {
   return {
     gender: p.gender,
-    age: p.age,
+    birth_date: p.birth_date,
     height_cm: p.height_cm,
     weight_kg: p.weight_kg,
     goal_type: p.goal_type,

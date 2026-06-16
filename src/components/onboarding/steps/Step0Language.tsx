@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
-import { initData } from '@telegram-apps/sdk-react';
+import { initData } from '@tma.js/sdk-react';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
 interface Props {
@@ -20,7 +20,10 @@ export const Step0Language = ({ data, onChange }: Props) => {
   useEffect(() => {
     if (data.language) return;
     try {
-      const tgLang = initData?.user()?.languageCode?.split('-')[0]?.toLowerCase();
+      const tgLang = initData
+        ?.user()
+        ?.language_code?.split('-')[0]
+        ?.toLowerCase();
       const match = OPTIONS.find((o) => o.value === tgLang);
       if (match) {
         onChange({ language: match.value }, true);
@@ -31,10 +34,7 @@ export const Step0Language = ({ data, onChange }: Props) => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <StepShell
-      title="Choose language"
-      subtitle="Выбери язык · Обери мову"
-    >
+    <StepShell title="Choose language" subtitle="Выбери язык · Обери мову">
       <div className="flex flex-col gap-3">
         {OPTIONS.map((opt) => (
           <OptionCard
