@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
-import { User, Trash2 } from 'lucide-react';
-import { initData } from '@telegram-apps/sdk-react';
+import { User, Trash2, Shield, ChevronRight } from 'lucide-react';
+import { initData } from '@tma.js/sdk-react';
 import { Section } from '../components/Section';
 import { SectionItem } from '../components/SectionItem';
 import { ModalWindow } from '../components/ModalWindow';
 import { users } from '../api/users';
+import { admin } from '../api/admin';
 
 export const ProfilePage = () => {
   const { user_data } = useUser();
@@ -19,7 +20,16 @@ export const ProfilePage = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const photo_url = initData.user()?.photoUrl;
+  const photo_url = initData.user()?.photo_url;
+
+  // Check if current user is admin
+  const { data: adminConfig } = useQuery({
+    queryKey: ['admin', 'config'],
+    queryFn: async () => (await admin.getConfig()).data,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isAdmin = adminConfig?.is_admin ?? false;
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -66,6 +76,22 @@ export const ProfilePage = () => {
         <SectionItem />
         <SectionItem />
       </Section>
+
+      {/* Admin Panel button — visible only for admin */}
+      {isAdmin && (
+        <Section>
+          <button
+            onClick={() => navigate('/admin')}
+            className="flex w-full items-center justify-between px-4 py-3"
+          >
+            <div className="flex items-center gap-3" style={{ color: theme.button_color }}>
+              <Shield size={18} />
+              <span className="font-medium">Admin Panel</span>
+            </div>
+            <ChevronRight color={theme.hint_color} size={22} />
+          </button>
+        </Section>
+      )}
 
       <Section>
         <button

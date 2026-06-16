@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // Мокаем axios и Telegram SDK до импорта request
 vi.mock('axios');
-vi.mock('@telegram-apps/sdk-react', () => ({
+vi.mock('@tma.js/sdk-react', () => ({
   initData: { raw: () => 'mock_init_data' },
 }));
 

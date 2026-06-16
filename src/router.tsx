@@ -1,11 +1,13 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { RouterErrorBoundary } from './components/loading/RouterErrorBoundary';
+import { LoadingScreen } from './components/loading/LoadingScreen.tsx';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    hydrateFallbackElement: <LoadingScreen />,
     children: [
       {
         errorElement: <RouterErrorBoundary />,
@@ -25,10 +27,10 @@ export const router = createBrowserRouter([
               })),
           },
           {
-            path: 'analytics',
+            path: 'water',
             lazy: () =>
-              import('./pages/AnalyticsPage').then((m) => ({
-                Component: m.AnalyticsPage,
+              import('./pages/WaterPage').then((m) => ({
+                Component: m.WaterPage,
               })),
           },
           {
@@ -39,15 +41,24 @@ export const router = createBrowserRouter([
               })),
           },
           {
-            path: 'ai',
+            path: 'analytics',
             lazy: () =>
-              import('./pages/AIPage').then((m) => ({ Component: m.AIPage })),
+              import('./pages/AnalyticsPage').then((m) => ({
+                Component: m.AnalyticsPage,
+              })),
           },
           {
             path: 'profile',
             lazy: () =>
               import('./pages/ProfilePage').then((m) => ({
                 Component: m.ProfilePage,
+              })),
+          },
+          {
+            path: 'admin',
+            lazy: () =>
+              import('./pages/admin/AdminPage').then((m) => ({
+                Component: m.AdminPage,
               })),
           },
         ],

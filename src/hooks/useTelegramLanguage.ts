@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { initData } from '@telegram-apps/sdk-react';
+import { initData } from '@tma.js/sdk-react';
 import i18n, { SUPPORTED_LANGUAGES, type AppLanguage } from '../i18n';
 
 function normalizeLanguage(lang: string | undefined): AppLanguage {
@@ -15,9 +15,10 @@ function normalizeLanguage(lang: string | undefined): AppLanguage {
  */
 export function useTelegramLanguage() {
   useEffect(() => {
+    const tgLang = initData?.user()?.languageCode;
+    
     try {
-      const tgLang = initData?.user()?.languageCode;
-      i18n.changeLanguage(normalizeLanguage(tgLang));
+      await i18n.changeLanguage(normalizeLanguage(tgLang));
     } catch {
       // initData not available — stay on 'en'
     }

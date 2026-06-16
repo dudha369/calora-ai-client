@@ -13,8 +13,8 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "@tanstack/react-query": "^5.62.0",
-    "@telegram-apps/sdk": "^2.11.3",
-    "@telegram-apps/sdk-react": "^2.0.25",
+    "@tma.js/sdk": "^3.2.2",
+    "@tma.js/sdk-react": "^3.0.21",
     "@zxing/browser": "^0.2.0",
     "@zxing/library": "^0.22.0",
     "axios": "^1.16.1",

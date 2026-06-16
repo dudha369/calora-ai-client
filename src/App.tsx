@@ -3,6 +3,7 @@ import { ErrorScreen } from './components/loading/ErrorScreen';
 import { NavigationBar } from './components/NavigationBar/NavigationBar';
 import { Outlet, Navigate, useLocation, useNavigation } from 'react-router-dom';
 
+import { useSwipeNavigation } from './hooks/useSwipeNavigation';
 import { useTelegram } from './hooks/useTelegram';
 import { useTelegramLanguage } from './hooks/useTelegramLanguage';
 import { useTheme } from './context/ThemeContext';
@@ -18,6 +19,8 @@ export function App() {
   const location = useLocation();
   const navigation = useNavigation();
   const session = useUserSession(ready);
+
+  const swipe = useSwipeNavigation(session.status === 'ready');
 
   if (
     session.status === 'ready' &&
@@ -35,6 +38,7 @@ export function App() {
         color: theme.text_color,
         paddingTop: safeTop,
       }}
+      {...swipe}
     >
       {session.status === 'booting' || navigation.state === 'loading' ? (
         <LoadingScreen />
@@ -51,9 +55,10 @@ export function App() {
               <Outlet />
             </main>
 
-            {location.pathname !== '/onboarding' && (
-              <NavigationBar safeBottom={safeBottom} />
-            )}
+            {location.pathname !== '/onboarding' &&
+              !location.pathname.startsWith('/admin') && (
+                <NavigationBar safeBottom={safeBottom} />
+              )}
           </ScannerProvider>
         </UserContext.Provider>
       ) : null}
