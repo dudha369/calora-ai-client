@@ -1,5 +1,5 @@
 import { Sprout, ChevronRight } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext.ts';
+import { useTheme } from '../context/ThemeContext';
 
 export const SectionItem = () => {
   const theme = useTheme();

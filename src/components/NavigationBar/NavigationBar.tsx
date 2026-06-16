@@ -2,10 +2,10 @@ import { NavItem } from './NavItem';
 import { FabButton } from './FabButton';
 import {
   House,
-  ChartNoAxesColumn,
+  GlassWater,
   Plus,
   Camera,
-  Droplets,
+  ChartNoAxesColumn,
   User,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -32,7 +32,7 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
           <NavItem to="/" icon={<House size={ICON_SIZE} />} label="Home" />
           <NavItem
             to="/water"
-            icon={<Droplets size={ICON_SIZE} />}
+            icon={<GlassWater size={ICON_SIZE} />}
             label="Water"
           />
 

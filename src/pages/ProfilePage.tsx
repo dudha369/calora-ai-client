@@ -70,54 +70,59 @@ export const ProfilePage = () => {
         </p>
       </section>
 
-      <Section>
-        <SectionItem />
-        <SectionItem />
-        <SectionItem />
-        <SectionItem />
-      </Section>
+      <section className="flex flex-col gap-3">
+        {/* Admin Panel button — visible only for admin */}
+        {isAdmin && (
+          <Section>
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex w-full items-center justify-between px-4 py-3"
+            >
+              <div
+                className="flex items-center gap-3"
+                style={{ color: theme.button_color }}
+              >
+                <Shield size={18} />
+                <span className="font-medium">Admin Panel</span>
+              </div>
+              <ChevronRight color={theme.hint_color} size={22} />
+            </button>
+          </Section>
+        )}
 
-      {/* Admin Panel button — visible only for admin */}
-      {isAdmin && (
+        <Section>
+          <SectionItem />
+          <SectionItem />
+          <SectionItem />
+          <SectionItem />
+        </Section>
+
+
         <Section>
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => setConfirmOpen(true)}
             className="flex w-full items-center justify-between px-4 py-3"
+            style={{ color: theme.destructive_text_color }}
           >
-            <div className="flex items-center gap-3" style={{ color: theme.button_color }}>
-              <Shield size={18} />
-              <span className="font-medium">Admin Panel</span>
+            <div className="flex items-center gap-3">
+              <Trash2 size={18} />
+              <span>Удалить аккаунт</span>
             </div>
-            <ChevronRight color={theme.hint_color} size={22} />
           </button>
         </Section>
-      )}
+      </section>
 
-      <Section>
-        <button
-          onClick={() => setConfirmOpen(true)}
-          className="flex w-full items-center justify-between px-4 py-3"
-          style={{ color: theme.destructive_text_color }}
-        >
-          <div className="flex items-center gap-3">
-            <Trash2 size={18} />
-            <span>Удалить аккаунт</span>
-          </div>
-        </button>
-      </Section>
 
       {confirmOpen && (
         <ModalWindow
           title="Удалить аккаунт?"
           onClose={() => !isDeleting && setConfirmOpen(false)}
-          actionLabel="Удалить навсегда"
+          actionLabel="Подтвердить"
+          iconCustomEmojiId="5258130763148172425"
           onAction={handleDeleteAccount}
           isProcessing={isDeleting}
         >
-          <p
-            className="py-2 text-center text-sm"
-            style={{ color: theme.subtitle_text_color }}
-          >
+          <p className="text-center" style={{ color: theme.text_color }}>
             Это действие необратимо. Будут удалены профиль, история питания,
             фото, квесты и все остальные данные. Чтобы продолжить пользоваться
             приложением, нужно будет пройти онбординг заново.

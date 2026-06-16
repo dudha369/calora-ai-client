@@ -5,6 +5,7 @@ import {
   useQueryClient,
   keepPreviousData,
 } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { Sprout, Flame, CalendarDays } from 'lucide-react';
 
 import { useUser } from '../context/UserContext';
@@ -32,6 +33,7 @@ export const HomePage = () => {
 
   const theme = useTheme();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const {
     dates,
@@ -86,7 +88,10 @@ export const HomePage = () => {
 
   return (
     <div className="flex flex-col gap-4 px-4 py-1">
-      <header className="flex flex-col gap-2">
+      <header
+        className="sticky top-0 z-10 flex flex-col gap-2 py-1"
+        style={{ backgroundColor: theme.bg_color }}
+      >
         <section className="flex h-6 justify-between px-1">
           <div className="flex items-center gap-1">
             <span
@@ -134,11 +139,14 @@ export const HomePage = () => {
         </section>
       </header>
 
-      <div className="flex flex-col gap-4">
-        <div
+      <main className="flex flex-col gap-4">
+        <section
           className="flex h-70 w-full flex-col rounded-3xl"
           style={{
             backgroundColor: theme.section_bg_color,
+          }}
+          onClick={() => {
+            navigate('/analytics');
           }}
         >
           <div className="h-50">
@@ -166,11 +174,11 @@ export const HomePage = () => {
               max={data?.carbs_goal_g}
             />
           </div>
-        </div>
+        </section>
 
         <div className="flex flex-col gap-1">
           <span
-            className="text-lg font-[750] tracking-wide"
+            className="text-lg font-semibold tracking-wide"
             style={{
               color: theme.subtitle_text_color,
             }}
@@ -197,7 +205,7 @@ export const HomePage = () => {
             )}
           </div>
         </div>
-      </div>
+      </main>
 
       {calendarOpen && (
         <Calendar

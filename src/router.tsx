@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { RouterErrorBoundary } from './components/loading/RouterErrorBoundary';
-import { LoadingScreen } from './components/loading/LoadingScreen.tsx';
+import { LoadingScreen } from './components/loading/LoadingScreen';
 
 export const router = createBrowserRouter([
   {

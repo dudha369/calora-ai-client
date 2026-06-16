@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react';
-import { mainButton } from '@tma.js/sdk-react';
+import { secondaryButton } from '@tma.js/sdk-react';
 import { useTelegram } from './useTelegram';
-import type { MainButtonOptions } from '../interfaces/MainButtonOptions';
+import type { SecondaryButtonOptions } from '../interfaces/SecondaryButtonOptions';
 
-export function useMainButton({
+export function useSecondaryButton({
   text,
   iconCustomEmojiId,
   isEnabled,
   isVisible = true,
-  isLoading = false,
   onClick,
-}: MainButtonOptions) {
+  position,
+}: SecondaryButtonOptions) {
   const { ready } = useTelegram();
 
   const onClickRef = useRef(onClick);
@@ -22,22 +22,22 @@ export function useMainButton({
   useEffect(() => {
     if (!ready) return;
 
-    if (!mainButton.isMounted()) {
-      mainButton.mount();
+    if (!secondaryButton.isMounted()) {
+      secondaryButton.mount();
     }
 
-    mainButton.setParams({ isVisible });
+    secondaryButton.setParams({ isVisible, position });
 
     return () => {
-      mainButton.setParams({ isVisible: false });
+      secondaryButton.setParams({ isVisible: false });
     };
-  }, [ready, isVisible]);
+  }, [ready, isVisible, position]);
 
   // Обработчик клика
   useEffect(() => {
     if (!ready) return;
 
-    return mainButton.onClick(() => {
+    return secondaryButton.onClick(() => {
       if (onClickRef.current) onClickRef.current();
     });
   }, [ready]);
@@ -46,16 +46,10 @@ export function useMainButton({
   useEffect(() => {
     if (!ready) return;
 
-    if (isLoading) {
-      mainButton.showLoader();
-    } else {
-      mainButton.hideLoader();
-    }
-
-    mainButton.setParams({
+    secondaryButton.setParams({
       text,
-      isEnabled: isEnabled && !isLoading,
+      isEnabled,
       iconCustomEmojiId,
     });
-  }, [ready, text, iconCustomEmojiId, isEnabled, isLoading]);
+  }, [ready, text, iconCustomEmojiId, isEnabled]);
 }

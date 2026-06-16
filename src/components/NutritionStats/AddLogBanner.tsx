@@ -1,7 +1,10 @@
 import { useTheme } from '../../context/ThemeContext';
-import { NoDataIcon } from '../NoDataIcon.tsx';
+import { NoDataIcon } from '../NoDataIcon';
+import { useNavigate } from 'react-router-dom';
 
 export const AddLogBanner = () => {
+  const navigate = useNavigate();
+
   const theme = useTheme();
 
   return (
@@ -9,6 +12,9 @@ export const AddLogBanner = () => {
       className="flex h-36 w-full flex-col items-center justify-center gap-1 rounded-xl py-4"
       style={{
         backgroundColor: theme.section_bg_color,
+      }}
+      onClick={() => {
+        navigate('/scanner');
       }}
     >
       <NoDataIcon

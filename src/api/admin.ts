@@ -1,6 +1,6 @@
 import { request, requestRaw } from './request';
-import type { Profile } from '../interfaces/Profile.ts';
-import type { Goal } from '../interfaces/Goal.ts';
+import type { Profile } from '../interfaces/Profile';
+import type { Goal } from '../interfaces/Goal';
 
 // ── Types ──────────────────────────────────────────────────────────
 

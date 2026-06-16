@@ -1,4 +1,4 @@
-import { useTheme } from '../context/ThemeContext.ts';
+import { useTheme } from '../context/ThemeContext';
 
 export const Skeleton = ({ className }: { className?: string }) => {
   const theme = useTheme();

@@ -7,7 +7,7 @@ import type {
   BarcodeLogIn,
   CreateFoodLogResponse,
 } from '../interfaces/api/food';
-import { toApiDate } from '../utils/date.ts';
+import { toApiDate } from '../utils/date';
 
 export const food = {
   analyze: (file: File) => {

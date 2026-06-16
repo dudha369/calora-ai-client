@@ -1,4 +1,4 @@
-import { useTheme } from '../../context/ThemeContext.ts';
+import { useTheme } from '../../context/ThemeContext';
 
 interface CaloriesArcProps {
   value?: number;
