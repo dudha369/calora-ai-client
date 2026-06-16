@@ -26,7 +26,7 @@ export const AdminPage = () => {
   useBackButton(() => navigate('/profile'), true);
 
   return (
-    <div className="flex min-h-full flex-col">
+    <div className="flex min-h-full flex-col overflow-x-hidden">
       {/* Header */}
       <div
         className="sticky top-0 z-10 px-4 pt-2 pb-0"
@@ -43,7 +43,7 @@ export const AdminPage = () => {
 
         {/* Tab bar */}
         <div
-          className="flex gap-1 rounded-2xl p-1"
+          className="flex rounded-2xl p-1"
           style={{ backgroundColor: theme.section_bg_color }}
         >
           {TABS.map((t) => {
@@ -53,14 +53,14 @@ export const AdminPage = () => {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className="flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all duration-200"
+                className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-all duration-200"
                 style={{
                   backgroundColor: isActive ? theme.button_color : 'transparent',
                   color: isActive ? theme.button_text_color : theme.hint_color,
                 }}
               >
-                <Icon size={14} />
-                <span className="hidden min-[380px]:inline">{t.label}</span>
+                <Icon size={14} className="shrink-0" />
+                <span className="hidden truncate min-[380px]:inline">{t.label}</span>
               </button>
             );
           })}
@@ -68,7 +68,7 @@ export const AdminPage = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-4 pt-4 pb-6">
+      <div className="flex-1 overflow-x-hidden px-4 pt-4 pb-6">
         {tab === 'dashboard' && <DashboardTab />}
         {tab === 'users' && <UsersTab />}
         {tab === 'settings' && <SettingsTab />}
