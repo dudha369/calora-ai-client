@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
-import { ArrowLeft, LayoutDashboard, Users, Settings, Megaphone } from 'lucide-react';
+import { useBackButton } from '../../hooks/useBackButton';
+import { LayoutDashboard, Users, Settings, Megaphone } from 'lucide-react';
 import { DashboardTab } from './tabs/DashboardTab';
 import { UsersTab } from './tabs/UsersTab';
 import { SettingsTab } from './tabs/SettingsTab';
@@ -21,6 +22,9 @@ export const AdminPage = () => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('dashboard');
 
+  // Telegram BackButton → назад в профиль
+  useBackButton(() => navigate('/profile'), true);
+
   return (
     <div className="flex min-h-full flex-col">
       {/* Header */}
@@ -29,13 +33,6 @@ export const AdminPage = () => {
         style={{ backgroundColor: theme.bg_color }}
       >
         <div className="flex items-center gap-3 pb-3">
-          <button
-            onClick={() => navigate('/profile')}
-            className="flex size-9 items-center justify-center rounded-xl transition-opacity active:opacity-60"
-            style={{ backgroundColor: theme.section_bg_color }}
-          >
-            <ArrowLeft size={20} style={{ color: theme.text_color }} />
-          </button>
           <h1
             className="text-xl font-bold"
             style={{ color: theme.text_color }}
