@@ -11,7 +11,6 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  ArrowLeft,
   Shield,
   ShieldOff,
   Trash2,
@@ -29,14 +28,18 @@ const FILTERS = [
   { id: 'active_today', label: 'Active' },
 ];
 
-export const UsersTab = () => {
+interface UsersTabProps {
+  selectedUserId: number | null;
+  onSelectUser: (id: number | null) => void;
+}
+
+export const UsersTab = ({ selectedUserId, onSelectUser }: UsersTabProps) => {
   const theme = useTheme();
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [page, setPage] = useState(1);
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const { data, isLoading } = useQuery<AdminUserList>({
     queryKey: ['admin', 'users', search, filter, page],
@@ -49,7 +52,7 @@ export const UsersTab = () => {
       <UserDetailView
         userId={selectedUserId}
         onBack={() => {
-          setSelectedUserId(null);
+          onSelectUser(null);
           queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
         }}
       />
@@ -122,7 +125,7 @@ export const UsersTab = () => {
             <UserRow
               key={u.telegram_id}
               user={u}
-              onClick={() => setSelectedUserId(u.telegram_id)}
+              onClick={() => onSelectUser(u.telegram_id)}
             />
           ))}
           {data?.users.length === 0 && (
@@ -272,13 +275,6 @@ function UserDetailView({
   if (isLoading || !data) {
     return (
       <div className="flex flex-col gap-3">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-1 self-start text-sm"
-          style={{ color: theme.button_color }}
-        >
-          <ArrowLeft size={16} /> Back
-        </button>
         <div className="flex justify-center py-10">
           <Loader2
             className="animate-spin"
@@ -296,15 +292,6 @@ function UserDetailView({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Back */}
-      <button
-        onClick={onBack}
-        className="flex items-center gap-1 self-start text-sm"
-        style={{ color: theme.button_color }}
-      >
-        <ArrowLeft size={16} /> Back to list
-      </button>
-
       {/* User header */}
       <div
         className="flex flex-col items-center gap-2 rounded-2xl py-4"
