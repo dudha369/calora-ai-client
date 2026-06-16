@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../../context/ThemeContext';
-import { admin } from '../../../api/admin';
+import { useTheme } from '../../context/ThemeContext';
+import { admin } from '../../api/admin';
 import { Save, Loader2, Check, X, User as UserIcon } from 'lucide-react';
 
 const FLAG_LABELS: Record<string, { label: string; description: string }> = {
@@ -106,10 +106,7 @@ export const SettingsTab = () => {
                 >
                   {meta.label}
                 </span>
-                <span
-                  className="text-xs"
-                  style={{ color: theme.hint_color }}
-                >
+                <span className="text-xs" style={{ color: theme.hint_color }}>
                   {meta.description}
                 </span>
               </div>
@@ -209,7 +206,7 @@ function WhitelistSection() {
       style={{ backgroundColor: theme.section_bg_color }}
     >
       <span
-        className="text-xs font-semibold uppercase tracking-wider"
+        className="text-xs font-semibold tracking-wider uppercase"
         style={{ color: theme.hint_color }}
       >
         Whitelist
@@ -292,17 +289,21 @@ function useAvatar(telegramId: number) {
   return blobUrl ?? null;
 }
 
-// ── Color from ID — deterministic avatar bg color ───────────────
-
-const AVATAR_COLORS = [
-  '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-  '#ec4899', '#f43f5e', '#ef4444', '#f97316',
-  '#f59e0b', '#84cc16', '#22c55e', '#10b981',
-  '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6',
+// ── Beautiful Telegram-style Gradients ──────────────────────────
+// Набор сочных градиентов. Один из них точь-в-точь как на твоем скриншоте!
+const AVATAR_GRADIENTS = [
+  'linear-gradient(135deg, #fd749b 0%, #281ac8 100%)', // Фиолетово-малиновый (как на фото)
+  'linear-gradient(135deg, #ff6a00 0%, #ee0979 100%)', // Огненный оранжевый
+  'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)', // Синий Telegram
+  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', // Яркий зеленый
+  'linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)', // Глубокий индиго
+  'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)', // Розовый коралл
+  'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)', // Голубой лед
+  'linear-gradient(135deg, #f9d423 0%, #ff4e50 100%)', // Солнечный закат
 ];
 
-function colorFromId(id: number) {
-  return AVATAR_COLORS[id % AVATAR_COLORS.length];
+function gradientFromId(id: number) {
+  return AVATAR_GRADIENTS[id % AVATAR_GRADIENTS.length];
 }
 
 function initialsFromName(name: string | null, id: number): string {
@@ -325,31 +326,42 @@ function WhitelistCard({
 }) {
   const theme = useTheme();
   const avatarUrl = useAvatar(user.telegram_id);
-  const bgColor = colorFromId(user.telegram_id);
+
+  // Получаем персональный градиент по ID
+  const backgroundGradient = gradientFromId(user.telegram_id);
   const initials = initialsFromName(user.full_name, user.telegram_id);
   const hasName = user.full_name && user.full_name !== String(user.telegram_id);
+
+  // Локальный стейт на случай, если картинка не загрузится (например, 404 от сервера)
+  const [imgError, setImgError] = useState(false);
+
+  // Сбрасываем ошибку, если вдруг поменялся avatarUrl
+  useEffect(() => {
+    setImgError(false);
+  }, [avatarUrl]);
 
   return (
     <div
       className="flex items-center gap-3 rounded-xl px-3 py-2.5"
       style={{ backgroundColor: `${theme.hint_color}10` }}
     >
-      {/* Avatar */}
-      {avatarUrl ? (
+      {/* Avatar с умным фолбеком */}
+      {avatarUrl && !imgError ? (
         <img
           src={avatarUrl}
           alt=""
           className="size-9 shrink-0 rounded-full object-cover"
+          onError={() => setImgError(true)} // Если упала 404, мягко переключаемся на CSS
         />
       ) : (
         <div
-          className="flex size-9 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: `${bgColor}25` }}
+          className="flex size-9 shrink-0 items-center justify-center rounded-full shadow-sm"
+          style={{ background: backgroundGradient }} // Применяем сочный градиент
         >
           {initials === '#' ? (
-            <UserIcon size={18} style={{ color: bgColor }} />
+            <UserIcon size={18} style={{ color: '#ffffff' }} />
           ) : (
-            <span className="text-sm font-bold" style={{ color: bgColor }}>
+            <span className="text-sm font-bold tracking-wide text-white">
               {initials}
             </span>
           )}
@@ -364,13 +376,8 @@ function WhitelistCard({
         >
           {hasName ? user.full_name : `User ${user.telegram_id}`}
         </span>
-        <span
-          className="truncate text-xs"
-          style={{ color: theme.hint_color }}
-        >
-          {user.username
-            ? `@${user.username}`
-            : `ID: ${user.telegram_id}`}
+        <span className="truncate text-xs" style={{ color: theme.hint_color }}>
+          {user.username ? `@${user.username}` : `ID: ${user.telegram_id}`}
         </span>
       </div>
 

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import {
   admin,
   type AdminUser,
   type AdminUserList,
   type AdminUserDetail,
-} from '../../../api/admin';
+} from '../../api/admin';
 import {
   Search,
   ChevronLeft,

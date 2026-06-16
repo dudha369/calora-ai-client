@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useTheme } from '../../../context/ThemeContext';
-import { admin, type AdminDashboard } from '../../../api/admin';
+import { useTheme } from '../../context/ThemeContext';
+import { admin, type AdminDashboard } from '../../api/admin';
 import {
   Users,
   UserPlus,
@@ -110,11 +110,7 @@ export const DashboardTab = () => {
 
       {/* DAU trend */}
       <Section title="DAU Trend (7 days)">
-        <MiniBarChart
-          data={data.dau_trend}
-          valueKey="dau"
-          color="#10b981"
-        />
+        <MiniBarChart data={data.dau_trend} valueKey="dau" color="#10b981" />
       </Section>
 
       {/* Onboarding funnel */}
@@ -150,10 +146,16 @@ export const DashboardTab = () => {
 
       {/* Extra stats */}
       <Section title="Growth">
-        <div className="flex flex-col divide-y" style={{ borderColor: theme.section_separator_color }}>
+        <div
+          className="flex flex-col divide-y"
+          style={{ borderColor: theme.section_separator_color }}
+        >
           <InfoRow label="New this week" value={data.new_week} />
           <InfoRow label="New this month" value={data.new_month} />
-          <InfoRow label="Completed onboarding" value={data.completed_onboarding} />
+          <InfoRow
+            label="Completed onboarding"
+            value={data.completed_onboarding}
+          />
           <InfoRow label="Stuck in onboarding" value={data.stuck_onboarding} />
         </div>
       </Section>
@@ -189,10 +191,7 @@ function StatCard({
           {label}
         </span>
       </div>
-      <span
-        className="text-2xl font-bold"
-        style={{ color: theme.text_color }}
-      >
+      <span className="text-2xl font-bold" style={{ color: theme.text_color }}>
         {value}
       </span>
     </div>
@@ -243,7 +242,7 @@ function Section({
       style={{ backgroundColor: theme.section_bg_color }}
     >
       <span
-        className="text-xs font-semibold uppercase tracking-wider"
+        className="text-xs font-semibold tracking-wider uppercase"
         style={{ color: theme.hint_color }}
       >
         {title}
@@ -267,7 +266,10 @@ function MiniBarChart({
   const max = Math.max(...values, 1);
 
   return (
-    <div className="flex items-end gap-px overflow-hidden pt-2" style={{ height: 80 }}>
+    <div
+      className="flex items-end gap-px overflow-hidden pt-2"
+      style={{ height: 80 }}
+    >
       {values.map((v, i) => {
         const h = Math.max((v / max) * 100, 2);
         return (

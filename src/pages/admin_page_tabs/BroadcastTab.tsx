@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../../context/ThemeContext';
-import { admin, type BroadcastItem } from '../../../api/admin';
+import { useTheme } from '../../context/ThemeContext';
+import { admin, type BroadcastItem } from '../../api/admin';
 import {
   Send,
   Eye,
@@ -82,7 +82,7 @@ export const BroadcastTab = () => {
         style={{ backgroundColor: theme.section_bg_color }}
       >
         <span
-          className="text-xs font-semibold uppercase tracking-wider"
+          className="text-xs font-semibold tracking-wider uppercase"
           style={{ color: theme.hint_color }}
         >
           Message (Markdown)
@@ -106,7 +106,7 @@ export const BroadcastTab = () => {
         style={{ backgroundColor: theme.section_bg_color }}
       >
         <span
-          className="text-xs font-semibold uppercase tracking-wider"
+          className="text-xs font-semibold tracking-wider uppercase"
           style={{ color: theme.hint_color }}
         >
           Audience
@@ -123,9 +123,7 @@ export const BroadcastTab = () => {
                     ? theme.button_color
                     : `${theme.hint_color}15`,
                 color:
-                  segment === s.id
-                    ? theme.button_text_color
-                    : theme.text_color,
+                  segment === s.id ? theme.button_text_color : theme.text_color,
               }}
             >
               {s.label}
@@ -140,7 +138,7 @@ export const BroadcastTab = () => {
         style={{ backgroundColor: theme.section_bg_color }}
       >
         <span
-          className="text-xs font-semibold uppercase tracking-wider"
+          className="text-xs font-semibold tracking-wider uppercase"
           style={{ color: theme.hint_color }}
         >
           Inline Button (optional)
@@ -232,7 +230,7 @@ export const BroadcastTab = () => {
           style={{ backgroundColor: theme.section_bg_color }}
         >
           <span
-            className="pb-2 text-xs font-semibold uppercase tracking-wider"
+            className="pb-2 text-xs font-semibold tracking-wider uppercase"
             style={{ color: theme.hint_color }}
           >
             History
@@ -285,10 +283,7 @@ function BroadcastRow({ broadcast: b }: { broadcast: BroadcastItem }) {
         )}
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
-        <span
-          className="truncate text-sm"
-          style={{ color: theme.text_color }}
-        >
+        <span className="truncate text-sm" style={{ color: theme.text_color }}>
           {b.text}
         </span>
         <div

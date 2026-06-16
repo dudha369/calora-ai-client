@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
-import { useBackButton } from '../../hooks/useBackButton';
+import { useTheme } from '../context/ThemeContext';
+import { useBackButton } from '../hooks/useBackButton';
 import { LayoutDashboard, Users, Settings, Megaphone } from 'lucide-react';
-import { DashboardTab } from './tabs/DashboardTab';
-import { UsersTab } from './tabs/UsersTab';
-import { SettingsTab } from './tabs/SettingsTab';
-import { BroadcastTab } from './tabs/BroadcastTab';
+import { DashboardTab } from './admin_page_tabs/DashboardTab';
+import { UsersTab } from './admin_page_tabs/UsersTab';
+import { SettingsTab } from './admin_page_tabs/SettingsTab';
+import { BroadcastTab } from './admin_page_tabs/BroadcastTab';
 
 type Tab = 'dashboard' | 'users' | 'settings' | 'broadcast';
 
@@ -39,14 +39,11 @@ export const AdminPage = () => {
     <div className="flex min-h-full flex-col overflow-x-hidden">
       {/* Header */}
       <div
-        className="sticky top-0 z-10 px-4 pt-2 pb-0"
+        className="sticky top-0 z-10 px-4 py-2"
         style={{ backgroundColor: theme.bg_color }}
       >
         <div className="flex items-center gap-3 pb-3">
-          <h1
-            className="text-xl font-bold"
-            style={{ color: theme.text_color }}
-          >
+          <h1 className="text-xl font-bold" style={{ color: theme.text_color }}>
             Admin Panel
           </h1>
         </div>
@@ -65,12 +62,16 @@ export const AdminPage = () => {
                 onClick={() => setTab(t.id)}
                 className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-all duration-200"
                 style={{
-                  backgroundColor: isActive ? theme.button_color : 'transparent',
+                  backgroundColor: isActive
+                    ? theme.button_color
+                    : 'transparent',
                   color: isActive ? theme.button_text_color : theme.hint_color,
                 }}
               >
                 <Icon size={14} className="shrink-0" />
-                <span className="hidden truncate min-[380px]:inline">{t.label}</span>
+                <span className="hidden truncate min-[380px]:inline">
+                  {t.label}
+                </span>
               </button>
             );
           })}
