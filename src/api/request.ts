@@ -24,3 +24,18 @@ export const request = async <T = unknown>(
     data: data,
   });
 };
+
+/** Fetch binary data (e.g. images) with auth headers. */
+export const requestRaw = async (
+  endpoint: string,
+): Promise<ArrayBuffer> => {
+  const res = await axios.request({
+    url: `${SERVER_API_URL}/${endpoint}`,
+    method: 'GET',
+    headers: {
+      initData: initData.raw() || DEBUG_INIT_DATA,
+    },
+    responseType: 'arraybuffer',
+  });
+  return res.data;
+};

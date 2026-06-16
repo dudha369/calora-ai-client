@@ -1,4 +1,4 @@
-import { request } from './request';
+import { request, requestRaw } from './request';
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -112,6 +112,9 @@ export const admin = {
       }[];
       enabled: boolean;
     }>('admin/whitelist'),
+  getUserAvatar: (telegramId: number) =>
+    requestRaw(`admin/users/${telegramId}/avatar`),
+
   addToWhitelist: (id: number) => request('admin/whitelist/' + id, 'POST'),
   removeFromWhitelist: (id: number) =>
     request('admin/whitelist/' + id, 'DELETE'),

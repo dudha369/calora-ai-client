@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '../../../context/ThemeContext';
 import { admin } from '../../../api/admin';
-import { Save, Loader2, Check, X, UserCircle } from 'lucide-react';
+import { Save, Loader2, Check, X, User as UserIcon } from 'lucide-react';
 
 const FLAG_LABELS: Record<string, { label: string; description: string }> = {
   whitelist_enabled: {
@@ -272,6 +272,46 @@ function WhitelistSection() {
   );
 }
 
+// ── Avatar hook — fetches via API with auth headers ─────────────
+
+function useAvatar(telegramId: number) {
+  const { data: blobUrl } = useQuery({
+    queryKey: ['admin', 'avatar', telegramId],
+    queryFn: async () => {
+      try {
+        const res = await admin.getUserAvatar(telegramId);
+        const blob = new Blob([res], { type: 'image/jpeg' });
+        return URL.createObjectURL(blob);
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+  return blobUrl ?? null;
+}
+
+// ── Color from ID — deterministic avatar bg color ───────────────
+
+const AVATAR_COLORS = [
+  '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
+  '#ec4899', '#f43f5e', '#ef4444', '#f97316',
+  '#f59e0b', '#84cc16', '#22c55e', '#10b981',
+  '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6',
+];
+
+function colorFromId(id: number) {
+  return AVATAR_COLORS[id % AVATAR_COLORS.length];
+}
+
+function initialsFromName(name: string | null, id: number): string {
+  if (!name || name === String(id)) return '#';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0][0].toUpperCase();
+}
+
 // ── Single whitelist user card ──────────────────────────────────
 
 function WhitelistCard({
@@ -284,9 +324,10 @@ function WhitelistCard({
   removing: boolean;
 }) {
   const theme = useTheme();
-  const avatarUrl = `/api/admin/users/${user.telegram_id}/avatar`;
-
-  const [imgError, setImgError] = useState(false);
+  const avatarUrl = useAvatar(user.telegram_id);
+  const bgColor = colorFromId(user.telegram_id);
+  const initials = initialsFromName(user.full_name, user.telegram_id);
+  const hasName = user.full_name && user.full_name !== String(user.telegram_id);
 
   return (
     <div
@@ -294,19 +335,24 @@ function WhitelistCard({
       style={{ backgroundColor: `${theme.hint_color}10` }}
     >
       {/* Avatar */}
-      {!imgError ? (
+      {avatarUrl ? (
         <img
           src={avatarUrl}
           alt=""
           className="size-9 shrink-0 rounded-full object-cover"
-          onError={() => setImgError(true)}
         />
       ) : (
         <div
           className="flex size-9 shrink-0 items-center justify-center rounded-full"
-          style={{ backgroundColor: `${theme.button_color}20` }}
+          style={{ backgroundColor: `${bgColor}25` }}
         >
-          <UserCircle size={22} style={{ color: theme.hint_color }} />
+          {initials === '#' ? (
+            <UserIcon size={18} style={{ color: bgColor }} />
+          ) : (
+            <span className="text-sm font-bold" style={{ color: bgColor }}>
+              {initials}
+            </span>
+          )}
         </div>
       )}
 
@@ -316,13 +362,15 @@ function WhitelistCard({
           className="truncate text-sm font-semibold"
           style={{ color: theme.text_color }}
         >
-          {user.full_name || user.telegram_id}
+          {hasName ? user.full_name : `User ${user.telegram_id}`}
         </span>
         <span
           className="truncate text-xs"
           style={{ color: theme.hint_color }}
         >
-          {user.username ? `@${user.username}` : `ID: ${user.telegram_id}`}
+          {user.username
+            ? `@${user.username}`
+            : `ID: ${user.telegram_id}`}
         </span>
       </div>
 

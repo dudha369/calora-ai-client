@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import { useBackButton } from '../../hooks/useBackButton';
@@ -21,9 +21,19 @@ export const AdminPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('dashboard');
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-  // Telegram BackButton → назад в профиль
-  useBackButton(() => navigate('/profile'), true);
+  // Telegram BackButton: если открыт детальный просмотр — назад к списку,
+  // иначе — выход из админки в профиль
+  const handleBack = useCallback(() => {
+    if (selectedUserId !== null) {
+      setSelectedUserId(null);
+    } else {
+      navigate('/profile');
+    }
+  }, [selectedUserId, navigate]);
+
+  useBackButton(handleBack, true);
 
   return (
     <div className="flex min-h-full flex-col overflow-x-hidden">
@@ -70,7 +80,12 @@ export const AdminPage = () => {
       {/* Content */}
       <div className="flex-1 overflow-x-hidden px-4 pt-4 pb-6">
         {tab === 'dashboard' && <DashboardTab />}
-        {tab === 'users' && <UsersTab />}
+        {tab === 'users' && (
+          <UsersTab
+            selectedUserId={selectedUserId}
+            onSelectUser={setSelectedUserId}
+          />
+        )}
         {tab === 'settings' && <SettingsTab />}
         {tab === 'broadcast' && <BroadcastTab />}
       </div>
