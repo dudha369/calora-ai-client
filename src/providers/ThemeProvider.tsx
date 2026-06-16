@@ -1,5 +1,5 @@
 import { type ReactNode, useState, useCallback, useEffect } from 'react';
-import { cloudStorage, themeParams } from '@telegram-apps/sdk-react';
+import { cloudStorage, themeParams } from '@tma.js/sdk-react';
 import ThemeContext from '../context/ThemeContext';
 import { getValidTheme } from '../utils/getValidTheme';
 import { useTelegram } from '../hooks/useTelegram';

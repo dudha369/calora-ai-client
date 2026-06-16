@@ -5,7 +5,7 @@ import {
   ChartNoAxesColumn,
   Plus,
   Camera,
-  Sparkles,
+  Droplets,
   User,
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -31,9 +31,9 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
         <nav className="flex h-16 items-center justify-evenly">
           <NavItem to="/" icon={<House size={ICON_SIZE} />} label="Home" />
           <NavItem
-            to="/analytics"
-            icon={<ChartNoAxesColumn size={ICON_SIZE} />}
-            label="Analytics"
+            to="/water"
+            icon={<Droplets size={ICON_SIZE} />}
+            label="Water"
           />
 
           <FabButton
@@ -44,7 +44,11 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
             navbarColor={theme.secondary_bg_color}
           />
 
-          <NavItem to="/ai" icon={<Sparkles size={ICON_SIZE} />} label="AI" />
+          <NavItem
+            to="/analytics"
+            icon={<ChartNoAxesColumn size={ICON_SIZE} />}
+            label="Analytics"
+          />
           <NavItem
             to="/profile"
             icon={<User size={ICON_SIZE} />}

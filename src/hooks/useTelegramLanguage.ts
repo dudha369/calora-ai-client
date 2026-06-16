@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { cloudStorage, initData } from '@telegram-apps/sdk-react';
+import { cloudStorage, initData } from '@tma.js/sdk-react';
 import i18n, { SUPPORTED_LANGUAGES, type AppLanguage } from '../i18n';
 
 function normalizeLanguage(lang: string | undefined): AppLanguage {
@@ -20,7 +20,7 @@ export function useTelegramLanguage() {
         }
 
         // 2. Язык из Telegram-профиля
-        const tgLang = initData?.user()?.languageCode;
+        const tgLang = initData?.user()?.language_code;
         await i18n.changeLanguage(normalizeLanguage(tgLang));
       } catch {
         // CloudStorage недоступен — остаёмся на 'en'

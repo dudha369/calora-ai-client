@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import { User, Trash2 } from 'lucide-react';
-import { initData } from '@telegram-apps/sdk-react';
+import { initData } from '@tma.js/sdk-react';
 import { Section } from '../components/Section';
 import { SectionItem } from '../components/SectionItem';
 import { ModalWindow } from '../components/ModalWindow';
@@ -19,7 +19,7 @@ export const ProfilePage = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const photo_url = initData.user()?.photoUrl;
+  const photo_url = initData.user()?.photo_url;
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);

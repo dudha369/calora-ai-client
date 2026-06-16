@@ -62,7 +62,7 @@ interface Props {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
-export const CalendarPicker = ({
+export const Calendar = ({
   value,
   minDate,
   maxDate,
@@ -73,36 +73,38 @@ export const CalendarPicker = ({
   const today = startOfDay(new Date());
 
   // Отображаемый месяц — начинаем с месяца выбранной даты
-  const [dispYear, setDispYear] = useState(value.getFullYear());
-  const [dispMonth, setDispMonth] = useState(value.getMonth());
+  const [displayYear, setDisplayYear] = useState(value.getFullYear());
+  const [displayMonth, setDisplayMonth] = useState(value.getMonth());
 
-  const cells = buildCalendarCells(dispYear, dispMonth);
+  const cells = buildCalendarCells(displayYear, displayMonth);
   const minNorm = startOfDay(minDate);
   const maxNorm = startOfDay(maxDate);
 
   // Можно ли листать месяцы
   const canGoPrev =
-    dispYear > minNorm.getFullYear() ||
-    (dispYear === minNorm.getFullYear() && dispMonth > minNorm.getMonth());
+    displayYear > minNorm.getFullYear() ||
+    (displayYear === minNorm.getFullYear() &&
+      displayMonth > minNorm.getMonth());
 
   const canGoNext =
-    dispYear < maxNorm.getFullYear() ||
-    (dispYear === maxNorm.getFullYear() && dispMonth < maxNorm.getMonth());
+    displayYear < maxNorm.getFullYear() ||
+    (displayYear === maxNorm.getFullYear() &&
+      displayMonth < maxNorm.getMonth());
 
   const prevMonth = () => {
     if (!canGoPrev) return;
-    if (dispMonth === 0) {
-      setDispYear((y) => y - 1);
-      setDispMonth(11);
-    } else setDispMonth((m) => m - 1);
+    if (displayMonth === 0) {
+      setDisplayYear((y) => y - 1);
+      setDisplayMonth(11);
+    } else setDisplayMonth((m) => m - 1);
   };
 
   const nextMonth = () => {
     if (!canGoNext) return;
-    if (dispMonth === 11) {
-      setDispYear((y) => y + 1);
-      setDispMonth(0);
-    } else setDispMonth((m) => m + 1);
+    if (displayMonth === 11) {
+      setDisplayYear((y) => y + 1);
+      setDisplayMonth(0);
+    } else setDisplayMonth((m) => m + 1);
   };
 
   return (
@@ -138,7 +140,7 @@ export const CalendarPicker = ({
             className="text-base font-semibold"
             style={{ color: theme.text_color }}
           >
-            {MONTH_NAMES[dispMonth]} {dispYear}
+            {MONTH_NAMES[displayMonth]} {displayYear}
           </span>
 
           <button

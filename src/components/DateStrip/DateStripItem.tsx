@@ -39,10 +39,10 @@ export const DateStripItem = ({
     numColor = theme.button_text_color;
     nameColor = withOpacity(theme.button_text_color, 0.7);
   } else if (isDisabled) {
-    bg = withOpacity(theme.section_bg_color, 0.6);
+    bg = withOpacity(theme.text_color, 0.04);
     border = '2px solid transparent';
-    numColor = theme.hint_color;
-    nameColor = theme.hint_color;
+    numColor = withOpacity(theme.text_color, 0.25);
+    nameColor = withOpacity(theme.text_color, 0.25);
   } else if (isToday) {
     bg = 'transparent';
     border = `2px dashed ${theme.text_color}`;
@@ -57,9 +57,21 @@ export const DateStripItem = ({
 
   return (
     <button
-      onClick={onClick}
-      disabled={isDisabled}
-      className="flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150 enabled:active:scale-[0.97]"
+      /*
+       * ВАЖНО: используем aria-disabled вместо disabled.
+       *
+       * Атрибут disabled блокирует pointer-события на уровне браузера
+       * (особенно Firefox/Safari), из-за чего pointerdown не баблится
+       * к Embla и drag-жест не стартует, если начинать его с недоступной даты.
+       *
+       * aria-disabled сохраняет семантику "недоступно" для скринридеров,
+       * но не вмешивается в поток pointer-событий — Embla получает pointerdown
+       * и корректно инициирует drag из любого места карусели.
+       */
+      onClick={isDisabled ? undefined : onClick}
+      aria-disabled={isDisabled || undefined}
+      tabIndex={isDisabled ? -1 : 0}
+      className={`flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150${isDisabled ? '' : 'active:scale-[0.97]'}`}
       style={{
         width: itemWidth,
         height: 60,

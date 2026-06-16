@@ -75,8 +75,12 @@ export const DateStrip = ({
     return () => observer.disconnect();
   }, []);
 
-  // startIndex фиксируется один раз при монтировании — Embla больше не
-  // реинициализируется (и не центрируется) на каждый тап.
+  /**
+   * startIndex — мгновенное позиционирование при маунте и смене месяца (нет анимации).
+   * Фиксируется один раз: повторный выбор той же даты не реинициализирует Embla.
+   *
+   * Анимированный скролл к выбранной дате обрабатывается ниже через pendingScrollDate.
+   */
   const [initialIndex] = useState(() =>
     Math.max(
       0,
@@ -98,21 +102,29 @@ export const DateStrip = ({
     wheelGesturesPlugin,
   ]);
 
-  // Реальное изменение геометрии (поворот экрана/resize).
+  // Реальное изменение геометрии (поворот экрана / resize).
   useEffect(() => {
     if (layout) emblaApi?.reInit();
   }, [emblaApi, layout]);
 
   /**
-   * Скролл к дате — ТОЛЬКО при выборе через CalendarPicker
-   * (selectDateExternal → pendingScrollDate). При тапе по карусели
-   * pendingScrollDate остаётся null — Embla не трогается вообще.
+   * Анимированный скролл к выбранной дате.
+   *
+   * Срабатывает при любом выборе: и тап по карусели, и CalendarPicker.
+   * useDateStrip выставляет pendingScrollDate в обоих случаях.
+   *
+   * emblaApi.scrollTo(index)           → animated (jump = false по умолчанию)
+   * emblaApi.scrollTo(index, true)     → instant jump (не используем)
+   *
+   * Если цель == текущая позиция, Embla пропускает анимацию автоматически,
+   * поэтому вызов safe даже когда элемент уже в центре.
    */
   useEffect(() => {
     if (!emblaApi || pendingScrollDate === null) return;
+
     const index = dates.findIndex((d) => isSameDay(d, pendingScrollDate));
     if (index >= 0) {
-      emblaApi.scrollTo(index);
+      emblaApi.scrollTo(index); // animated by default
       onScrollConsumed();
     }
   }, [emblaApi, pendingScrollDate, dates, onScrollConsumed]);
@@ -125,7 +137,7 @@ export const DateStrip = ({
   const viewportWidth = count * itemWidth + (count - 1) * GAP;
 
   return (
-    <div ref={wrapperRef} className="w-full">
+    <div ref={wrapperRef} className="w-full" data-no-swipe>
       <div
         ref={emblaRef}
         className="mx-auto overflow-hidden"
