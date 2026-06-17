@@ -6,5 +6,5 @@ export interface SecondaryButtonOptions {
   isEnabled: boolean;
   isVisible?: boolean;
   onClick: () => void;
-  position: SecondaryButtonPosition;
+  position?: SecondaryButtonPosition;
 }

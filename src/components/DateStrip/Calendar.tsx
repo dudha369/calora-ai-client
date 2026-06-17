@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
 import { isSameDay, startOfDay } from '../../utils/date';
+import { useBackButton } from '../../hooks/useBackButton.ts';
+import { useSecondaryButton } from '../../hooks/useSecondaryButton.ts';
 
 // ── Константы ────────────────────────────────────────────────────────────────
 
@@ -76,7 +78,40 @@ export const Calendar = ({
   const [displayYear, setDisplayYear] = useState(value.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(value.getMonth());
 
-  const cells = buildCalendarCells(displayYear, displayMonth);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsMounted(true), 10);
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      clearTimeout(timer);
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
+
+  const handleClose = useCallback(() => {
+    if (isClosing) return;
+    setIsClosing(true);
+
+    setTimeout(() => {
+      onClose();
+    }, 300);
+  }, [onClose, isClosing]);
+
+  const handleSelect = (d: Date) => {
+    onSelect(d);
+
+    handleClose();
+  };
+
+  const cells = useMemo(
+    () => buildCalendarCells(displayYear, displayMonth),
+    [displayYear, displayMonth],
+  );
   const minNorm = startOfDay(minDate);
   const maxNorm = startOfDay(maxDate);
 
@@ -107,20 +142,33 @@ export const Calendar = ({
     } else setDisplayMonth((m) => m + 1);
   };
 
+  const isVisible = isMounted && !isClosing;
+  const isButtonsVisible = !isClosing;
+
+  useBackButton(onClose, true);
+  useSecondaryButton({
+    text: 'Закрыть',
+    iconCustomEmojiId: '',
+    isEnabled: true,
+    isVisible: isButtonsVisible,
+    onClick: handleClose,
+  });
+
   return (
     // Фиксированный оверлей поверх всего приложения
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
-      {/* Полупрозрачный фон — закрывает пикер по клику */}
-      <div
-        className="absolute inset-0 bg-black/40"
-        style={{ backdropFilter: 'blur(4px)' }}
-        onClick={onClose}
-      />
-
+    <div
+      className={`fixed inset-0 z-20 flex items-end justify-center backdrop-blur-xs transition-opacity duration-300 ease-in-out ${
+        isVisible ? 'opacity-100' : 'opacity-0'
+      }`}
+      onClick={handleClose}
+    >
       {/* Панель календаря */}
       <div
-        className="relative z-10 mx-0 w-full rounded-t-3xl px-4 pt-5 pb-6 sm:mx-4 sm:max-w-sm sm:rounded-3xl"
+        className={`relative z-10 w-full rounded-t-3xl px-4 py-5 transition-transform duration-300 ease-in-out ${
+          isVisible ? 'translate-y-0' : 'translate-y-full'
+        }`}
         style={{ backgroundColor: theme.bg_color }}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Заголовок — навигация по месяцам */}
         <div className="mb-5 flex items-center justify-between">
@@ -130,7 +178,8 @@ export const Calendar = ({
             className="rounded-xl p-2 transition-opacity"
             style={{
               backgroundColor: theme.section_bg_color,
-              color: canGoPrev ? theme.button_color : `${theme.hint_color}55`,
+              color: canGoPrev ? theme.button_text_color : theme.hint_color,
+              cursor: canGoPrev ? 'pointer' : 'not-allowed',
             }}
           >
             <ChevronLeft size={18} />
@@ -149,7 +198,8 @@ export const Calendar = ({
             className="rounded-xl p-2 transition-opacity"
             style={{
               backgroundColor: theme.section_bg_color,
-              color: canGoNext ? theme.button_color : `${theme.hint_color}55`,
+              color: canGoNext ? theme.button_text_color : theme.hint_color,
+              cursor: canGoNext ? 'pointer' : 'not-allowed',
             }}
           >
             <ChevronRight size={18} />
@@ -170,7 +220,7 @@ export const Calendar = ({
         </div>
 
         {/* Сетка дней */}
-        <div className="grid grid-cols-7 gap-y-1">
+        <div className="grid grid-cols-7 gap-x-2 gap-y-2">
           {cells.map((date, i) => {
             if (!date) {
               return <div key={`empty-${i}`} className="aspect-square" />;
@@ -182,28 +232,29 @@ export const Calendar = ({
             const isItToday = isSameDay(d, today);
 
             let bg = 'transparent';
+            let border = '2px solid transparent';
             let txtColor = theme.text_color;
 
             if (isSelected) {
               bg = theme.button_color;
               txtColor = theme.button_text_color;
             } else if (isItToday) {
-              bg = `${theme.button_color}22`;
-              txtColor = theme.button_color;
+              border = `2px dashed ${theme.text_color}`;
             } else if (isDisabled) {
-              txtColor = `${theme.hint_color}44`;
+              txtColor = `${theme.hint_color}40`;
             }
 
             return (
               <button
                 key={d.toISOString()}
-                onClick={() => !isDisabled && onSelect(d)}
+                onClick={() => !isDisabled && handleSelect(d)}
                 disabled={isDisabled}
-                className="flex aspect-square items-center justify-center rounded-xl text-sm font-medium transition-colors"
+                className="flex aspect-square items-center justify-center rounded-2xl text-base font-medium transition-colors"
                 style={{
                   backgroundColor: bg,
                   color: txtColor,
-                  cursor: isDisabled ? 'default' : 'pointer',
+                  border,
+                  cursor: isDisabled ? 'not-allowed' : 'pointer',
                 }}
               >
                 {date.getDate()}
@@ -211,18 +262,6 @@ export const Calendar = ({
             );
           })}
         </div>
-
-        {/* Кнопка закрытия */}
-        <button
-          onClick={onClose}
-          className="mt-5 w-full rounded-2xl py-3 text-sm font-semibold transition-opacity active:opacity-60"
-          style={{
-            backgroundColor: theme.section_bg_color,
-            color: theme.hint_color,
-          }}
-        >
-          Закрыть
-        </button>
       </div>
     </div>
   );
