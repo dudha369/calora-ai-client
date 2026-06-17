@@ -5,13 +5,36 @@ import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 import { DateStripItem } from './DateStripItem';
 import { isSameDay, toApiDate, startOfDay } from '../../utils/date';
 
-const GAP = 4; // px между элементами
-const MIN_ITEM = 48; // px — минимальная ширина элемента
-const MAX_ITEM = 64; // px — максимальная ширина (на широких экранах не растягиваем)
+const GAP = 4;
+const MIN_ITEM = 48;
+const MAX_ITEM = 64;
+const IDEAL_COUNT = 7;
+const MIN_COUNT = 5;
 
 interface Layout {
   count: number;
   itemWidth: number;
+}
+
+function round(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+function computeLayout(containerWidth: number): Layout {
+  let count = IDEAL_COUNT;
+  let itemWidth = (containerWidth - (count - 1) * GAP) / count;
+
+  while (itemWidth > MAX_ITEM) {
+    count += 1;
+    itemWidth = (containerWidth - (count - 1) * GAP) / count;
+  }
+
+  while (itemWidth < MIN_ITEM && count > MIN_COUNT) {
+    count -= 1;
+    itemWidth = (containerWidth - (count - 1) * GAP) / count;
+  }
+
+  return { count, itemWidth: round(itemWidth) };
 }
 
 interface Props {
@@ -22,16 +45,6 @@ interface Props {
   onSelect: (date: Date) => void;
   pendingScrollDate: Date | null;
   onScrollConsumed: () => void;
-}
-
-function computeLayout(containerWidth: number): Layout {
-  for (const count of [7, 6, 5]) {
-    const itemWidth = Math.floor((containerWidth - (count - 1) * GAP) / count);
-    if (itemWidth >= MIN_ITEM) {
-      return { count, itemWidth: Math.min(itemWidth, MAX_ITEM) };
-    }
-  }
-  return { count: 5, itemWidth: MIN_ITEM };
 }
 
 export const DateStrip = ({
@@ -75,12 +88,6 @@ export const DateStrip = ({
     return () => observer.disconnect();
   }, []);
 
-  /**
-   * startIndex — мгновенное позиционирование при маунте и смене месяца (нет анимации).
-   * Фиксируется один раз: повторный выбор той же даты не реинициализирует Embla.
-   *
-   * Анимированный скролл к выбранной дате обрабатывается ниже через pendingScrollDate.
-   */
   const [initialIndex] = useState(() =>
     Math.max(
       0,
@@ -102,29 +109,16 @@ export const DateStrip = ({
     wheelGesturesPlugin,
   ]);
 
-  // Реальное изменение геометрии (поворот экрана / resize).
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (layout) emblaApi?.reInit();
   }, [emblaApi, layout]);
 
-  /**
-   * Анимированный скролл к выбранной дате.
-   *
-   * Срабатывает при любом выборе: и тап по карусели, и CalendarPicker.
-   * useDateStrip выставляет pendingScrollDate в обоих случаях.
-   *
-   * emblaApi.scrollTo(index)           → animated (jump = false по умолчанию)
-   * emblaApi.scrollTo(index, true)     → instant jump (не используем)
-   *
-   * Если цель == текущая позиция, Embla пропускает анимацию автоматически,
-   * поэтому вызов safe даже когда элемент уже в центре.
-   */
   useEffect(() => {
     if (!emblaApi || pendingScrollDate === null) return;
 
     const index = dates.findIndex((d) => isSameDay(d, pendingScrollDate));
     if (index >= 0) {
-      emblaApi.scrollTo(index); // animated by default
+      emblaApi.scrollTo(index);
       onScrollConsumed();
     }
   }, [emblaApi, pendingScrollDate, dates, onScrollConsumed]);

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
 import { isSameDay, startOfDay } from '../../utils/date';
 import { useBackButton } from '../../hooks/useBackButton.ts';
 import { useSecondaryButton } from '../../hooks/useSecondaryButton.ts';
+import { useModalAnimation } from '../../hooks/useModalAnimation.ts';
 
 // ── Константы ────────────────────────────────────────────────────────────────
 
@@ -78,33 +79,11 @@ export const Calendar = ({
   const [displayYear, setDisplayYear] = useState(value.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(value.getMonth());
 
-  const [isMounted, setIsMounted] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsMounted(true), 10);
-
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      clearTimeout(timer);
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  const handleClose = useCallback(() => {
-    if (isClosing) return;
-    setIsClosing(true);
-
-    setTimeout(() => {
-      onClose();
-    }, 300);
-  }, [onClose, isClosing]);
+  const { isVisible, isButtonsVisible, handleClose } =
+    useModalAnimation(onClose);
 
   const handleSelect = (d: Date) => {
     onSelect(d);
-
     handleClose();
   };
 
@@ -112,6 +91,7 @@ export const Calendar = ({
     () => buildCalendarCells(displayYear, displayMonth),
     [displayYear, displayMonth],
   );
+
   const minNorm = startOfDay(minDate);
   const maxNorm = startOfDay(maxDate);
 
@@ -142,10 +122,7 @@ export const Calendar = ({
     } else setDisplayMonth((m) => m + 1);
   };
 
-  const isVisible = isMounted && !isClosing;
-  const isButtonsVisible = !isClosing;
-
-  useBackButton(onClose, true);
+  useBackButton(handleClose, true);
   useSecondaryButton({
     text: 'Закрыть',
     iconCustomEmojiId: '',

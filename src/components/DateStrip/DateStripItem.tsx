@@ -57,21 +57,10 @@ export const DateStripItem = ({
 
   return (
     <button
-      /*
-       * ВАЖНО: используем aria-disabled вместо disabled.
-       *
-       * Атрибут disabled блокирует pointer-события на уровне браузера
-       * (особенно Firefox/Safari), из-за чего pointerdown не баблится
-       * к Embla и drag-жест не стартует, если начинать его с недоступной даты.
-       *
-       * aria-disabled сохраняет семантику "недоступно" для скринридеров,
-       * но не вмешивается в поток pointer-событий — Embla получает pointerdown
-       * и корректно инициирует drag из любого места карусели.
-       */
       onClick={isDisabled ? undefined : onClick}
-      aria-disabled={isDisabled || undefined}
+      aria-disabled={isDisabled}
       tabIndex={isDisabled ? -1 : 0}
-      className={`flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150${isDisabled ? '' : 'active:scale-[0.97]'}`}
+      className={`flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150 ${isDisabled ? '' : 'active:scale-[0.97]'}`}
       style={{
         width: itemWidth,
         height: 60,
@@ -81,13 +70,13 @@ export const DateStripItem = ({
       }}
     >
       <span
-        className="text-[13px] leading-none font-medium"
+        className="text-sm leading-none font-medium"
         style={{ color: nameColor }}
       >
         {weekday}
       </span>
       <span
-        className="text-[27px] leading-none font-semibold tracking-[-0.03em]"
+        className="text-3xl leading-none font-semibold tracking-tight"
         style={{ color: numColor }}
       >
         {day}
