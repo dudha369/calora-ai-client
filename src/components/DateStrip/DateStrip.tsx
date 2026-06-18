@@ -4,6 +4,7 @@ import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
 import { DateStripItem } from './DateStripItem';
 import { isSameDay, toApiDate, startOfDay } from '../../utils/date';
+import type { ActiveDateSets } from '../../hooks/useActiveDates';
 
 const GAP = 4;
 const MIN_ITEM = 48;
@@ -42,7 +43,7 @@ interface DateStripProps {
   selectedDate: Date;
   today: Date;
   minDate: Date;
-  activeDates: Set<string>;
+  activeDates: ActiveDateSets;
   onSelect: (date: Date) => void;
   pendingScrollDate: Date | null;
   onScrollConsumed: () => void;
@@ -126,7 +127,7 @@ export const DateStrip = ({
   }, [emblaApi, pendingScrollDate, dates, onScrollConsumed]);
 
   if (!layout) {
-    return <div ref={wrapperRef} className="h-16 w-full" />;
+    return <div ref={wrapperRef} className="h-15 w-full" />;
   }
 
   const { count, itemWidth } = layout;
@@ -143,16 +144,18 @@ export const DateStrip = ({
           {dates.map((date) => {
             const isFuture = !isSameDay(date, today) && date > today;
             const isBeforeMin = date < minNorm;
+            const apiDate = toApiDate(date);
 
             return (
               <DateStripItem
-                key={toApiDate(date)}
+                key={apiDate}
                 date={date}
                 isSelected={isSameDay(date, selectedDate)}
                 isToday={isSameDay(date, today)}
                 isFuture={isFuture}
                 isBeforeMin={isBeforeMin}
-                hasEntries={activeDates.has(toApiDate(date))}
+                hasFood={activeDates.foodDates.has(apiDate)}
+                hasWater={activeDates.waterDates.has(apiDate)}
                 onClick={() => onSelect(date)}
                 itemWidth={itemWidth}
               />

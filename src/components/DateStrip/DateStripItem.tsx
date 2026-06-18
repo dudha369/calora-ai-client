@@ -1,17 +1,20 @@
+import type { CSSProperties } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { withOpacity } from '../../utils/colors';
+import { MARKER_FOOD_COLOR, MARKER_WATER_COLOR } from '../../constants/markers';
 
 const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] as const;
 
-const ITEM_HEIGHT = 64; // px — синхронизировано с placeholder-высотой в DateStrip.tsx
+const ITEM_HEIGHT = 60; // px
 
-interface DateStripItemProps {
+interface Props {
   date: Date;
   isSelected: boolean;
   isToday: boolean;
   isFuture: boolean;
   isBeforeMin: boolean;
-  hasEntries: boolean;
+  hasFood: boolean;
+  hasWater: boolean;
   onClick: () => void;
   itemWidth: number;
 }
@@ -22,10 +25,11 @@ export const DateStripItem = ({
   isToday,
   isFuture,
   isBeforeMin,
-  hasEntries,
+  hasFood,
+  hasWater,
   onClick,
   itemWidth,
-}: DateStripItemProps) => {
+}: Props) => {
   const theme = useTheme();
   const isDisabled = isFuture || isBeforeMin;
 
@@ -59,18 +63,30 @@ export const DateStripItem = ({
     nameColor = theme.hint_color;
   }
 
-  // На синей выбранной плашке берём цвет текста плашки (контраст с bg),
-  // во всех остальных состояниях — акцентный цвет темы.
-  const dotColor = isSelected
-    ? theme.button_text_color
-    : theme.accent_text_color;
+  const hasMarker = hasFood || hasWater;
+
+  // Цвет/градиент точки не зависит от состояния выбора — зелёный должен
+  // всегда читаться как "еда", синий как "вода". На выбранной (синей)
+  // плашке добавляем тонкое кольцо цветом текста плашки, иначе синяя
+  // "вода" сливалась бы с синим фоном выбора.
+  const dotStyle: CSSProperties = {
+    bottom: 6,
+    ...(hasFood && hasWater
+      ? {
+          background: `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`,
+        }
+      : { backgroundColor: hasFood ? MARKER_FOOD_COLOR : MARKER_WATER_COLOR }),
+    ...(isSelected
+      ? { boxShadow: `0 0 0 1px ${theme.button_text_color}` }
+      : {}),
+  };
 
   return (
     <button
       onClick={isDisabled ? undefined : onClick}
       aria-disabled={isDisabled}
       tabIndex={isDisabled ? -1 : 0}
-      className={`flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150 ${isDisabled ? '' : 'active:scale-[0.97]'}`}
+      className={`relative flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150 ${isDisabled ? '' : 'active:scale-[0.97]'}`}
       style={{
         width: itemWidth,
         height: ITEM_HEIGHT,
@@ -91,12 +107,16 @@ export const DateStripItem = ({
       >
         {day}
       </span>
-      {/* Слот точки всегда занимает место в layout — иначе высота элементов
-          с записями и без них отличалась бы, и ряд выглядел бы неровным. */}
-      <span
-        className="size-1.5 rounded-full"
-        style={{ backgroundColor: hasEntries ? dotColor : 'transparent' }}
-      />
+
+      {/* Абсолютный оверлей, НЕ часть flex-потока: weekday+число всегда
+          центрируются как пара, независимо от наличия точки, а когда
+          точки нет — не рендерится вообще ничего, без "мёртвой" зоны. */}
+      {hasMarker && (
+        <span
+          className="absolute left-1/2 size-1.5 -translate-x-1/2 rounded-full"
+          style={dotStyle}
+        />
+      )}
     </button>
   );
 };

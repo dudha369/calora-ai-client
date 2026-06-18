@@ -8,6 +8,9 @@ import { useBackButton } from '../../hooks/useBackButton.ts';
 import { useSecondaryButton } from '../../hooks/useSecondaryButton.ts';
 import { useModalAnimation } from '../../hooks/useModalAnimation.ts';
 
+import type { CSSProperties } from 'react';
+import { MARKER_FOOD_COLOR, MARKER_WATER_COLOR } from '../../constants/markers';
+
 // ── Константы ────────────────────────────────────────────────────────────────
 
 const DAY_HEADERS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] as const;
@@ -232,7 +235,25 @@ export const Calendar = ({
               txtColor = `${theme.hint_color}40`;
             }
 
-            const hasEntries = activeDates.has(toApiDate(d));
+            const apiDate = toApiDate(d);
+            const hasFood = activeDates.foodDates.has(apiDate);
+            const hasWater = activeDates.waterDates.has(apiDate);
+            const hasMarker = hasFood || hasWater;
+
+            const dotStyle: CSSProperties = {
+              ...(hasFood && hasWater
+                ? {
+                    background: `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`,
+                  }
+                : {
+                    backgroundColor: hasFood
+                      ? MARKER_FOOD_COLOR
+                      : MARKER_WATER_COLOR,
+                  }),
+              ...(isSelected
+                ? { boxShadow: `0 0 0 1px ${theme.button_text_color}` }
+                : {}),
+            };
 
             return (
               <button
@@ -248,14 +269,10 @@ export const Calendar = ({
                 }}
               >
                 {date.getDate()}
-                {hasEntries && (
+                {hasMarker && (
                   <span
                     className="absolute bottom-1.5 left-1/2 size-1 -translate-x-1/2 rounded-full"
-                    style={{
-                      backgroundColor: isSelected
-                        ? theme.button_text_color
-                        : theme.accent_text_color,
-                    }}
+                    style={dotStyle}
                   />
                 )}
               </button>
