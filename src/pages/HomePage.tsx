@@ -87,9 +87,9 @@ export const HomePage = () => {
   });
 
   return (
-    <div className="flex flex-col gap-4 px-4 py-1">
+    <div className="flex flex-col gap-4 px-4">
       <header
-        className="sticky top-0 z-10 flex flex-col gap-2 py-1"
+        className="sticky top-0 z-10 flex flex-col gap-2 pt-1 pb-2"
         style={{ backgroundColor: theme.bg_color }}
       >
         <section className="flex h-6 justify-between px-1">
@@ -125,7 +125,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        <section>
+        <section className="-mx-4">
           <DateStrip
             key={monthKey}
             dates={dates}
@@ -139,7 +139,7 @@ export const HomePage = () => {
         </section>
       </header>
 
-      <main className="flex flex-col gap-4">
+      <main className="flex flex-col gap-3">
         <section
           className="flex h-70 w-full flex-col rounded-3xl"
           style={{
@@ -176,7 +176,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-px">
           <span
             className="text-lg font-semibold tracking-wide"
             style={{

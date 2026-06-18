@@ -57,13 +57,14 @@ export const FoodResultModal = ({
     <ModalWindow
       title="Оценка блюда"
       onClose={onClose}
-      actionLabel="Добавить в дневник"
+      actionLabel="Добавить"
+      iconCustomEmojiId="5260416304224936047"
       onAction={handleConfirm}
       isProcessing={isConfirming}
     >
       {/* Список блюд (только если несколько — иначе избыточно) */}
       {hasManyDishes && (
-        <div className="mt-2 flex flex-col gap-0.5">
+        <div className="flex flex-col gap-0.5">
           {result.dishes.map((dish, i) => (
             <div
               key={i}

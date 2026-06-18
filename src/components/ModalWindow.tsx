@@ -1,9 +1,10 @@
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { useBackButton } from '../hooks/useBackButton';
 import { useSecondaryButton } from '../hooks/useSecondaryButton';
 import { useMainButton } from '../hooks/useMainButton';
+import { useModalAnimation } from '../hooks/useModalAnimation.ts';
 
 interface ModalWindowProps {
   onClose: () => void;
@@ -26,39 +27,11 @@ export const ModalWindow = ({
 }: ModalWindowProps) => {
   const theme = useTheme();
 
-  const [isMounted, setIsMounted] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
-
-  // Запускаем анимацию появления сразу после монтирования в DOM
-  useEffect(() => {
-    // Небольшая задержка нужна, чтобы браузер успел применить начальные CSS классы
-    const timer = setTimeout(() => setIsMounted(true), 10);
-
-    // Блокируем скролл на body, чтобы Telegram не рисовал полосу прокрутки
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      clearTimeout(timer);
-      // Возвращаем как было при закрытии
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  // Функция закрытия с задержкой для проигрывания анимации
-  const handleClose = useCallback(() => {
-    if (isClosing) return; // Защита от повторных кликов
-
-    setIsClosing(true); // Запускаем анимацию исчезновения
-
-    // Ждем 300мс (время выполнения CSS transition), затем удаляем из DOM
-    setTimeout(() => {
-      onClose();
-    }, 300);
-  }, [onClose, isClosing]);
+  const { isVisible, isButtonsVisible, handleClose } =
+    useModalAnimation(onClose);
 
   const showActions = Boolean(actionLabel && onAction);
-  const isButtonsVisible = showActions && !isClosing;
+  const isTgButtonsVisible = showActions && isButtonsVisible;
 
   useBackButton(handleClose, true);
 
@@ -66,7 +39,7 @@ export const ModalWindow = ({
     text: isProcessing ? 'Загрузка...' : 'Отмена',
     iconCustomEmojiId: '5260342697075416641',
     isEnabled: true,
-    isVisible: isButtonsVisible,
+    isVisible: isTgButtonsVisible,
     onClick: handleClose,
     position: 'left',
   });
@@ -75,12 +48,10 @@ export const ModalWindow = ({
     text: isProcessing ? 'Загрузка...' : actionLabel || '',
     iconCustomEmojiId,
     isEnabled: !isProcessing,
-    isVisible: isButtonsVisible,
+    isVisible: isTgButtonsVisible,
     isLoading: isProcessing,
     onClick: onAction || (() => {}),
   });
-
-  const isVisible = isMounted && !isClosing;
 
   return (
     <div
@@ -102,7 +73,7 @@ export const ModalWindow = ({
         <header className="relative flex w-full items-center justify-center">
           <span className="text-xl font-bold">{title}</span>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="absolute right-0 rounded-full transition-colors hover:opacity-70"
           >
             <X size={24} style={{ color: theme.text_color }} />

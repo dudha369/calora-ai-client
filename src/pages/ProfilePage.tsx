@@ -3,7 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
-import { User, Trash2, Shield, ChevronRight } from 'lucide-react';
+import {
+  User,
+  Trash2,
+  Shield,
+  Target,
+  Sprout,
+  ChartNoAxesCombinedIcon,
+  Trophy,
+  Settings,
+} from 'lucide-react';
 import { initData } from '@tma.js/sdk-react';
 import { Section } from '../components/Section';
 import { SectionItem } from '../components/SectionItem';
@@ -47,7 +56,7 @@ export const ProfilePage = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="flex flex-col items-center gap-1 pt-6">
+      <section className="flex flex-col items-center gap-2 pt-6">
         <div
           className="flex size-24 items-center justify-center rounded-full"
           style={{ backgroundColor: `${theme.button_color}20` }}
@@ -63,55 +72,68 @@ export const ProfilePage = () => {
           )}
         </div>
         <p
-          className="text-center text-xl font-semibold"
+          className="text-center text-xl font-semibold tracking-wider"
           style={{ color: theme.text_color }}
         >
           {user_data?.user.full_name ?? 'Пользователь'}
         </p>
       </section>
 
-      <section className="flex flex-col gap-3">
-        {/* Admin Panel button — visible only for admin */}
+      <section className="flex flex-col gap-4">
         {isAdmin && (
-          <Section>
-            <button
+          <Section title="Admin Panel">
+            <SectionItem
+              icon={<Shield size={18} />}
+              label="Admin Panel"
+              color={theme.button_color}
               onClick={() => navigate('/admin')}
-              className="flex w-full items-center justify-between px-4 py-3"
-            >
-              <div
-                className="flex items-center gap-3"
-                style={{ color: theme.button_color }}
-              >
-                <Shield size={18} />
-                <span className="font-medium">Admin Panel</span>
-              </div>
-              <ChevronRight color={theme.hint_color} size={22} />
-            </button>
+            />
           </Section>
         )}
 
-        <Section>
-          <SectionItem />
-          <SectionItem />
-          <SectionItem />
-          <SectionItem />
+        <Section title="Моё тело">
+          <SectionItem
+            icon={<Target size={18} />}
+            label="Тело и цели"
+            onClick={() => {}}
+          />
+          <SectionItem
+            icon={<Sprout size={18} />}
+            label="Питание и здоровье"
+            onClick={() => {}}
+          />
         </Section>
 
+        <Section title="Прогресс">
+          <SectionItem
+            icon={<ChartNoAxesCombinedIcon size={18} />}
+            label="Динамика веса"
+            onClick={() => {}}
+          />
+          <SectionItem
+            icon={<Trophy size={18} />}
+            label="Квесты и достижения"
+            onClick={() => {}}
+          />
+        </Section>
+
+        <Section title="Настройки">
+          <SectionItem
+            icon={<Settings size={18} />}
+            label="Настройки"
+            to="settings"
+          />
+        </Section>
 
         <Section>
-          <button
+          <SectionItem
+            icon={<Trash2 size={18} />}
+            label="Удалить аккаунт"
+            color={theme.destructive_text_color}
             onClick={() => setConfirmOpen(true)}
-            className="flex w-full items-center justify-between px-4 py-3"
-            style={{ color: theme.destructive_text_color }}
-          >
-            <div className="flex items-center gap-3">
-              <Trash2 size={18} />
-              <span>Удалить аккаунт</span>
-            </div>
-          </button>
+          />
         </Section>
       </section>
-
 
       {confirmOpen && (
         <ModalWindow
@@ -125,7 +147,7 @@ export const ProfilePage = () => {
           <p className="text-center" style={{ color: theme.text_color }}>
             Это действие необратимо. Будут удалены профиль, история питания,
             фото, квесты и все остальные данные. Чтобы продолжить пользоваться
-            приложением, нужно будет пройти онбординг заново.
+            приложением, нужно будет пройти регистрацию заново.
           </p>
         </ModalWindow>
       )}

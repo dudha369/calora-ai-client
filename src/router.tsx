@@ -49,10 +49,22 @@ export const router = createBrowserRouter([
           },
           {
             path: 'profile',
-            lazy: () =>
-              import('./pages/ProfilePage').then((m) => ({
-                Component: m.ProfilePage,
-              })),
+            children: [
+              {
+                index: true,
+                lazy: () =>
+                  import('./pages/ProfilePage').then((m) => ({
+                    Component: m.ProfilePage,
+                  })),
+              },
+              {
+                path: 'settings',
+                lazy: () =>
+                  import('./pages/settings/SettingsPage').then((m) => ({
+                    Component: m.SettingsPage,
+                  })),
+              },
+            ],
           },
           {
             path: 'admin',

@@ -1,7 +1,13 @@
 import { LoadingScreen } from './components/loading/LoadingScreen';
 import { ErrorScreen } from './components/loading/ErrorScreen';
 import { NavigationBar } from './components/NavigationBar/NavigationBar';
-import { Outlet, Navigate, useLocation, useNavigation } from 'react-router-dom';
+import {
+  Outlet,
+  Navigate,
+  useLocation,
+  useNavigation,
+  useNavigate,
+} from 'react-router-dom';
 
 import { useSwipeNavigation } from './hooks/useSwipeNavigation';
 import { useTelegram } from './hooks/useTelegram';
@@ -11,10 +17,28 @@ import { useUserSession } from './hooks/useUserSession';
 import UserContext from './context/UserContext';
 import ScannerProvider from './providers/ScannerProvider';
 
+import { useEffect } from 'react';
+import { settingsButton } from '@tma.js/sdk-react';
+
 export function App() {
   const { ready, safeTop, safeBottom } = useTelegram();
   const theme = useTheme();
   useTelegramLanguage();
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!settingsButton.mount.isAvailable()) return;
+
+    settingsButton.mount();
+    settingsButton.show();
+
+    const off = settingsButton.onClick(() => navigate('/profile'));
+
+    return () => {
+      off();
+      settingsButton.hide();
+    };
+  }, [navigate]);
 
   const location = useLocation();
   const navigation = useNavigation();
