@@ -2,7 +2,7 @@ import { NavItem } from './NavItem';
 import { FabButton } from './FabButton';
 import {
   House,
-  GlassWater,
+  Droplets,
   Plus,
   Camera,
   ChartNoAxesColumn,
@@ -32,7 +32,7 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
           <NavItem to="/" icon={<House size={ICON_SIZE} />} label="Home" />
           <NavItem
             to="/water"
-            icon={<GlassWater size={ICON_SIZE} />}
+            icon={<Droplets size={ICON_SIZE} />}
             label="Water"
           />
 

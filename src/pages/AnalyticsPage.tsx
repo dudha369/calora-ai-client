@@ -177,7 +177,7 @@ export const AnalyticsPage = () => {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-3 pb-8">
+    <div className="flex flex-col gap-4 px-4">
       <h1 className="text-2xl font-bold" style={{ color: theme.text_color }}>
         Аналитика
       </h1>

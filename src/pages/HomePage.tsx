@@ -24,6 +24,7 @@ import type { DailyStats } from '../interfaces/api/stats';
 import type { FoodByDateResponse } from '../interfaces/api/food';
 import { startOfDay } from '../utils/date';
 import { getFlameColor } from '../utils/getFlameColor';
+import { useActiveDates } from '../hooks/useActiveDates.ts';
 
 export const HomePage = () => {
   const { user_data } = useUser();
@@ -46,6 +47,7 @@ export const HomePage = () => {
     pendingScrollDate, // ← передаём в DateStrip
     clearPendingScroll, // ← передаём в DateStrip
   } = useDateStrip();
+  const activeDates = useActiveDates(dates[0], dates[dates.length - 1]);
 
   const { data, isLoading: statsLoading } = useQuery<DailyStats>({
     queryKey: ['stats', 'daily', selectedDateStr],
@@ -132,6 +134,7 @@ export const HomePage = () => {
             selectedDate={selectedDate}
             today={today}
             minDate={minDate}
+            activeDates={activeDates}
             onSelect={selectDate}
             pendingScrollDate={pendingScrollDate}
             onScrollConsumed={clearPendingScroll}

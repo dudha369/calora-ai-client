@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import type { ReactNode } from 'react';
 
 interface SectionItemProps {
@@ -25,7 +25,7 @@ export const SectionItem = ({
   const content = (
     <>
       <div
-        className="flex items-center gap-3"
+        className="flex items-center gap-3.5 text-[17px]"
         style={{ color: color ?? theme.text_color }}
       >
         {icon}
@@ -35,7 +35,7 @@ export const SectionItem = ({
       {right ? (
         right
       ) : to ? (
-        <ChevronRight color={theme.hint_color} size={22} />
+        <ChevronRight color={theme.hint_color} size={20} />
       ) : null}
     </>
   );

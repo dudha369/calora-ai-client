@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SectionProps {
   title?: string;
@@ -12,13 +12,13 @@ export const Section = ({ title, children }: SectionProps) => {
   return (
     <div className="mx-4 flex flex-col gap-1">
       <span
-        className="ml-1.5 text-xs font-bold uppercase"
+        className="какое ml-3 text-[13px] font-medium tracking-wider uppercase"
         style={{ color: theme.section_header_text_color }}
       >
         {title}
       </span>
       <div
-        className="flex flex-col divide-y divide-(--tg-section-separator-color) rounded-3xl"
+        className="flex flex-col divide-y divide-(--tg-section-separator-color) overflow-hidden rounded-3xl"
         style={{ backgroundColor: theme.section_bg_color }}
       >
         {children}

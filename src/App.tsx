@@ -75,7 +75,7 @@ export function App() {
           value={{ user_data: session.userData, isLoading: false }}
         >
           <ScannerProvider>
-            <main className="relative flex flex-1 flex-col overflow-y-auto">
+            <main className="relative flex flex-1 flex-col overflow-y-auto pb-4">
               <Outlet />
             </main>
 

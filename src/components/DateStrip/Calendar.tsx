@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { useTheme } from '../../context/ThemeContext';
-import { isSameDay, startOfDay } from '../../utils/date';
+import { isSameDay, startOfDay, toApiDate } from '../../utils/date';
+import { useActiveDates } from '../../hooks/useActiveDates';
 import { useBackButton } from '../../hooks/useBackButton.ts';
 import { useSecondaryButton } from '../../hooks/useSecondaryButton.ts';
 import { useModalAnimation } from '../../hooks/useModalAnimation.ts';
@@ -49,7 +50,7 @@ function buildCalendarCells(year: number, month: number): (Date | null)[] {
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
-interface Props {
+interface CalendarProps {
   /** Текущая выбранная дата (подсвечивается в сетке) */
   value: Date;
   /**
@@ -71,13 +72,23 @@ export const Calendar = ({
   maxDate,
   onSelect,
   onClose,
-}: Props) => {
+}: CalendarProps) => {
   const theme = useTheme();
   const today = startOfDay(new Date());
 
   // Отображаемый месяц — начинаем с месяца выбранной даты
   const [displayYear, setDisplayYear] = useState(value.getFullYear());
   const [displayMonth, setDisplayMonth] = useState(value.getMonth());
+
+  const monthStart = useMemo(
+    () => new Date(displayYear, displayMonth, 1),
+    [displayYear, displayMonth],
+  );
+  const monthEnd = useMemo(
+    () => new Date(displayYear, displayMonth + 1, 0),
+    [displayYear, displayMonth],
+  );
+  const activeDates = useActiveDates(monthStart, monthEnd);
 
   const { isVisible, isButtonsVisible, handleClose } =
     useModalAnimation(onClose);
@@ -221,12 +232,14 @@ export const Calendar = ({
               txtColor = `${theme.hint_color}40`;
             }
 
+            const hasEntries = activeDates.has(toApiDate(d));
+
             return (
               <button
                 key={d.toISOString()}
                 onClick={() => !isDisabled && handleSelect(d)}
                 disabled={isDisabled}
-                className="flex aspect-square items-center justify-center rounded-2xl text-base font-medium transition-colors"
+                className="relative flex aspect-square items-center justify-center rounded-2xl text-base font-medium transition-colors"
                 style={{
                   backgroundColor: bg,
                   color: txtColor,
@@ -235,6 +248,16 @@ export const Calendar = ({
                 }}
               >
                 {date.getDate()}
+                {hasEntries && (
+                  <span
+                    className="absolute bottom-1.5 left-1/2 size-1 -translate-x-1/2 rounded-full"
+                    style={{
+                      backgroundColor: isSelected
+                        ? theme.button_text_color
+                        : theme.accent_text_color,
+                    }}
+                  />
+                )}
               </button>
             );
           })}

@@ -37,11 +37,12 @@ function computeLayout(containerWidth: number): Layout {
   return { count, itemWidth: round(itemWidth) };
 }
 
-interface Props {
+interface DateStripProps {
   dates: Date[];
   selectedDate: Date;
   today: Date;
   minDate: Date;
+  activeDates: Set<string>;
   onSelect: (date: Date) => void;
   pendingScrollDate: Date | null;
   onScrollConsumed: () => void;
@@ -52,10 +53,11 @@ export const DateStrip = ({
   selectedDate,
   today,
   minDate,
+  activeDates,
   onSelect,
   pendingScrollDate,
   onScrollConsumed,
-}: Props) => {
+}: DateStripProps) => {
   const wheelGesturesPlugin = useMemo(
     () => WheelGesturesPlugin({ forceWheelAxis: 'y' }),
     [],
@@ -124,7 +126,7 @@ export const DateStrip = ({
   }, [emblaApi, pendingScrollDate, dates, onScrollConsumed]);
 
   if (!layout) {
-    return <div ref={wrapperRef} className="w-full" style={{ height: 60 }} />;
+    return <div ref={wrapperRef} className="h-16 w-full" />;
   }
 
   const { count, itemWidth } = layout;
@@ -150,6 +152,7 @@ export const DateStrip = ({
                 isToday={isSameDay(date, today)}
                 isFuture={isFuture}
                 isBeforeMin={isBeforeMin}
+                hasEntries={activeDates.has(toApiDate(date))}
                 onClick={() => onSelect(date)}
                 itemWidth={itemWidth}
               />
