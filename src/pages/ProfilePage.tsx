@@ -86,7 +86,7 @@ export const ProfilePage = () => {
               icon={<Shield size={18} />}
               label="Admin Panel"
               color={theme.button_color}
-              onClick={() => navigate('/admin')}
+              to="/admin"
             />
           </Section>
         )}

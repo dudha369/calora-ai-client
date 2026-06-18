@@ -32,7 +32,7 @@ export function App() {
     settingsButton.mount();
     settingsButton.show();
 
-    const off = settingsButton.onClick(() => navigate('/profile'));
+    const off = settingsButton.onClick(() => navigate('/profile/settings'));
 
     return () => {
       off();
