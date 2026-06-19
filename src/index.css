@@ -39,3 +39,38 @@
     font: inherit;
   }
 }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html[data-view-transition-dir='forward']::view-transition-old(root) {
+  animation-name: calora-slide-out-left;
+}
+html[data-view-transition-dir='forward']::view-transition-new(root) {
+  animation-name: calora-slide-in-right;
+}
+
+html[data-view-transition-dir='backward']::view-transition-old(root) {
+  animation-name: calora-slide-out-right;
+}
+html[data-view-transition-dir='backward']::view-transition-new(root) {
+  animation-name: calora-slide-in-left;
+}
+
+@keyframes calora-slide-out-left {
+  to { transform: translateX(-28%); opacity: 0.55; }
+}
+@keyframes calora-slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes calora-slide-out-right {
+  to { transform: translateX(28%); opacity: 0.55; }
+}
+@keyframes calora-slide-in-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}

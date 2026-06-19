@@ -2,7 +2,11 @@ import { useTheme } from '../../context/ThemeContext';
 import { NoDataIcon } from '../NoDataIcon';
 import { useNavigate } from 'react-router-dom';
 
-export const AddLogBanner = () => {
+interface AddLogBannerProps {
+  isToday: boolean;
+}
+
+export const AddLogBanner = ({ isToday }: AddLogBannerProps) => {
   const navigate = useNavigate();
 
   const theme = useTheme();
@@ -13,9 +17,7 @@ export const AddLogBanner = () => {
       style={{
         backgroundColor: theme.section_bg_color,
       }}
-      onClick={() => {
-        navigate('/scanner');
-      }}
+      onClick={() => (isToday ? navigate('/scnner') : {})}
     >
       <NoDataIcon
         className="h-22 w-auto"
@@ -30,7 +32,7 @@ export const AddLogBanner = () => {
           color: theme.subtitle_text_color,
         }}
       >
-        Tap + to log meal
+        No logs{isToday && '. Tap + to log meal'}
       </span>
     </div>
   );

@@ -60,12 +60,12 @@ export const ProfilePage = () => {
           <Section title="Admin Panel">
             <SectionItem
               icon={
-                <SectionItemIcon color={theme.button_color}>
+                <SectionItemIcon color="#5856D6">
                   <Shield />
                 </SectionItemIcon>
               }
               label="Admin Panel"
-              to="/admin"
+              to="admin"
             />
           </Section>
         )}
@@ -78,7 +78,7 @@ export const ProfilePage = () => {
               </SectionItemIcon>
             }
             label="Тело и цели"
-            onClick={() => {}}
+            to="body"
           />
           <SectionItem
             icon={
@@ -87,7 +87,7 @@ export const ProfilePage = () => {
               </SectionItemIcon>
             }
             label="Питание и здоровье"
-            onClick={() => {}}
+            to="nutrition"
           />
         </Section>
 
@@ -99,7 +99,7 @@ export const ProfilePage = () => {
               </SectionItemIcon>
             }
             label="Динамика веса"
-            onClick={() => {}}
+            to="weight"
           />
           <SectionItem
             icon={
@@ -108,7 +108,7 @@ export const ProfilePage = () => {
               </SectionItemIcon>
             }
             label="Квесты и достижения"
-            onClick={() => {}}
+            to="quests"
           />
         </Section>
 

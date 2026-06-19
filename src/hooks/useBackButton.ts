@@ -9,9 +9,6 @@ export const useBackButton = (onBack: () => void, enabled: boolean) => {
   });
 
   useEffect(() => {
-    if (!backButton.mount.isAvailable()) return;
-    if (!backButton.isMounted()) backButton.mount();
-
     const handler = () => onBackRef.current();
     const offClick = backButton.onClick(handler);
 
@@ -22,7 +19,10 @@ export const useBackButton = (onBack: () => void, enabled: boolean) => {
   }, []);
 
   useEffect(() => {
-    if (!backButton.isMounted()) return;
-    enabled ? backButton.show() : backButton.hide();
+    if (enabled) {
+      backButton.show();
+    } else {
+      backButton.hide();
+    }
   }, [enabled]);
 };

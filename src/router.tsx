@@ -58,20 +58,48 @@ export const router = createBrowserRouter([
                   })),
               },
               {
+                path: 'admin',
+                lazy: () =>
+                  import('./pages/profile/AdminPage').then((m) => ({
+                    Component: m.AdminPage,
+                  })),
+              },
+              {
+                path: 'body',
+                lazy: () =>
+                  import('./pages/profile/BodyPage').then((m) => ({
+                    Component: m.BodyPage,
+                  })),
+              },
+              {
+                path: 'nutrition',
+                lazy: () =>
+                  import('./pages/profile/NutritionPage').then((m) => ({
+                    Component: m.NutritionPage,
+                  })),
+              },
+              {
+                path: 'weight',
+                lazy: () =>
+                  import('./pages/profile/WeightPage').then((m) => ({
+                    Component: m.WeightPage,
+                  })),
+              },
+              {
+                path: 'quests',
+                lazy: () =>
+                  import('./pages/profile/QuestsPage').then((m) => ({
+                    Component: m.QuestsPage,
+                  })),
+              },
+              {
                 path: 'settings',
                 lazy: () =>
-                  import('./pages/settings/SettingsPage').then((m) => ({
+                  import('./pages/profile/SettingsPage').then((m) => ({
                     Component: m.SettingsPage,
                   })),
               },
             ],
-          },
-          {
-            path: 'admin',
-            lazy: () =>
-              import('./pages/AdminPage').then((m) => ({
-                Component: m.AdminPage,
-              })),
           },
         ],
       },

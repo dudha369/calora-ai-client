@@ -22,10 +22,6 @@ export function useMainButton({
   useEffect(() => {
     if (!ready) return;
 
-    if (!mainButton.isMounted()) {
-      mainButton.mount();
-    }
-
     mainButton.setParams({ isVisible });
 
     return () => {

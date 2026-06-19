@@ -18,7 +18,12 @@ import UserContext from './context/UserContext';
 import ScannerProvider from './providers/ScannerProvider';
 
 import { useEffect } from 'react';
-import { settingsButton } from '@tma.js/sdk-react';
+import {
+  backButton,
+  mainButton,
+  secondaryButton,
+  settingsButton,
+} from '@tma.js/sdk-react';
 
 export function App() {
   const { ready, safeTop, safeBottom } = useTelegram();
@@ -27,10 +32,25 @@ export function App() {
 
   const navigate = useNavigate();
   useEffect(() => {
-    if (!settingsButton.mount.isAvailable()) return;
+    if (
+      !settingsButton.mount.isAvailable() ||
+      !mainButton.mount.isAvailable() ||
+      !secondaryButton.mount.isAvailable() ||
+      !backButton.mount.isAvailable()
+    )
+      return;
 
     settingsButton.mount();
     settingsButton.show();
+
+    mainButton.mount();
+    mainButton.hide();
+
+    secondaryButton.mount();
+    secondaryButton.hide();
+
+    backButton.mount();
+    backButton.hide();
 
     const off = settingsButton.onClick(() => navigate('/profile/settings'));
 
@@ -56,9 +76,9 @@ export function App() {
 
   return (
     <div
-      className="relative flex h-dvh flex-col" // max-w-screen-sm
+      className="relative flex h-dvh flex-col"
       style={{
-        backgroundColor: theme.bg_color,
+        backgroundColor: theme.bg_color, // secondary_
         color: theme.text_color,
         paddingTop: safeTop,
       }}
@@ -75,7 +95,16 @@ export function App() {
           value={{ user_data: session.userData, isLoading: false }}
         >
           <ScannerProvider>
-            <main className="relative flex flex-1 flex-col overflow-y-auto pb-4">
+            <main
+              className={`relative flex flex-1 flex-col overflow-y-auto pb-4 ${
+                location.pathname.startsWith('/admin')
+                  ? 'w-full'
+                  : 'mx-auto w-full max-w-screen-sm'
+              }`}
+              style={{
+                backgroundColor: theme.bg_color,
+              }}
+            >
               <Outlet />
             </main>
 

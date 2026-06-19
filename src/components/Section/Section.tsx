@@ -18,7 +18,7 @@ export const Section = ({ title, children }: SectionProps) => {
         {title}
       </span>
       <div
-        className="flex flex-col divide-y divide-(--tg-section-separator-color) overflow-hidden rounded-3xl"
+        className="flex flex-col overflow-hidden rounded-3xl"
         style={{ backgroundColor: theme.section_bg_color }}
       >
         {children}

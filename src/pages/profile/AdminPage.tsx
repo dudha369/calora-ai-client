@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
-import { useBackButton } from '../hooks/useBackButton';
+import { useTheme } from '../../context/ThemeContext';
+import { useBackButton } from '../../hooks/useBackButton';
 import { LayoutDashboard, Users, Settings, Megaphone } from 'lucide-react';
-import { DashboardTab } from './admin_page_tabs/DashboardTab';
-import { UsersTab } from './admin_page_tabs/UsersTab';
-import { SettingsTab } from './admin_page_tabs/SettingsTab';
-import { BroadcastTab } from './admin_page_tabs/BroadcastTab';
+import { DashboardTab } from './admin_tabs/DashboardTab';
+import { UsersTab } from './admin_tabs/UsersTab';
+import { SettingsTab } from './admin_tabs/SettingsTab';
+import { BroadcastTab } from './admin_tabs/BroadcastTab';
 
 type Tab = 'dashboard' | 'users' | 'settings' | 'broadcast';
 

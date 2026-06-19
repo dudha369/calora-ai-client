@@ -1,11 +1,8 @@
-import type { CSSProperties } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { withOpacity } from '../../utils/colors';
 import { MARKER_FOOD_COLOR, MARKER_WATER_COLOR } from '../../constants/markers';
 
 const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] as const;
-
-const ITEM_HEIGHT = 60; // px
 
 interface Props {
   date: Date;
@@ -63,33 +60,28 @@ export const DateStripItem = ({
     nameColor = theme.hint_color;
   }
 
-  const hasMarker = hasFood || hasWater;
+  let dot_bg: string;
 
-  // Цвет/градиент точки не зависит от состояния выбора — зелёный должен
-  // всегда читаться как "еда", синий как "вода". На выбранной (синей)
-  // плашке добавляем тонкое кольцо цветом текста плашки, иначе синяя
-  // "вода" сливалась бы с синим фоном выбора.
-  const dotStyle: CSSProperties = {
-    bottom: 6,
-    ...(hasFood && hasWater
-      ? {
-          background: `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`,
-        }
-      : { backgroundColor: hasFood ? MARKER_FOOD_COLOR : MARKER_WATER_COLOR }),
-    ...(isSelected
-      ? { boxShadow: `0 0 0 1px ${theme.button_text_color}` }
-      : {}),
-  };
+  if (hasFood && hasWater) {
+    dot_bg = `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`;
+  } else if (hasFood) {
+    dot_bg = MARKER_FOOD_COLOR;
+  } else if (hasWater) {
+    dot_bg = MARKER_WATER_COLOR;
+  } else if (isDisabled) {
+    dot_bg = withOpacity(theme.text_color, 0.25);
+  } else {
+    dot_bg = theme.hint_color;
+  }
 
   return (
     <button
       onClick={isDisabled ? undefined : onClick}
       aria-disabled={isDisabled}
       tabIndex={isDisabled ? -1 : 0}
-      className={`relative flex shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150 ${isDisabled ? '' : 'active:scale-[0.97]'}`}
+      className={`flex h-16 shrink-0 flex-col items-center justify-center gap-1 rounded-[18px] transition-[background-color,border-color,color] duration-150 ${isDisabled ? '' : 'active:scale-[0.97]'}`}
       style={{
         width: itemWidth,
-        height: ITEM_HEIGHT,
         backgroundColor: bg,
         border,
         cursor: isDisabled ? 'not-allowed' : 'pointer',
@@ -108,15 +100,12 @@ export const DateStripItem = ({
         {day}
       </span>
 
-      {/* Абсолютный оверлей, НЕ часть flex-потока: weekday+число всегда
-          центрируются как пара, независимо от наличия точки, а когда
-          точки нет — не рендерится вообще ничего, без "мёртвой" зоны. */}
-      {hasMarker && (
-        <span
-          className="absolute left-1/2 size-1.5 -translate-x-1/2 rounded-full"
-          style={dotStyle}
-        />
-      )}
+      <span
+        className="h-1 w-1/2 rounded-full"
+        style={{
+          background: dot_bg,
+        }}
+      />
     </button>
   );
 };

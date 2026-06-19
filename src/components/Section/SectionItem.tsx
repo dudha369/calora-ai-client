@@ -25,22 +25,32 @@ export const SectionItem = ({
   const content = (
     <>
       <div
-        className="flex items-center gap-3.5 text-[17px]"
+        className="z-10 flex items-center gap-3.5 text-[17px]"
         style={{ color: color ?? theme.text_color }}
       >
         {icon}
-        <span>{label}</span>
+        <span className="text-base">{label}</span>
       </div>
 
-      {right ? (
-        right
-      ) : to ? (
-        <ChevronRight color={theme.hint_color} size={20} />
-      ) : null}
+      <div className="z-10 flex items-center">
+        {right ? (
+          right
+        ) : to ? (
+          <ChevronRight color={theme.hint_color} size={20} strokeWidth={2} />
+        ) : null}
+      </div>
+
+      <div
+        className="absolute right-4 bottom-0 left-13.5 h-[0.5px] group-last:hidden"
+        style={{
+          backgroundColor: theme.section_separator_color,
+        }}
+      />
     </>
   );
 
-  const baseClassName = 'flex w-full items-center justify-between px-4 py-3';
+  const baseClassName =
+    'group relative flex w-full items-center justify-between px-4 py-3 transition-colors';
 
   if (to) {
     return (

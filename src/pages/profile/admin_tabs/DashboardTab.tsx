@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useTheme } from '../../context/ThemeContext';
-import { admin, type AdminDashboard } from '../../api/admin';
+import { useTheme } from '../../../context/ThemeContext';
+import { admin, type AdminDashboard } from '../../../api/admin';
 import {
   Users,
   UserPlus,

@@ -8,8 +8,8 @@ import { useBackButton } from '../../hooks/useBackButton.ts';
 import { useSecondaryButton } from '../../hooks/useSecondaryButton.ts';
 import { useModalAnimation } from '../../hooks/useModalAnimation.ts';
 
-import type { CSSProperties } from 'react';
 import { MARKER_FOOD_COLOR, MARKER_WATER_COLOR } from '../../constants/markers';
+import { withOpacity } from '../../utils/colors.ts';
 
 // ── Константы ────────────────────────────────────────────────────────────────
 
@@ -238,29 +238,27 @@ export const Calendar = ({
             const apiDate = toApiDate(d);
             const hasFood = activeDates.foodDates.has(apiDate);
             const hasWater = activeDates.waterDates.has(apiDate);
-            const hasMarker = hasFood || hasWater;
 
-            const dotStyle: CSSProperties = {
-              ...(hasFood && hasWater
-                ? {
-                    background: `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`,
-                  }
-                : {
-                    backgroundColor: hasFood
-                      ? MARKER_FOOD_COLOR
-                      : MARKER_WATER_COLOR,
-                  }),
-              ...(isSelected
-                ? { boxShadow: `0 0 0 1px ${theme.button_text_color}` }
-                : {}),
-            };
+            let dot_bg: string;
+
+            if (hasFood && hasWater) {
+              dot_bg = `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`;
+            } else if (hasFood) {
+              dot_bg = MARKER_FOOD_COLOR;
+            } else if (hasWater) {
+              dot_bg = MARKER_WATER_COLOR;
+            } else if (isDisabled) {
+              dot_bg = withOpacity(theme.text_color, 0.25);
+            } else {
+              dot_bg = theme.hint_color;
+            }
 
             return (
               <button
                 key={d.toISOString()}
                 onClick={() => !isDisabled && handleSelect(d)}
                 disabled={isDisabled}
-                className="relative flex aspect-square items-center justify-center rounded-2xl text-base font-medium transition-colors"
+                className="flex aspect-square flex-col items-center justify-center gap-0.5 rounded-2xl text-lg font-medium transition-colors"
                 style={{
                   backgroundColor: bg,
                   color: txtColor,
@@ -269,12 +267,12 @@ export const Calendar = ({
                 }}
               >
                 {date.getDate()}
-                {hasMarker && (
-                  <span
-                    className="absolute bottom-1.5 left-1/2 size-1 -translate-x-1/2 rounded-full"
-                    style={dotStyle}
-                  />
-                )}
+                <span
+                  className="h-1 w-1/2 rounded-full"
+                  style={{
+                    background: dot_bg,
+                  }}
+                />
               </button>
             );
           })}

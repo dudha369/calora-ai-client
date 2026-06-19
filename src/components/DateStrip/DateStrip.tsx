@@ -127,7 +127,7 @@ export const DateStrip = ({
   }, [emblaApi, pendingScrollDate, dates, onScrollConsumed]);
 
   if (!layout) {
-    return <div ref={wrapperRef} className="h-15 w-full" />;
+    return <div ref={wrapperRef} className="h-16 w-full" />;
   }
 
   const { count, itemWidth } = layout;

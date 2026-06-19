@@ -202,7 +202,9 @@ export const HomePage = () => {
                     onDelete={deleteLog}
                   />
                 ) : (
-                  <AddLogBanner />
+                  <AddLogBanner
+                    isToday={selectedDate.getTime() === today.getTime()}
+                  />
                 )}
               </div>
             )}

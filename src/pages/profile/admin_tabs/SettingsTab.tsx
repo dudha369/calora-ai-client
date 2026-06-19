@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../context/ThemeContext';
-import { admin } from '../../api/admin';
+import { useTheme } from '../../../context/ThemeContext';
+import { admin } from '../../../api/admin';
 import { Save, Loader2, Check, X, User as UserIcon } from 'lucide-react';
 
 const FLAG_LABELS: Record<string, { label: string; description: string }> = {

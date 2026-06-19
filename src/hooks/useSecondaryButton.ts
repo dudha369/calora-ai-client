@@ -22,10 +22,6 @@ export function useSecondaryButton({
   useEffect(() => {
     if (!ready) return;
 
-    if (!secondaryButton.isMounted()) {
-      secondaryButton.mount();
-    }
-
     secondaryButton.setParams({ isVisible, position });
 
     return () => {
