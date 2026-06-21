@@ -6,7 +6,7 @@ interface AddLogBannerProps {
   isToday: boolean;
 }
 
-export const AddLogBanner = ({ isToday }: AddLogBannerProps) => {
+export const NoLogsBanner = ({ isToday }: AddLogBannerProps) => {
   const navigate = useNavigate();
 
   const theme = useTheme();
@@ -17,7 +17,7 @@ export const AddLogBanner = ({ isToday }: AddLogBannerProps) => {
       style={{
         backgroundColor: theme.section_bg_color,
       }}
-      onClick={() => (isToday ? navigate('/scnner') : {})}
+      onClick={() => (isToday ? navigate('/scanner') : {})}
     >
       <NoDataIcon
         className="h-22 w-auto"

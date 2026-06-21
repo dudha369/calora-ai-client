@@ -21,3 +21,9 @@ export function startOfDay(date: Date): Date {
   d.setHours(0, 0, 0, 0);
   return d;
 }
+
+export function addDays(date: Date, n: number): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}

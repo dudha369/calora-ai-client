@@ -48,6 +48,13 @@ export const router = createBrowserRouter([
               })),
           },
           {
+            path: 'analytics/:date',
+            lazy: () =>
+              import('./pages/AnalyticsPage').then((m) => ({
+                Component: m.AnalyticsPage,
+              })),
+          },
+          {
             path: 'profile',
             children: [
               {

@@ -1,14 +1,7 @@
 /**
  * DTO-типы для /api/food/*
- *
- * Decimal-поля Tortoise (portion_g, calories, *_g) FastAPI сериализует
- * через jsonable_encoder в обычный JSON number — поэтому здесь всё number,
- * без строк и без Decimal.
  */
 
-// ─── Базовые сущности ────────────────────────────────────────────────────────
-
-/** Одно блюдо/продукт внутри записи еды (FoodItem) */
 export interface FoodItem {
   id: number;
   food_log_id: number;
@@ -22,20 +15,26 @@ export interface FoodItem {
   sugar_g: number;
 }
 
-/** Суммарный КБЖУ — используется и в daily_total, и в total анализа фото */
+/** Суммарный КБЖУ + клетчатка/сахар — используется и в daily_total, и в анализе фото */
 export interface NutritionTotals {
   calories: number;
   protein_g: number;
   fat_g: number;
   carbs_g: number;
+  fiber_g: number;
+  sugar_g: number;
 }
 
-/** Запись еды (FoodLog) без вложенных блюд — как возвращает FoodLogSchema */
+/** Итог анализа фото — те же показатели + суммарная гидратация */
+export interface FoodAnalysisTotals extends NutritionTotals {
+  water_ml: number;
+}
+
 export interface FoodLogBase {
   id: number;
   user_id: number;
-  log_date: string; // YYYY-MM-DD
-  logged_at: string; // ISO datetime (UTC)
+  log_date: string;
+  logged_at: string;
   photo_url: string | null;
   total_calories: number;
   total_protein_g: number;
@@ -45,14 +44,13 @@ export interface FoodLogBase {
   total_sugar_g: number;
 }
 
-/** Запись еды с блюдами — то, что отдают GET /api/food/{date} и POST /api/food/log */
 export interface FoodLog extends FoodLogBase {
   items: FoodItem[];
 }
 
 // ─── POST /api/food/analyze ──────────────────────────────────────────────────
 
-/** Блюдо, распознанное Gemini на фото (ещё не сохранено в БД, нет id) */
+/** Блюдо или напиток, распознанные Gemini на фото (ещё не сохранены, нет id) */
 export interface AnalyzedDish {
   name: string;
   portion_g: number;
@@ -62,22 +60,21 @@ export interface AnalyzedDish {
   carbs_g: number;
   fiber_g: number;
   sugar_g: number;
+  /** Гидратация этого конкретного блюда/напитка, мл. 0 для сухой твёрдой еды. */
+  water_ml: number;
   confidence: number;
 }
 
 export interface FoodAnalyzeResponse {
   dishes: AnalyzedDish[];
-  total: NutritionTotals;
+  total: FoodAnalysisTotals;
   portion_note: string;
-  /** true — модель не уверена в оценке, стоит спросить пользователя */
   ask_user: boolean;
-  /** Ключ объекта в B2. Передать в food.log(), чтобы привязать фото к записи */
   photo_key: string | null;
 }
 
 // ─── POST /api/food/log ──────────────────────────────────────────────────────
 
-/** Одно блюдо при сохранении записи (то, что подтвердил пользователь) */
 export interface FoodItemIn {
   food_name: string;
   portion_g: number;
@@ -90,15 +87,16 @@ export interface FoodItemIn {
 }
 
 export interface BarcodeLogIn {
-  log_date: string; // YYYY-MM-DD
+  log_date: string;
   items: FoodItemIn[];
 }
 
 export interface FoodLogIn {
-  log_date: string; // YYYY-MM-DD
+  log_date: string;
   items: FoodItemIn[];
-  /** photo_key из ответа food.analyze(), если фото было */
   photo_key?: string | null;
+  /** Суммарная гидратация из AnalyzedDish[] — авто-создаёт WaterLog на бэкенде */
+  water_ml?: number;
 }
 
 export interface CreateFoodLogResponse {

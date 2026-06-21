@@ -10,11 +10,12 @@ import { useTheme } from '../context/ThemeContext';
 import { CameraView } from '../components/CameraView';
 import { BarcodeResultModal } from '../components/BarcodeResultModal';
 import { FoodResultModal } from '../components/FoodResultModal';
+import { FoodNotesSheet } from '../components/FoodNotesSheet';
 import { ModalWindow } from '../components/ModalWindow';
 
 import { food, todayApiDate } from '../api/food';
 import type { ProductData } from '../types/productData';
-import type { FoodAnalyzeResponse } from '../interfaces/api/food';
+import type { AnalyzedDish } from '../interfaces/api/food';
 
 interface ScannerLocationState {
   photo?: string;
@@ -32,7 +33,7 @@ export const ScannerPage = () => {
     state?.photo ?? null,
   );
 
-  const status = useFoodAnalysis(photo);
+  const { status, runAnalysis } = useFoodAnalysis(photo);
 
   const pendingPhotoKeyRef = useRef<string | null>(null);
 
@@ -64,11 +65,14 @@ export const ScannerPage = () => {
 
   useBackButton(clearPhoto, !!photo);
 
-  const invalidateFoodQueries = () => {
+  const invalidateLoggedQueries = (hadWater: boolean) => {
     const date = todayApiDate();
     queryClient.invalidateQueries({ queryKey: ['food', date] });
     queryClient.invalidateQueries({ queryKey: ['stats', 'daily', date] });
     queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+    if (hadWater) {
+      queryClient.invalidateQueries({ queryKey: ['water', date] });
+    }
   };
 
   const handleBarcodeConfirm = async (
@@ -88,34 +92,49 @@ export const ScannerPage = () => {
           protein_g: Number(((p.protein ?? 0) * factor).toFixed(1)),
           fat_g: Number(((p.fat ?? 0) * factor).toFixed(1)),
           carbs_g: Number(((p.carbs ?? 0) * factor).toFixed(1)),
+          fiber_g: Number(((p.fiber ?? 0) * factor).toFixed(1)),
+          sugar_g: Number(((p.sugars ?? 0) * factor).toFixed(1)),
         },
       ],
     });
 
-    invalidateFoodQueries();
+    invalidateLoggedQueries(false);
     clearPhoto();
     navigate('/');
   };
 
-  const handleFoodConfirm = async (result: FoodAnalyzeResponse) => {
+  const handleFoodConfirm = async (dishes: AnalyzedDish[]) => {
+    if (status.kind !== 'food') return;
     pendingPhotoKeyRef.current = null;
+
+    const totalWaterMl = dishes.reduce((sum, d) => sum + d.water_ml, 0);
 
     await food.log({
       log_date: todayApiDate(),
-      items: result.dishes.map((dish) => ({
+      items: dishes.map((dish) => ({
         food_name: dish.name,
         portion_g: dish.portion_g,
         calories: dish.calories,
         protein_g: dish.protein_g,
         fat_g: dish.fat_g,
         carbs_g: dish.carbs_g,
+        fiber_g: dish.fiber_g,
+        sugar_g: dish.sugar_g,
       })),
-      photo_key: result.photo_key,
+      photo_key: status.result.photo_key,
+      water_ml: totalWaterMl > 0 ? totalWaterMl : undefined,
     });
 
-    invalidateFoodQueries();
+    invalidateLoggedQueries(totalWaterMl > 0);
     clearPhoto();
     navigate('/');
+  };
+
+  const handleRetry = () => {
+    clearPhoto();
+    if (camera.method === 'input') {
+      camera.openInputCamera();
+    }
   };
 
   return (
@@ -125,6 +144,20 @@ export const ScannerPage = () => {
         photo={photo}
         onFileChange={handleFileChange}
       />
+
+      {status.kind === 'detecting' && (
+        <div
+          className="absolute inset-x-4 bottom-6 z-10 rounded-2xl py-3 text-center text-sm font-medium backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.bg_color}CC`,
+            color: theme.text_color,
+          }}
+        >
+          Распознаём…
+        </div>
+      )}
+
+      {status.kind === 'ready' && <FoodNotesSheet onSubmit={runAnalysis} />}
 
       {status.kind === 'analyzing' && (
         <div
@@ -155,7 +188,13 @@ export const ScannerPage = () => {
       )}
 
       {status.kind === 'error' && (
-        <ModalWindow title="Ошибка" onClose={clearPhoto}>
+        <ModalWindow
+          title="Ошибка"
+          onClose={clearPhoto}
+          actionLabel="Попробовать снова"
+          iconCustomEmojiId="5260687119092817530"
+          onAction={handleRetry}
+        >
           <p
             className="py-2 text-center text-sm"
             style={{ color: theme.subtitle_text_color }}

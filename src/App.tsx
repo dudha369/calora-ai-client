@@ -9,62 +9,40 @@ import {
   useNavigate,
 } from 'react-router-dom';
 
-import { useSwipeNavigation } from './hooks/useSwipeNavigation';
 import { useTelegram } from './hooks/useTelegram';
 import { useTelegramLanguage } from './hooks/useTelegramLanguage';
 import { useTheme } from './context/ThemeContext';
 import { useUserSession } from './hooks/useUserSession';
 import UserContext from './context/UserContext';
+import { ScrollContainerContext } from './context/ScrollContainerContext';
 import ScannerProvider from './providers/ScannerProvider';
 
-import { useEffect } from 'react';
-import {
-  backButton,
-  mainButton,
-  secondaryButton,
-  settingsButton,
-} from '@tma.js/sdk-react';
+import { useEffect, useRef } from 'react';
+import { settingsButton } from '@tma.js/sdk-react';
 
 export function App() {
   const { ready, safeTop, safeBottom } = useTelegram();
   const theme = useTheme();
   useTelegramLanguage();
 
+  const scrollContainerRef = useRef<HTMLElement>(null);
+
   const navigate = useNavigate();
   useEffect(() => {
-    if (
-      !settingsButton.mount.isAvailable() ||
-      !mainButton.mount.isAvailable() ||
-      !secondaryButton.mount.isAvailable() ||
-      !backButton.mount.isAvailable()
-    )
-      return;
-
-    settingsButton.mount();
-    settingsButton.show();
-
-    mainButton.mount();
-    mainButton.hide();
-
-    secondaryButton.mount();
-    secondaryButton.hide();
-
-    backButton.mount();
-    backButton.hide();
+    if (!ready) return;
 
     const off = settingsButton.onClick(() => navigate('/profile/settings'));
+    settingsButton.show();
 
     return () => {
       off();
       settingsButton.hide();
     };
-  }, [navigate]);
+  }, [navigate, ready]);
 
   const location = useLocation();
   const navigation = useNavigation();
   const session = useUserSession(ready);
-
-  const swipe = useSwipeNavigation(session.status === 'ready');
 
   if (
     session.status === 'ready' &&
@@ -82,7 +60,6 @@ export function App() {
         color: theme.text_color,
         paddingTop: safeTop,
       }}
-      {...swipe}
     >
       {session.status === 'booting' || navigation.state === 'loading' ? (
         <LoadingScreen />
@@ -95,18 +72,20 @@ export function App() {
           value={{ user_data: session.userData, isLoading: false }}
         >
           <ScannerProvider>
-            <main
-              className={`relative flex flex-1 flex-col overflow-y-auto pb-4 ${
-                location.pathname.startsWith('/admin')
-                  ? 'w-full'
-                  : 'mx-auto w-full max-w-screen-sm'
-              }`}
-              style={{
-                backgroundColor: theme.bg_color,
-              }}
-            >
-              <Outlet />
-            </main>
+            <ScrollContainerContext.Provider value={scrollContainerRef}>
+              <main
+                className={`relative flex flex-1 flex-col overflow-y-auto overscroll-y-contain ${
+                  location.pathname.startsWith('/admin')
+                    ? 'w-full'
+                    : 'mx-auto w-full max-w-screen-sm'
+                }`}
+                style={{
+                  backgroundColor: theme.bg_color,
+                }}
+              >
+                <Outlet />
+              </main>
+            </ScrollContainerContext.Provider>
 
             {location.pathname !== '/onboarding' &&
               !location.pathname.startsWith('/admin') && (

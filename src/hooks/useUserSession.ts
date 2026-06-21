@@ -10,11 +10,8 @@ export type SessionState =
   | { status: 'access_denied' }
   | { status: 'ready'; userData: UserData | undefined };
 
-const DEBUG_INIT_DATA = import.meta.env.VITE_DEBUG_INIT_DATA ?? '';
-
 function isTelegramContext(ready: boolean): boolean {
   if (!ready) return true;
-  if (DEBUG_INIT_DATA) return true;
 
   try {
     const raw = initData.raw();

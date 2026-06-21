@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useEmblaCarousel from 'embla-carousel-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useBackButton } from '../../hooks/useBackButton';
 import { LayoutDashboard, Users, Settings, Megaphone } from 'lucide-react';
@@ -8,23 +9,43 @@ import { UsersTab } from './admin_tabs/UsersTab';
 import { SettingsTab } from './admin_tabs/SettingsTab';
 import { BroadcastTab } from './admin_tabs/BroadcastTab';
 
-type Tab = 'dashboard' | 'users' | 'settings' | 'broadcast';
-
-const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'users', label: 'Users', icon: Users },
-  { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'broadcast', label: 'Broadcast', icon: Megaphone },
-];
+const TABS = [
+  { label: 'Dashboard', icon: LayoutDashboard },
+  { label: 'Users', icon: Users },
+  { label: 'Settings', icon: Settings },
+  { label: 'Broadcast', icon: Megaphone },
+] as const;
 
 export const AdminPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>('dashboard');
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-  // Telegram BackButton: если открыт детальный просмотр — назад к списку,
-  // иначе — выход из админки в профиль
+  const dragEnabled = selectedUserId === null;
+  const [emblaRef, emblaApi] = useEmblaCarousel({ watchDrag: dragEnabled });
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // embla → активная вкладка (свайп пальцем)
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => setActiveIndex(emblaApi.selectedScrollSnap());
+    emblaApi.on('select', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
+
+  // dragEnabled меняется реактивно — embla должна узнать об этом явно
+  useEffect(() => {
+    emblaApi?.reInit({ watchDrag: dragEnabled });
+  }, [emblaApi, dragEnabled]);
+
+  const goToTab = useCallback(
+    (index: number) => emblaApi?.scrollTo(index),
+    [emblaApi],
+  );
+
   const handleBack = useCallback(() => {
     if (selectedUserId !== null) {
       setSelectedUserId(null);
@@ -37,7 +58,6 @@ export const AdminPage = () => {
 
   return (
     <div className="flex min-h-full flex-col overflow-x-hidden">
-      {/* Header */}
       <div
         className="sticky top-0 z-10 px-4 py-2"
         style={{ backgroundColor: theme.bg_color }}
@@ -48,18 +68,17 @@ export const AdminPage = () => {
           </h1>
         </div>
 
-        {/* Tab bar */}
         <div
           className="flex rounded-2xl p-1"
           style={{ backgroundColor: theme.section_bg_color }}
         >
-          {TABS.map((t) => {
+          {TABS.map((t, index) => {
             const Icon = t.icon;
-            const isActive = tab === t.id;
+            const isActive = activeIndex === index;
             return (
               <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
+                key={t.label}
+                onClick={() => goToTab(index)}
                 className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold transition-all duration-200"
                 style={{
                   backgroundColor: isActive
@@ -78,17 +97,24 @@ export const AdminPage = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-x-hidden px-4 pt-4 pb-6">
-        {tab === 'dashboard' && <DashboardTab />}
-        {tab === 'users' && (
-          <UsersTab
-            selectedUserId={selectedUserId}
-            onSelectUser={setSelectedUserId}
-          />
-        )}
-        {tab === 'settings' && <SettingsTab />}
-        {tab === 'broadcast' && <BroadcastTab />}
+      <div className="flex-1 overflow-hidden" ref={emblaRef}>
+        <div className="flex h-full">
+          <div className="min-w-0 flex-[0_0_100%] overflow-y-auto px-4 pt-4 pb-6">
+            <DashboardTab />
+          </div>
+          <div className="min-w-0 flex-[0_0_100%] overflow-y-auto px-4 pt-4 pb-6">
+            <UsersTab
+              selectedUserId={selectedUserId}
+              onSelectUser={setSelectedUserId}
+            />
+          </div>
+          <div className="min-w-0 flex-[0_0_100%] overflow-y-auto px-4 pt-4 pb-6">
+            <SettingsTab />
+          </div>
+          <div className="min-w-0 flex-[0_0_100%] overflow-y-auto px-4 pt-4 pb-6">
+            <BroadcastTab />
+          </div>
+        </div>
       </div>
     </div>
   );

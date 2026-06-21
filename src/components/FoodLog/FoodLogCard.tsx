@@ -1,13 +1,12 @@
-import { Clock, Trash2, UtensilsCrossed } from 'lucide-react';
+import { Clock, UtensilsCrossed } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import { FoodItemRow } from './FoodItemRow';
+import { pluralizeDishes } from '../../utils/pluralize';
 import type { FoodLog } from '../../interfaces/api/food';
 
-interface Props {
+interface FoodLogCardProps {
   log: FoodLog;
-  onDelete: (logId: number) => void;
-  /** true, если именно эта запись сейчас удаляется (для затемнения/disabled) */
   isDeleting: boolean;
+  onClickRef: (log: FoodLog) => void;
 }
 
 function formatTime(iso: string): string {
@@ -17,77 +16,90 @@ function formatTime(iso: string): string {
   });
 }
 
-export const FoodLogCard = ({ log, onDelete, isDeleting }: Props) => {
+function formatRemainingDishes(totalCount: number): string {
+  const count = totalCount - 1;
+  return `+ ещё ${count} ${pluralizeDishes(count)}`;
+}
+
+export const FoodLogCard = ({
+  log,
+  isDeleting,
+  onClickRef,
+}: FoodLogCardProps) => {
   const theme = useTheme();
+
+  const onClick = () => {
+    onClickRef(log);
+  };
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl p-3 transition-opacity"
+      className="flex h-20 w-full items-center gap-3 rounded-2xl p-3 transition-opacity"
       style={{
         backgroundColor: theme.section_bg_color,
         opacity: isDeleting ? 0.5 : 1,
       }}
+      onClick={onClick}
     >
-      {/* Заголовок: фото + время + общий итог + удаление */}
-      <div className="flex items-center gap-3">
-        <div
-          className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl"
-          style={{ backgroundColor: theme.secondary_bg_color }}
-        >
-          {log.photo_url ? (
-            <img
-              src={log.photo_url}
-              alt={log.items[0]?.food_name ?? 'Еда'}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <UtensilsCrossed size={22} style={{ color: theme.hint_color }} />
-          )}
-        </div>
-
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <div
-            className="flex items-center gap-1"
-            style={{ color: theme.hint_color }}
-          >
-            <Clock size={12} />
-            <span className="text-xs">{formatTime(log.logged_at)}</span>
-          </div>
-          <p
-            className="text-base font-bold tabular-nums"
-            style={{ color: theme.text_color }}
-          >
-            {log.total_calories} ккал
-          </p>
-          <p className="text-xs" style={{ color: theme.hint_color }}>
-            Б {log.total_protein_g} · Ж {log.total_fat_g} · У{' '}
-            {log.total_carbs_g}
-          </p>
-        </div>
-
-        <button
-          onClick={() => onDelete(log.id)}
-          disabled={isDeleting}
-          aria-label="Удалить запись"
-          className="shrink-0 rounded-xl p-2 transition-opacity active:opacity-60 disabled:opacity-40"
-          style={{ color: theme.destructive_text_color }}
-        >
-          <Trash2 size={18} />
-        </button>
+      <div
+        className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl"
+        style={{ backgroundColor: theme.secondary_bg_color }}
+      >
+        {log.photo_url ? (
+          <img
+            src={log.photo_url}
+            alt={log.items[0]?.food_name ?? 'Еда'}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <UtensilsCrossed size={22} style={{ color: theme.hint_color }} />
+        )}
       </div>
 
-      {/* Блюда внутри записи */}
-      {log.items.length > 0 && (
-        <div className="flex flex-col px-1">
-          {log.items.map((item, i) => (
-            <FoodItemRow
-              key={item.id}
-              item={item}
-              isLast={i === log.items.length - 1}
-            />
-          ))}
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <p
+          className="truncate text-[16px] font-semibold"
+          style={{ color: theme.text_color }}
+        >
+          {log.items[0]?.food_name ?? 'Еда'}
+        </p>
+
+        <div className="text-xs">
+          {log.items.length > 1 ? (
+            <span style={{ color: theme.button_color }}>
+              {formatRemainingDishes(log.items.length)}
+            </span>
+          ) : (
+            <div
+              className="flex items-center gap-0.5"
+              style={{ color: theme.hint_color }}
+            >
+              <Clock size={12} />
+              <span>{formatTime(log.logged_at)}</span>
+
+              <span> · </span>
+
+              <span>{log.items[0]?.portion_g} г</span>
+            </div>
+          )}
         </div>
-      )}
+      </div>
+
+      <div className="flex flex-col items-end">
+        <span
+          className="text-lg font-extrabold tabular-nums"
+          style={{ color: theme.text_color }}
+        >
+          {log.total_calories} ккал
+        </span>
+        <span
+          className="text-xs font-medium"
+          style={{ color: theme.hint_color }}
+        >
+          Б {Math.round(log.total_protein_g)} · Ж {Math.round(log.total_fat_g)}{' '}
+          · У {Math.round(log.total_carbs_g)}
+        </span>
+      </div>
     </div>
   );
 };

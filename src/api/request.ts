@@ -4,7 +4,6 @@ import { initData } from '@tma.js/sdk-react';
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
 const SERVER_API_URL = import.meta.env.VITE_SERVER_API_URL;
-const DEBUG_INIT_DATA = import.meta.env.VITE_DEBUG_INIT_DATA ?? '';
 
 export const request = async <T = unknown>(
   endpoint: string,
@@ -17,7 +16,7 @@ export const request = async <T = unknown>(
     url: `${SERVER_API_URL}/${endpoint}`,
     method,
     headers: {
-      initData: initData.raw() || DEBUG_INIT_DATA,
+      initData: initData.raw(),
       Accept: 'application/json',
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     },
@@ -26,14 +25,12 @@ export const request = async <T = unknown>(
 };
 
 /** Fetch binary data (e.g. images) with auth headers. */
-export const requestRaw = async (
-  endpoint: string,
-): Promise<ArrayBuffer> => {
+export const requestRaw = async (endpoint: string): Promise<ArrayBuffer> => {
   const res = await axios.request({
     url: `${SERVER_API_URL}/${endpoint}`,
     method: 'GET',
     headers: {
-      initData: initData.raw() || DEBUG_INIT_DATA,
+      initData: initData.raw(),
     },
     responseType: 'arraybuffer',
   });

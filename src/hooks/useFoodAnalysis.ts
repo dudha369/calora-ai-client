@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { decodeBarcode } from '../utils/decodeBarcode';
 import { fetchProductByBarcode } from '../api/openfoodfacts';
 import { food } from '../api/food';
@@ -9,10 +9,6 @@ import type { ProductData } from '../types/productData';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-/**
- * Конвертирует data URL (результат FileReader / canvas.toDataURL) в File
- * для отправки через multipart/form-data.
- */
 function dataUrlToFile(dataUrl: string, filename = 'photo.jpg'): File {
   const [header, b64] = dataUrl.split(',');
   const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
@@ -20,94 +16,118 @@ function dataUrlToFile(dataUrl: string, filename = 'photo.jpg'): File {
   return new File([bytes], filename, { type: mime });
 }
 
+function resolveErrorMessage(err: unknown): string {
+  let detail: string | undefined;
+
+  if (axios.isAxiosError(err)) {
+    detail = err.response?.data?.detail;
+  } else if (err && typeof err === 'object' && 'detail' in err) {
+    detail = (err as { detail?: string }).detail;
+  }
+
+  if (detail === 'no_food_detected') {
+    return 'На фотографии не найдена еда. Убедитесь, что продукт в кадре, и попробуйте ещё раз.';
+  }
+  if (err instanceof Error) return err.message;
+  return 'Не удалось проанализировать фото. Попробуй ещё раз.';
+}
+
 // ── State machine ─────────────────────────────────────────────────────────────
 
 export type AnalysisStatus =
   | { kind: 'idle' }
+  /** Локальное декодирование штрихкода + (если найден) запрос в OpenFoodFacts */
+  | { kind: 'detecting' }
+  | { kind: 'barcode'; product: ProductData }
+  /** Штрихкода нет (или он не найден в OFF) — ждём подтверждения/уточнения перед ИИ */
+  | { kind: 'ready' }
   | { kind: 'analyzing' }
-  | { kind: 'barcode'; product: ProductData | null }
   | { kind: 'food'; result: FoodAnalyzeResponse }
   | { kind: 'error'; message: string };
 
-// ── Hook ──────────────────────────────────────────────────────────────────────
+export interface UseFoodAnalysisReturn {
+  status: AnalysisStatus;
+  /** Запускает ИИ-анализ с опциональным уточнением пользователя. */
+  runAnalysis: (notes?: string) => void;
+}
 
 /**
- * Запускает анализ автоматически при смене photo.
- *
- * Порядок анализа:
- *   1. Декодируем штрихкод в браузере (zxing + BarcodeDetector) — без сети.
+ * Детектирование запускается автоматически при появлении фото:
+ *   1. Локальное декодирование штрихкода (zxing + BarcodeDetector) — без сети.
  *   2. Если штрихкод найден → запрос к OpenFoodFacts.
- *   3. Иначе → data URL → File → POST /api/food/analyze (Gemini Vision).
+ *      - продукт найден  → status 'barcode', поток завершён.
+ *      - не найден в OFF → шаг 3, как при отсутствии штрихкода вовсе.
+ *   3. Совпадения нет → status 'ready'. Сам вызов ИИ НЕ запускается
+ *      автоматически — ScannerPage показывает поле уточнения и вызывает
+ *      runAnalysis() только когда пользователь подтвердит или пропустит его.
  *
- * Локальная переменная `cancelled` гарантирует отсутствие set-state после
- * размонтирования или смены photo (race condition).
+ * requestIdRef — «номер поколения» запроса: и авто-детект, и runAnalysis
+ * увеличивают его перед стартом и сверяют перед записью результата в state.
+ * Так одной примитивной защитой закрываются обе гонки: смена фото
+ * посреди детекта и повторный вызов runAnalysis поверх ещё не
+ * завершившегося предыдущего вызова.
  */
-export function useFoodAnalysis(photo: string | null): AnalysisStatus {
+export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
   const [status, setStatus] = useState<AnalysisStatus>({ kind: 'idle' });
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
+    const requestId = ++requestIdRef.current;
+
     if (!photo) {
       setStatus({ kind: 'idle' });
       return;
     }
 
-    let cancelled = false;
-    setStatus({ kind: 'analyzing' });
+    setStatus({ kind: 'detecting' });
 
     (async () => {
       try {
-        // Шаг 1: штрихкод — CPU-only, быстро
         const barcode = await decodeBarcode(photo);
-        if (cancelled) return;
+        if (requestIdRef.current !== requestId) return;
 
         if (barcode) {
           const product = await fetchProductByBarcode(barcode);
-          if (!cancelled) setStatus({ kind: 'barcode', product });
-          return;
+          if (requestIdRef.current !== requestId) return;
+          if (product) {
+            setStatus({ kind: 'barcode', product });
+            return;
+          }
+          // Штрихкод есть, но продукта нет в OFF — отдаём фото ИИ ниже.
         }
 
-        // Шаг 2: сжимаем изображение (1280px, JPEG 80%) чтобы уменьшить трафик
-        const compressed = await compressImage(photo);
-        if (cancelled) return;
-
-        // Шаг 3: AI анализ через бэкенд
-        const file = dataUrlToFile(compressed);
-        const { data } = await food.analyze(file);
-        if (!cancelled) setStatus({ kind: 'food', result: data });
-      } catch (err) {
-        if (cancelled) return;
-
-        let errorMessage =
-          'Не удалось проанализировать фото. Попробуй ещё раз.';
-        let errorDetail: string | undefined;
-
-        // Проверяем, является ли ошибка ошибкой Axios
-        if (axios.isAxiosError(err)) {
-          errorDetail = err.response?.data?.detail;
-        } else if (err && typeof err === 'object' && 'detail' in err) {
-          // Проверка на случай, если detail лежит прямо в объекте
-          errorDetail = (err as any).detail;
-        }
-
-        if (errorDetail === 'no_food_detected') {
-          errorMessage =
-            'На фотографии не найдена еда. Убедитесь, что продукт в кадре, и попробуйте ещё раз.';
-        } else if (err instanceof Error) {
-          errorMessage = err.message;
-        }
-
-        setStatus({
-          kind: 'error',
-          message: errorMessage,
-        });
+        setStatus({ kind: 'ready' });
+      } catch {
+        // Сбой декодирования/OFF — не блокируем пользователя ошибкой,
+        // просто отдаём фото на ИИ-анализ как обычное фото еды.
+        if (requestIdRef.current === requestId) setStatus({ kind: 'ready' });
       }
     })();
-
-    // Cleanup отменяет все pending setState — важно при быстрой смене фото
-    return () => {
-      cancelled = true;
-    };
   }, [photo]);
 
-  return status;
+  const runAnalysis = useCallback(
+    (notes?: string) => {
+      if (!photo) return;
+      const requestId = ++requestIdRef.current;
+      setStatus({ kind: 'analyzing' });
+
+      (async () => {
+        try {
+          const compressed = await compressImage(photo);
+          const file = dataUrlToFile(compressed);
+          const { data } = await food.analyze(file, notes);
+          if (requestIdRef.current === requestId) {
+            setStatus({ kind: 'food', result: data });
+          }
+        } catch (err) {
+          if (requestIdRef.current === requestId) {
+            setStatus({ kind: 'error', message: resolveErrorMessage(err) });
+          }
+        }
+      })();
+    },
+    [photo],
+  );
+
+  return { status, runAnalysis };
 }

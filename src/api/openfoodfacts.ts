@@ -95,6 +95,7 @@ interface OFFProduct {
 
 interface OFFResponse {
   status: 0 | 1;
+  status_verbose: string;
   product?: OFFProduct;
 }
 
@@ -213,8 +214,14 @@ export async function fetchProductByBarcode(
   const { data } = await offAxios.get<OFFResponse>(`/product/${barcode}.json`, {
     params: { fields: OFF_FIELDS },
   });
+  // console.log(data);
 
-  if (data.status !== 1 || !data.product) return null;
+  if (
+    data.status !== 1 ||
+    !data.product ||
+    data.status_verbose !== 'product found'
+  )
+    return null;
 
   const p = data.product;
   const n = p.nutriments ?? {};

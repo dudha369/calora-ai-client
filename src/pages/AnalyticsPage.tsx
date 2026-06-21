@@ -6,6 +6,7 @@ import { stats } from '../api/stats';
 import { weight } from '../api/weight';
 import { toApiDate, startOfDay } from '../utils/date';
 import type { DailyStats } from '../interfaces/api/stats';
+import { useParams } from 'react-router-dom';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -100,6 +101,9 @@ const MacroBar = ({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export const AnalyticsPage = () => {
+  const { date } = useParams();
+  console.log(date);
+
   const theme = useTheme();
   const today = useMemo(() => toApiDate(startOfDay(new Date())), []);
   const last7 = useMemo(buildLast7Dates, []);

@@ -5,49 +5,57 @@ import { useBackButton } from '../hooks/useBackButton';
 import { useSecondaryButton } from '../hooks/useSecondaryButton';
 import { useMainButton } from '../hooks/useMainButton';
 import { useModalAnimation } from '../hooks/useModalAnimation.ts';
+import type { SecondaryButtonPosition } from '@tma.js/sdk-react';
 
 interface ModalWindowProps {
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  cancelLabel?: string;
   actionLabel?: string;
   iconCustomEmojiId?: string;
   onAction?: () => void;
   isProcessing?: boolean;
+  actionDisabled?: boolean;
+  cancelPosition?: SecondaryButtonPosition;
 }
 
 export const ModalWindow = ({
   onClose,
   title,
   children,
+  cancelLabel,
   actionLabel,
   iconCustomEmojiId,
   onAction,
   isProcessing = false,
+  actionDisabled = false,
+  cancelPosition = 'left',
 }: ModalWindowProps) => {
   const theme = useTheme();
 
   const { isVisible, isButtonsVisible, handleClose } =
     useModalAnimation(onClose);
 
-  const showActions = Boolean(actionLabel && onAction);
-  const isTgButtonsVisible = showActions && isButtonsVisible;
+  const isTgButtonsVisible = onAction && isButtonsVisible;
 
   useBackButton(handleClose, true);
 
-  useSecondaryButton({
-    text: isProcessing ? 'Загрузка...' : 'Отмена',
-    iconCustomEmojiId: '5260342697075416641',
-    isEnabled: true,
-    isVisible: isTgButtonsVisible,
-    onClick: handleClose,
-    position: 'left',
-  });
+  if (cancelLabel) {
+    useSecondaryButton({
+      text: cancelLabel,
+      iconCustomEmojiId: '5260342697075416641',
+      isEnabled: true,
+      isVisible: isTgButtonsVisible,
+      onClick: handleClose,
+      position: cancelPosition,
+    });
+  }
 
   useMainButton({
     text: isProcessing ? 'Загрузка...' : actionLabel || '',
     iconCustomEmojiId,
-    isEnabled: !isProcessing,
+    isEnabled: !isProcessing && !actionDisabled,
     isVisible: isTgButtonsVisible,
     isLoading: isProcessing,
     onClick: onAction || (() => {}),
@@ -70,15 +78,17 @@ export const ModalWindow = ({
           color: theme.text_color,
         }}
       >
-        <header className="relative flex w-full items-center justify-center">
-          <span className="text-xl font-bold">{title}</span>
-          <button
-            onClick={handleClose}
-            className="absolute right-0 rounded-full transition-colors hover:opacity-70"
-          >
-            <X size={24} style={{ color: theme.text_color }} />
-          </button>
-        </header>
+        {title && (
+          <header className="relative flex w-full items-center justify-center">
+            <span className="text-xl font-bold">{title}</span>
+            <button
+              onClick={handleClose}
+              className="absolute right-0 rounded-full transition-colors hover:opacity-70"
+            >
+              <X size={24} style={{ color: theme.text_color }} />
+            </button>
+          </header>
+        )}
 
         <main className="w-full flex-1">{children}</main>
       </div>

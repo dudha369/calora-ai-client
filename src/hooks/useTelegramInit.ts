@@ -1,5 +1,15 @@
 import { useEffect } from 'react';
-import { init, initData, viewport, themeParams } from '@tma.js/sdk-react';
+import {
+  init,
+  initData,
+  viewport,
+  themeParams,
+  swipeBehavior,
+  settingsButton,
+  mainButton,
+  secondaryButton,
+  backButton,
+} from '@tma.js/sdk-react';
 import { isMobileDevice } from '../utils/device';
 
 function requestSafeAreaUpdate() {
@@ -14,7 +24,9 @@ function requestSafeAreaUpdate() {
         '{}',
       );
     }
-  } catch {}
+  } catch {
+    // Игнорируем ошибку, если TelegramWebviewProxy недоступен в текущем окружении
+  }
 }
 
 export function useTelegramInit(onReady: () => void) {
@@ -23,16 +35,50 @@ export function useTelegramInit(onReady: () => void) {
       try {
         init();
         initData.restore();
-        themeParams.mount();
 
-        await viewport.mount();
-        viewport.expand();
+        if (themeParams.mount.isAvailable() && !themeParams.isMounted()) {
+          themeParams.mount();
+        }
+
+        if (settingsButton.mount.isAvailable() && !settingsButton.isMounted()) {
+          settingsButton.mount();
+        }
+
+        if (mainButton.mount.isAvailable() && !mainButton.isMounted()) {
+          mainButton.mount();
+          mainButton.hide();
+        }
+
+        if (
+          secondaryButton.mount.isAvailable() &&
+          !secondaryButton.isMounted()
+        ) {
+          secondaryButton.mount();
+          secondaryButton.hide();
+        }
+
+        if (backButton.mount.isAvailable() && !backButton.isMounted()) {
+          backButton.mount();
+          backButton.hide();
+        }
+
+        if (swipeBehavior.mount.isAvailable() && !swipeBehavior.isMounted()) {
+          swipeBehavior.mount();
+          swipeBehavior.disableVertical();
+        }
+
+        if (viewport.mount.isAvailable() && !viewport.isMounted()) {
+          await viewport.mount();
+          viewport.expand();
+        }
 
         if (isMobileDevice()) {
           try {
             await viewport.requestFullscreen();
             requestSafeAreaUpdate();
-          } catch {}
+          } catch {
+            // Игнорируем ошибку, если устройство заблокировало переход в fullscreen
+          }
         }
       } finally {
         onReady();
@@ -40,5 +86,5 @@ export function useTelegramInit(onReady: () => void) {
     };
 
     run();
-  }, []);
+  }, [onReady]);
 }

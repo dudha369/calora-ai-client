@@ -12,13 +12,13 @@ import { useQueryClient } from '@tanstack/react-query';
 export const SettingsPage = () => {
   const theme = useTheme();
 
-  const navigate = useNavigate();
-  useBackButton(() => navigate('/profile'), true);
-
   const queryClient = useQueryClient();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const navigate = useNavigate();
+  useBackButton(() => navigate('/profile'), !confirmOpen);
 
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
@@ -49,6 +49,7 @@ export const SettingsPage = () => {
         <ModalWindow
           title="Удалить аккаунт?"
           onClose={() => !isDeleting && setConfirmOpen(false)}
+          cancelLabel="Отменить"
           actionLabel="Подтвердить"
           iconCustomEmojiId="5258130763148172425"
           onAction={handleDeleteAccount}
