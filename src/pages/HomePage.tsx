@@ -89,9 +89,9 @@ export const HomePage = () => {
   });
 
   return (
-    <div className="flex h-full flex-col gap-2 px-4">
+    <div className="flex h-full flex-col gap-2">
       <header
-        className="sticky top-0 z-10 flex flex-col gap-2 pt-1"
+        className="sticky top-0 z-10 flex flex-col gap-2 px-4 pt-1"
         style={{ backgroundColor: theme.bg_color }}
       >
         <section className="flex h-6 justify-between px-1">
@@ -127,7 +127,7 @@ export const HomePage = () => {
           </div>
         </section>
 
-        <section className="-mx-4">
+        <section>
           <DateStrip
             key={monthKey}
             dates={dates}

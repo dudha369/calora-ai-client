@@ -66,7 +66,7 @@ export const DayContent = ({
 
   return (
     <main
-      className="flex h-full flex-col gap-3 overflow-y-auto pb-4"
+      className="flex h-full flex-col gap-3 overflow-y-auto px-4 pb-4"
       style={isActive ? { viewTransitionName: 'day-content' } : undefined}
     >
       <section
