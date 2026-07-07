@@ -29,6 +29,7 @@ import type {
   HeightUnit,
   WeightUnit,
 } from '../interfaces/Onboarding';
+import { useTranslation } from 'react-i18next';
 
 const CS_HEIGHT_UNIT = 'units_height';
 const CS_WEIGHT_UNIT = 'units_weight';
@@ -129,6 +130,7 @@ export const OnboardingPage = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation('onboarding');
 
   const [data, setData] = useState<Partial<OnboardingData>>(INITIAL_DATA);
   const [step, setStep] = useState(0);
@@ -273,7 +275,7 @@ export const OnboardingPage = () => {
         validRef.current = isStepValid(nextStep, currentData);
       }
     } catch {
-      setError('Не удалось сохранить. Проверь соединение и попробуй ещё раз.');
+      setError(t('buttons.save_error'));
     } finally {
       setSaving(false);
     }
@@ -285,7 +287,7 @@ export const OnboardingPage = () => {
   const isLastStep = stepIndex === activeSteps.length - 1;
 
   useMainButton({
-    text: isLastStep ? 'Завершить' : 'Далее',
+    text: isLastStep ? t('buttons.finish') : t('buttons.next'),
     iconCustomEmojiId: isLastStep
       ? '5193212401188615252'
       : '5193191330079062069',

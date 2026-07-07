@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { ModalWindow } from './ModalWindow';
+import { BottomSheet } from './BottomSheet';
 import { NumberField } from './NumberField';
-import { NutritionTable, type NutritionRow } from './NutritionTable';
+import { NutritionGrid } from './NutritionStats/NutritionGrid';
 import { round1 } from '../utils/nutrition';
 import type { AnalyzedDish, FoodAnalyzeResponse } from '../interfaces/api/food';
 import { useTheme } from '../context/ThemeContext';
@@ -13,8 +13,6 @@ interface FoodResultModalProps {
   onConfirm: (dishes: AnalyzedDish[]) => Promise<void>;
   onClose: () => void;
 }
-
-const fmt = (n: number) => n.toFixed(1).replace(/\.0$/, '');
 
 interface Totals {
   calories: number;
@@ -97,28 +95,20 @@ export const FoodResultModal = ({
     }
   };
 
-  const totalRows: NutritionRow[] = [
-    { label: 'Итого калорий', value: `${totals.calories} ккал`, primary: true },
-    { label: 'Белки', value: `${fmt(totals.protein_g)} г` },
-    { label: 'Жиры', value: `${fmt(totals.fat_g)} г` },
-    { label: 'Углеводы', value: `${fmt(totals.carbs_g)} г` },
-    { label: 'Клетчатка', value: `${fmt(totals.fiber_g)} г` },
-    { label: 'Сахар', value: `${fmt(totals.sugar_g)} г` },
-    ...(totals.water_ml > 0
-      ? [{ label: '💧 Вода', value: `${totals.water_ml} мл` }]
-      : []),
-  ];
-
   return (
-    <ModalWindow
+    <BottomSheet
       title="Оценка блюда"
       onClose={onClose}
-      cancelLabel="Отмена"
       actionLabel="Добавить"
-      iconCustomEmojiId="5260416304224936047"
+      iconCustomEmojiId="5274008024585871702"
       onAction={handleConfirm}
       isProcessing={isConfirming}
       actionDisabled={dishes.length === 0}
+      secondaryAction={{
+        text: 'Отменить',
+        iconCustomEmojiId: '5260342697075416641',
+        position: 'left',
+      }}
     >
       <div className="flex flex-col gap-2.5">
         {dishes.map((dish, i) => (
@@ -207,18 +197,28 @@ export const FoodResultModal = ({
             </div>
           </div>
         ))}
+
+        <NutritionGrid
+          data={{
+            total_calories: totals.calories,
+            total_protein_g: totals.protein_g,
+            total_fat_g: totals.fat_g,
+            total_carbs_g: totals.carbs_g,
+            total_fiber_g: totals.fiber_g,
+            total_sugar_g: totals.sugar_g,
+            total_water_ml: totals.water_ml,
+          }}
+        />
+
+        {result.ask_user && result.portion_note && (
+          <p
+            className="mt-2.5 px-1 text-center text-xs leading-relaxed"
+            style={{ color: theme.hint_color }}
+          >
+            ⚠️ {result.portion_note}
+          </p>
+        )}
       </div>
-
-      <NutritionTable rows={totalRows} />
-
-      {result.ask_user && result.portion_note && (
-        <p
-          className="mt-2.5 px-1 text-center text-xs leading-relaxed"
-          style={{ color: theme.hint_color }}
-        >
-          ⚠️ {result.portion_note}
-        </p>
-      )}
-    </ModalWindow>
+    </BottomSheet>
   );
 };

@@ -41,14 +41,7 @@ export const router = createBrowserRouter([
               })),
           },
           {
-            path: 'analytics',
-            lazy: () =>
-              import('./pages/AnalyticsPage').then((m) => ({
-                Component: m.AnalyticsPage,
-              })),
-          },
-          {
-            path: 'analytics/:date',
+            path: 'analytics/:date?',
             lazy: () =>
               import('./pages/AnalyticsPage').then((m) => ({
                 Component: m.AnalyticsPage,

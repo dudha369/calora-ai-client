@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
 import { useTheme } from '../../../context/ThemeContext';
@@ -7,16 +8,17 @@ import type {
   WaterTrack,
 } from '../../../interfaces/Onboarding';
 
-// weight(kg) × 33 ml — standard recommendation
 const calcAuto = (weight?: number) => (weight ? Math.round(weight * 33) : 2000);
 
-interface Props {
+interface Step9WaterProps {
   data: Partial<OnboardingData>;
   onChange: (patch: Partial<OnboardingData>, isValid: boolean) => void;
 }
 
-export const Step9Water = ({ data, onChange }: Props) => {
+export const Step9Water = ({ data, onChange }: Step9WaterProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('onboarding');
+  const { t: tc } = useTranslation('common');
   const autoGoal = calcAuto(data.weight);
 
   const [track, setTrack] = useState<WaterTrack | undefined>(data.water_track);
@@ -47,26 +49,23 @@ export const Step9Water = ({ data, onChange }: Props) => {
   const OPTIONS: { value: WaterTrack; label: string; description: string }[] = [
     {
       value: 'auto',
-      label: '💧 Да, рассчитай норму',
-      description: `На основе твоего веса (~${autoGoal} мл/день)`,
+      label: t('step9.auto'),
+      description: t('step9.auto_desc', { goal: autoGoal }),
     },
     {
       value: 'manual',
-      label: '✏️ Да, введу свою норму',
-      description: 'Укажу сам сколько хочу выпивать',
+      label: t('step9.manual'),
+      description: t('step9.manual_desc'),
     },
     {
       value: 'none',
-      label: '🚫 Нет, не нужно',
-      description: 'Не хочу отслеживать воду',
+      label: t('step9.opt_none'),
+      description: t('step9.opt_none_desc'),
     },
   ];
 
   return (
-    <StepShell
-      title="Отслеживать воду?"
-      subtitle="Помогает не забывать пить в течение дня. Норма = вес × 33 мл"
-    >
+    <StepShell title={t('step9.title')} subtitle={t('step9.subtitle')}>
       <div className="flex flex-col gap-3">
         {OPTIONS.map((opt) => (
           <OptionCard
@@ -85,7 +84,7 @@ export const Step9Water = ({ data, onChange }: Props) => {
               inputMode="numeric"
               value={rawGoal}
               onChange={(e) => handleGoalInput(e.target.value)}
-              placeholder="Например, 2000"
+              placeholder={t('step9.placeholder')}
               className="w-full rounded-2xl p-4 pr-24 text-lg font-medium outline-none"
               style={{
                 backgroundColor: theme.section_bg_color,
@@ -97,7 +96,7 @@ export const Step9Water = ({ data, onChange }: Props) => {
               className="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium"
               style={{ color: theme.hint_color }}
             >
-              мл / день
+              {tc('units.ml_per_day')}
             </span>
           </div>
         )}

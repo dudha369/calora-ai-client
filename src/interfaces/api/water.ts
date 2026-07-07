@@ -5,15 +5,16 @@
 export interface WaterLog {
   id: number;
   user_id: number;
-  log_date: string;  // YYYY-MM-DD
-  logged_at: string;  // ISO datetime
+  log_date: string;
+  logged_at: string;
   amount_ml: number;
+  source_label: string | null;
 }
 
-/** Тело запроса POST /api/water */
 export interface WaterIn {
-  log_date: string; // YYYY-MM-DD
-  amount_ml: number; // 250 | 400 | 500 ...
+  log_date: string;
+  amount_ml: number;
+  source_label?: string;
 }
 
 /** Ответ GET /api/water/{date} */

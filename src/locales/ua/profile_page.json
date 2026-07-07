@@ -1,0 +1,24 @@
+{
+  "default_full_name": "Користувач",
+  "body_section": {
+    "title": "Моє тіло",
+    "body": {
+      "title": "Тіло та цілі"
+    },
+    "nutrition": {
+      "title": "Харчування та здоров'я"
+    }
+  },
+  "progress_section": {
+    "title": "Прогрес",
+    "weight": {
+      "title": "Динаміка ваги"
+    },
+    "quests": {
+      "title": "Квести та досягнення"
+    }
+  },
+  "settings_section": {
+    "title": "Налаштування"
+  }
+}

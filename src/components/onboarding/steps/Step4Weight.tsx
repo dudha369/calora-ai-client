@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { useTheme } from '../../../context/ThemeContext';
 import type {
@@ -12,13 +13,16 @@ const KG_DEFAULT = 70;
 
 const kgToLbs = (kg: number) => Math.round(kg * 2.205);
 
-interface Props {
+interface Step4WeightProps {
   data: Partial<OnboardingData>;
   onChange: (patch: Partial<OnboardingData>, isValid: boolean) => void;
 }
 
-export const Step4Weight = ({ data, onChange }: Props) => {
+export const Step4Weight = ({ data, onChange }: Step4WeightProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('onboarding');
+  const { t: tc } = useTranslation('common');
+
   const [kg, setKg] = useState(data.weight ?? KG_DEFAULT);
   const [unit, setUnit] = useState<WeightUnit>(data.weight_unit ?? 'kg');
 
@@ -38,13 +42,10 @@ export const Step4Weight = ({ data, onChange }: Props) => {
   };
 
   const displayValue = unit === 'kg' ? `${kg}` : `${kgToLbs(kg)}`;
-  const displayUnit = unit === 'kg' ? 'кг' : 'фунт';
+  const displayUnit = unit === 'kg' ? tc('units.kg') : tc('units.lbs');
 
   return (
-    <StepShell
-      title="Текущий вес"
-      subtitle="Главный параметр BMR. Историю изменений веса будем отслеживать"
-    >
+    <StepShell title={t('step4.title')} subtitle={t('step4.subtitle')}>
       <div className="flex flex-col gap-5">
         <div className="flex items-center justify-between">
           <span
@@ -67,7 +68,7 @@ export const Step4Weight = ({ data, onChange }: Props) => {
               color: theme.button_color,
             }}
           >
-            {unit === 'kg' ? '→ Фунты' : '→ Кг'}
+            {unit === 'kg' ? t('step4.to_imperial') : t('step4.to_metric')}
           </button>
         </div>
 
@@ -85,8 +86,12 @@ export const Step4Weight = ({ data, onChange }: Props) => {
             className="flex justify-between text-xs"
             style={{ color: theme.hint_color }}
           >
-            <span>{KG_MIN} кг</span>
-            <span>{KG_MAX} кг</span>
+            <span>
+              {KG_MIN} {tc('units.kg')}
+            </span>
+            <span>
+              {KG_MAX} {tc('units.kg')}
+            </span>
           </div>
         </div>
       </div>

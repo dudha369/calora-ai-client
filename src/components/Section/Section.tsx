@@ -12,7 +12,7 @@ export const Section = ({ title, children }: SectionProps) => {
   return (
     <div className="mx-4 flex flex-col gap-1">
       <span
-        className="какое ml-3 text-[13px] font-medium tracking-wider uppercase"
+        className="ml-3 text-[13px] font-medium tracking-wider uppercase"
         style={{ color: theme.section_header_text_color }}
       >
         {title}

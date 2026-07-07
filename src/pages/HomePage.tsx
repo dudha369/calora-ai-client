@@ -14,12 +14,14 @@ import { getFlameColor } from '../utils/getFlameColor';
 import { useActiveDates } from '../hooks/useActiveDates.ts';
 import { FoodLogModal } from '../components/FoodLog/FoodLogModal.tsx';
 import type { FoodLog } from '../interfaces/api/food';
+import { StreakPopup } from '../components/StreakPopup/StreakPopup';
 
 export const HomePage = () => {
   const { user_data } = useUser();
-  const currentStreak = user_data?.user.current_streak ?? 0;
-  const flameColorProps = getFlameColor(currentStreak);
   const createdAt = user_data?.user.created_at;
+  const currentStreak = user_data?.user.current_streak ?? 0;
+  const streakActiveToday = user_data?.user.streak_active_today ?? false;
+  const flameColorProps = getFlameColor(currentStreak, streakActiveToday);
 
   const theme = useTheme();
   const queryClient = useQueryClient();
@@ -43,6 +45,7 @@ export const HomePage = () => {
     [createdAt, today],
   );
 
+  const [streakPopupOpen, setStreakPopupOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [foodLogModalOpen, setFoodLogModalOpen] = useState(false);
   const [currentFoodLog, setCurrentFoodLog] = useState<FoodLog | undefined>();
@@ -71,6 +74,7 @@ export const HomePage = () => {
         queryKey: ['stats', 'daily', selectedDateStr],
       });
       queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       setFoodLogModalOpen(false);
     },
   });
@@ -84,6 +88,7 @@ export const HomePage = () => {
       queryClient.invalidateQueries({ queryKey: ['food', todayStr] });
       queryClient.invalidateQueries({ queryKey: ['stats', 'daily', todayStr] });
       queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
       setFoodLogModalOpen(false);
     },
   });
@@ -107,11 +112,12 @@ export const HomePage = () => {
 
           <div className="flex items-center gap-3">
             <div
-              className="flex items-center gap-1 rounded-2xl pr-2.25 pl-1.5"
+              className="flex cursor-pointer items-center gap-1 rounded-2xl pr-2.25 pl-1.5 transition-opacity active:opacity-70"
               style={{
                 backgroundColor: theme.section_bg_color,
                 color: theme.text_color,
               }}
+              onClick={() => setStreakPopupOpen(true)}
             >
               <Flame {...flameColorProps} size={18} />
               <span className="text-lg">{currentStreak}</span>
@@ -154,9 +160,16 @@ export const HomePage = () => {
         />
       </div>
 
+      {streakPopupOpen && (
+        <StreakPopup
+          currentStreak={currentStreak}
+          onClose={() => setStreakPopupOpen(false)}
+        />
+      )}
+
       {calendarOpen && (
         <Calendar
-          value={selectedDate}
+          selectedDate={selectedDate}
           minDate={minDate}
           maxDate={today}
           onSelect={(date) => {
@@ -167,7 +180,7 @@ export const HomePage = () => {
         />
       )}
 
-      {foodLogModalOpen && (
+      {foodLogModalOpen && currentFoodLog && (
         <FoodLogModal
           log={currentFoodLog}
           isDeleting={foodLogDeleting}

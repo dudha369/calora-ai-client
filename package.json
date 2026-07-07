@@ -19,6 +19,7 @@
     "@zxing/browser": "^0.2.0",
     "@zxing/library": "^0.22.0",
     "axios": "^1.16.1",
+    "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "embla-carousel-wheel-gestures": "^8.1.0",
     "i18next": "^26.3.1",
@@ -27,6 +28,7 @@
     "react-dom": "^18.3.1",
     "react-i18next": "^17.0.8",
     "react-router-dom": "^7.15.0",
+    "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.2.4"
   },
   "devDependencies": {

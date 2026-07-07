@@ -37,12 +37,10 @@ export const food = {
   /**
    * Повторяет уже залогированную запись на сегодня.
    *
-   * Намеренно без отдельного backend-эндпоинта: переиспользует уже
-   * загруженные `log.items` через обычный POST /food/log — пересчёт
-   * total_*, начисление стрика и инвалидация кэша работают так же, как
-   * при обычном логировании, без дублирования логики. Фото и вода исходной
-   * записи не переносятся: фото физически не копируется, а вода привязана
-   * не к FoodLog, а к отдельной WaterLog-записи в момент исходного лога.
+   * water_ml передаётся на уровне items — backend сам суммирует
+   * и создаёт WaterLog, привязанный к новому FoodLog. Это означает,
+   * что вода из повторённой записи будет корректно удалена вместе
+   * с едой при следующем delete.
    */
   repeat: (log: FoodLog) =>
     request<CreateFoodLogResponse>('food/log', 'POST', {
@@ -56,6 +54,8 @@ export const food = {
         carbs_g: item.carbs_g,
         fiber_g: item.fiber_g,
         sugar_g: item.sugar_g,
+        water_ml: item.water_ml,
       })),
+      // Нет явного water_ml на уровне лога — backend суммирует из items
     } satisfies FoodLogIn),
 };

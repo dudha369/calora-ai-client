@@ -1,6 +1,7 @@
 import { Clock, UtensilsCrossed } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
-import { pluralizeDishes } from '../../utils/pluralize';
+import { getIntlLocale } from '../../utils/locale';
 import type { FoodLog } from '../../interfaces/api/food';
 
 interface FoodLogCardProps {
@@ -9,32 +10,33 @@ interface FoodLogCardProps {
   onClickRef: (log: FoodLog) => void;
 }
 
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
-
-function formatRemainingDishes(totalCount: number): string {
-  const count = totalCount - 1;
-  return `+ ещё ${count} ${pluralizeDishes(count)}`;
-}
-
 export const FoodLogCard = ({
   log,
   isDeleting,
   onClickRef,
 }: FoodLogCardProps) => {
   const theme = useTheme();
+  const { t, i18n } = useTranslation('home_page');
+  const { t: tc } = useTranslation('common');
+
+  const formattedTime = new Date(log.logged_at).toLocaleTimeString(
+    getIntlLocale(i18n.language),
+    {
+      hour: '2-digit',
+      minute: '2-digit',
+    },
+  );
 
   const onClick = () => {
     onClickRef(log);
   };
 
+  const defaultFoodName = t('food');
+  const firstItemName = log.items[0]?.food_name ?? defaultFoodName;
+
   return (
     <div
-      className="flex h-20 w-full items-center gap-3 rounded-2xl p-3 transition-opacity"
+      className="flex h-20 w-full cursor-pointer items-center gap-3 rounded-2xl p-3 transition-opacity"
       style={{
         backgroundColor: theme.section_bg_color,
         opacity: isDeleting ? 0.5 : 1,
@@ -48,7 +50,7 @@ export const FoodLogCard = ({
         {log.photo_url ? (
           <img
             src={log.photo_url}
-            alt={log.items[0]?.food_name ?? 'Еда'}
+            alt={firstItemName}
             className="h-full w-full object-cover"
           />
         ) : (
@@ -61,13 +63,13 @@ export const FoodLogCard = ({
           className="truncate text-[16px] font-semibold"
           style={{ color: theme.text_color }}
         >
-          {log.items[0]?.food_name ?? 'Еда'}
+          {firstItemName}
         </p>
 
         <div className="text-xs">
           {log.items.length > 1 ? (
             <span style={{ color: theme.button_color }}>
-              {formatRemainingDishes(log.items.length)}
+              {t('more_dishes', { count: log.items.length - 1 })}
             </span>
           ) : (
             <div
@@ -75,11 +77,13 @@ export const FoodLogCard = ({
               style={{ color: theme.hint_color }}
             >
               <Clock size={12} />
-              <span>{formatTime(log.logged_at)}</span>
+              <span>{formattedTime}</span>
 
-              <span> · </span>
+              <b> · </b>
 
-              <span>{log.items[0]?.portion_g} г</span>
+              <span>
+                {log.items[0]?.portion_g} {tc('units.g')}
+              </span>
             </div>
           )}
         </div>
@@ -87,17 +91,20 @@ export const FoodLogCard = ({
 
       <div className="flex flex-col items-end">
         <span
-          className="text-lg font-extrabold tabular-nums"
+          className="text-lg font-bold tabular-nums"
           style={{ color: theme.text_color }}
         >
-          {log.total_calories} ккал
+          {log.total_calories} {tc('units.kcal')}
         </span>
         <span
           className="text-xs font-medium"
           style={{ color: theme.hint_color }}
         >
-          Б {Math.round(log.total_protein_g)} · Ж {Math.round(log.total_fat_g)}{' '}
-          · У {Math.round(log.total_carbs_g)}
+          {t('macros', {
+            p: Math.round(log.total_protein_g),
+            f: Math.round(log.total_fat_g),
+            c: Math.round(log.total_carbs_g),
+          })}
         </span>
       </div>
     </div>

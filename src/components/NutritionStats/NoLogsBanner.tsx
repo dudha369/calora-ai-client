@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { NoDataIcon } from '../NoDataIcon';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +11,7 @@ export const NoLogsBanner = ({ isToday }: AddLogBannerProps) => {
   const navigate = useNavigate();
 
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
 
   return (
     <div
@@ -32,7 +34,8 @@ export const NoLogsBanner = ({ isToday }: AddLogBannerProps) => {
           color: theme.subtitle_text_color,
         }}
       >
-        No logs{isToday && '. Tap + to log meal'}
+        {t('no_logs')}
+        {isToday && '. ' + t('tap_to_log')}
       </span>
     </div>
   );

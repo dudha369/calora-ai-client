@@ -5,7 +5,7 @@ import { Trash2 } from 'lucide-react';
 import { Section } from '../../components/Section/Section.tsx';
 import { useState } from 'react';
 import { users } from '../../api/users.ts';
-import { ModalWindow } from '../../components/ModalWindow';
+import { BottomSheet } from '../../components/BottomSheet';
 import { useTheme } from '../../context/ThemeContext.ts';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -46,21 +46,25 @@ export const SettingsPage = () => {
       </Section>
 
       {confirmOpen && (
-        <ModalWindow
+        <BottomSheet
           title="Удалить аккаунт?"
           onClose={() => !isDeleting && setConfirmOpen(false)}
-          cancelLabel="Отменить"
           actionLabel="Подтвердить"
           iconCustomEmojiId="5258130763148172425"
           onAction={handleDeleteAccount}
           isProcessing={isDeleting}
+          secondaryAction={{
+            text: 'Отменить',
+            iconCustomEmojiId: '5260342697075416641',
+            position: 'left',
+          }}
         >
           <p className="text-center" style={{ color: theme.text_color }}>
             Это действие необратимо. Будут удалены профиль, история питания,
             фото, квесты и все остальные данные. Чтобы продолжить пользоваться
             приложением, нужно будет пройти регистрацию заново.
           </p>
-        </ModalWindow>
+        </BottomSheet>
       )}
     </>
   );

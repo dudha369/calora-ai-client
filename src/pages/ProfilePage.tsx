@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { useUser } from '../context/UserContext';
 import { useTheme } from '../context/ThemeContext';
 import {
@@ -18,6 +19,7 @@ import { SectionItemIcon } from '../components/Section/SectionItemIcon.tsx';
 
 export const ProfilePage = () => {
   const { user_data } = useUser();
+  const { t } = useTranslation('profile_page');
   const theme = useTheme();
 
   const photo_url = initData.user()?.photo_url;
@@ -31,8 +33,8 @@ export const ProfilePage = () => {
   const isAdmin = adminConfig?.is_admin ?? false;
 
   return (
-    <div className="flex flex-col gap-6">
-      <section className="flex flex-col items-center gap-2 pt-6">
+    <div className="flex flex-col gap-6 pb-4">
+      <section className="flex flex-col items-center gap-1 pt-6">
         <div
           className="flex size-22 items-center justify-center rounded-full"
           style={{ backgroundColor: `${theme.button_color}20` }}
@@ -48,10 +50,10 @@ export const ProfilePage = () => {
           )}
         </div>
         <p
-          className="text-center text-[22px] font-semibold tracking-wider"
+          className="text-center font-mono text-[22px] font-semibold tracking-wider"
           style={{ color: theme.text_color }}
         >
-          {user_data?.user.full_name ?? 'Пользователь'}
+          {user_data?.user.full_name ?? t('default_full_name')}
         </p>
       </section>
 
@@ -70,14 +72,14 @@ export const ProfilePage = () => {
           </Section>
         )}
 
-        <Section title="Моё тело">
+        <Section title={t('body_section.title')}>
           <SectionItem
             icon={
               <SectionItemIcon color="#FF2D55">
                 <Target />
               </SectionItemIcon>
             }
-            label="Тело и цели"
+            label={t('body_section.body.title')}
             to="body"
           />
           <SectionItem
@@ -86,19 +88,19 @@ export const ProfilePage = () => {
                 <Sprout />
               </SectionItemIcon>
             }
-            label="Питание и здоровье"
+            label={t('body_section.nutrition.title')}
             to="nutrition"
           />
         </Section>
 
-        <Section title="Прогресс">
+        <Section title={t('progress_section.title')}>
           <SectionItem
             icon={
               <SectionItemIcon color="#007AFF">
                 <ChartNoAxesCombinedIcon />
               </SectionItemIcon>
             }
-            label="Динамика веса"
+            label={t('progress_section.weight.title')}
             to="weight"
           />
           <SectionItem
@@ -107,19 +109,19 @@ export const ProfilePage = () => {
                 <Trophy />
               </SectionItemIcon>
             }
-            label="Квесты и достижения"
+            label={t('progress_section.quests.title')}
             to="quests"
           />
         </Section>
 
-        <Section title="Настройки">
+        <Section title={t('settings_section.title')}>
           <SectionItem
             icon={
               <SectionItemIcon color="#8E8E93">
                 <Settings />
               </SectionItemIcon>
             }
-            label="Настройки"
+            label={t('settings_section.title')}
             to="settings"
           />
         </Section>

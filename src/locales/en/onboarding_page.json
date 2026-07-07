@@ -1,0 +1,103 @@
+{
+  "buttons": {
+    "next": "Next →",
+    "finish": "Finish ✓",
+    "save_error": "Failed to save. Please check your connection and try again."
+  },
+  "step1": {
+    "title": "Please select your gender",
+    "subtitle": "Affects the calculation of your basal metabolic rate — men and women have different BMR coefficients",
+    "male": "♂ Male",
+    "female": "♀ Female"
+  },
+  "step2": {
+    "title": "How old are you?",
+    "subtitle": "Age is used in the Mifflin-St Jeor formula for calorie calculation",
+    "placeholder": "E.g. 25",
+    "hint": "From {{min}} to {{max}} years old",
+    "error": "Age must be from {{min}} to {{max}} years old",
+    "age_one": "You are {{count}} year old",
+    "age_other": "You are {{count}} years old"
+  },
+  "step3": {
+    "title": "Please enter your height",
+    "subtitle": "The primary physical parameter for calculating your basal metabolic rate",
+    "to_imperial": "→ Feet",
+    "to_metric": "→ Cm"
+  },
+  "step4": {
+    "title": "Please enter your current weight",
+    "subtitle": "The main BMR parameter. We will track your weight change history",
+    "to_imperial": "→ Pounds",
+    "to_metric": "→ Kg",
+    "unit_kg": "kg",
+    "unit_lbs": "lbs"
+  },
+  "step5": {
+    "title": "What is your main goal?",
+    "subtitle": "Determines calorie deficit or surplus and the primary focus of the application",
+    "lose": "🔥 Lose weight",
+    "lose_desc": "Calorie deficit, focus on cardio and nutrition",
+    "maintain": "⚖️ Maintain weight",
+    "maintain_desc": "Balance — maintain your current shape",
+    "gain": "💪 Build muscle mass",
+    "gain_desc": "Calorie surplus, focus on protein and strength training"
+  },
+  "step6": {
+    "title": "Please enter your target weight",
+    "subtitle_lose": "What weight do you wish to lose down to?",
+    "subtitle_gain": "What weight do you wish to gain up to?",
+    "current_weight": "Current weight: {{weight}} {{unit}}",
+    "placeholder_lose": "E.g. 50",
+    "placeholder_gain": "E.g. 85",
+    "error": "Please enter a valid weight"
+  },
+  "step7": {
+    "title": "How active are you?",
+    "subtitle": "Physical activity level (PAL) coefficient multiplied by BMR determines your daily calorie norm (TDEE)",
+    "sedentary": "🛋 Sedentary",
+    "sedentary_desc": "Office job, almost no movement (×1.2)",
+    "light": "🚶 Lightly active",
+    "light_desc": "Light walks 1–2 times a week (×1.375)",
+    "moderate": "🏃 Moderately active",
+    "moderate_desc": "Exercise 3–5 times a week (×1.55)",
+    "active": "🏋️ Very active",
+    "active_desc": "Intense workouts 6–7 times a week (×1.725)",
+    "extreme": "⚡ Extremely active",
+    "extreme_desc": "Physical labour + daily sports (×1.9)"
+  },
+  "step8": {
+    "title": "Please specify your dietary restrictions",
+    "subtitle": "Necessary for selecting suitable products and recipes. This step can be skipped",
+    "none": "No restrictions",
+    "vegetarian": "Vegetarian",
+    "vegan": "Vegan",
+    "gluten_free": "Gluten-free",
+    "lactose_free": "Lactose-free",
+    "halal": "Halal",
+    "kosher": "Kosher",
+    "allergy": "Allergy",
+    "allergy_placeholder": "What are you allergic to? E.g. nuts, seafood…"
+  },
+  "step9": {
+    "title": "Would you like to track water intake?",
+    "subtitle": "Helps you remember to drink throughout the day. Norm = weight × 33 ml",
+    "auto": "💧 Yes, calculate my norm",
+    "auto_desc": "Based on your weight (~{{goal}} ml/day)",
+    "manual": "✏️ Yes, I'll set my own norm",
+    "manual_desc": "I'll specify how much I want to drink",
+    "opt_none": "🚫 No, not needed",
+    "opt_none_desc": "I don't want to track water",
+    "placeholder": "E.g. 2000"
+  },
+  "step10": {
+    "title": "Please specify your medical conditions",
+    "subtitle": "Used solely for AI recommendation accuracy. Data is not shared with third parties. Can be skipped",
+    "none": "No conditions",
+    "diabetes": "Type 2 Diabetes",
+    "hypertension": "High Blood Pressure",
+    "cholesterol": "High Cholesterol",
+    "kidney": "Kidney Disease",
+    "warning": "⚠️ Used only for filtering AI advice"
+  }
+}

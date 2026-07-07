@@ -1,1 +1,45 @@
-{}
+{
+  "loading": "Loading…",
+  "buttons": {
+    "retry": "Retry",
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "delete": "Delete",
+    "open_today": "Go to today"
+  },
+  "nav": {
+    "home": "Home",
+    "water": "Water",
+    "scanner": "Scanner",
+    "analytics": "Analytics",
+    "profile": "Profile"
+  },
+  "errors": {
+    "network": {
+      "title": "Connection Error",
+      "subtitle": "Please check your internet connection"
+    },
+    "general": {
+      "title": "Unexpected Error",
+      "subtitle": "Something went wrong. Please try again."
+    },
+    "no_telegram": {
+      "title": "Authentication Error",
+      "subtitle": "Please open the app via Telegram"
+    },
+    "access_denied": {
+      "title": "Access Denied",
+      "subtitle": "You don't have access to this application"
+    }
+  },
+  "units": {
+    "kcal": "kcal",
+    "g": "g",
+    "ml": "ml",
+    "ml_per_day": "ml / day",
+    "kg": "kg",
+    "lbs": "lbs",
+    "cm": "cm"
+  }
+}

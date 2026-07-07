@@ -1,4 +1,5 @@
-import type { ElementType, ReactNode } from 'react';
+import type { ElementType } from 'react';
+import { useTranslation, Trans } from 'react-i18next'; // Импортируем Trans для работы с JSX в переводах
 import { useTheme } from '../../context/ThemeContext';
 import {
   WifiOff,
@@ -8,64 +9,36 @@ import {
   Lock,
 } from 'lucide-react';
 
-/**
- * errorType values:
- *  - "network"       — no internet / chunk load failed
- *  - "general"       — unexpected runtime error
- *  - "no_telegram"   — opened outside Telegram (401 / no initData)
- *  - "access_denied" — user is not on the whitelist (403)
- */
 export type ErrorType = 'network' | 'general' | 'no_telegram' | 'access_denied';
+
+const CONFIG: Record<ErrorType, { Icon: ElementType; showRetry: boolean }> = {
+  network: {
+    Icon: WifiOff,
+    showRetry: true,
+  },
+  general: {
+    Icon: AlertTriangle,
+    showRetry: true,
+  },
+  no_telegram: {
+    Icon: ShieldAlert,
+    showRetry: false,
+  },
+  access_denied: {
+    Icon: Lock,
+    showRetry: false,
+  },
+};
 
 interface ErrorScreenProps {
   errorType: ErrorType;
   onRetry?: () => void;
 }
 
-const CONFIG: Record<
-  ErrorType,
-  { Icon: ElementType; title: string; subtitle: ReactNode; showRetry: boolean }
-> = {
-  network: {
-    Icon: WifiOff,
-    title: 'Ошибка подключения',
-    subtitle: 'Проверьте интернет-соединение',
-    showRetry: true,
-  },
-  general: {
-    Icon: AlertTriangle,
-    title: 'Непредвиденная ошибка',
-    subtitle: 'Что-то пошло не так. Попробуйте еще раз.',
-    showRetry: true,
-  },
-  no_telegram: {
-    Icon: ShieldAlert,
-    title: 'Ошибка аутентификации',
-    subtitle: (
-      <>
-        Откройте приложение через
-        <a
-          href="https://t.me/CaloraAIBot"
-          style={{ textDecoration: 'underline' }}
-        >
-          {' '}
-          Telegram
-        </a>
-      </>
-    ),
-    showRetry: false,
-  },
-  access_denied: {
-    Icon: Lock,
-    title: 'Нет доступа',
-    subtitle: 'У вас нет доступа к этому приложению',
-    showRetry: false,
-  },
-};
-
 export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
   const theme = useTheme();
-  const { Icon, title, subtitle, showRetry } = CONFIG[errorType];
+  const { t } = useTranslation('common');
+  const { Icon, showRetry } = CONFIG[errorType];
 
   return (
     <div
@@ -83,13 +56,28 @@ export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
           className="text-center text-base font-medium tracking-widest uppercase"
           style={{ color: theme.text_color }}
         >
-          {title}
+          {t(`errors.${errorType}.title`)}
         </p>
+
         <p
           className="text-center text-sm font-medium"
           style={{ color: theme.hint_color }}
         >
-          {subtitle}
+          {errorType === 'no_telegram' ? (
+            <Trans
+              i18nKey="errors.no_telegram.subtitle"
+              components={{
+                telegramLink: (
+                  <a
+                    href="https://t.me/CaloraAIBot"
+                    style={{ textDecoration: 'underline' }}
+                  />
+                ),
+              }}
+            />
+          ) : (
+            t(`errors.${errorType}.subtitle`)
+          )}
         </p>
       </div>
 
@@ -103,7 +91,7 @@ export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
           }}
         >
           <RefreshCw size={16} />
-          Повторить
+          {t('buttons.retry')}
         </button>
       )}
     </div>

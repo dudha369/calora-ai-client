@@ -13,6 +13,7 @@ export interface FoodItem {
   carbs_g: number;
   fiber_g: number;
   sugar_g: number;
+  water_ml: number;
 }
 
 /** Суммарный КБЖУ + клетчатка/сахар — используется и в daily_total, и в анализе фото */
@@ -23,12 +24,11 @@ export interface NutritionTotals {
   carbs_g: number;
   fiber_g: number;
   sugar_g: number;
+  water_ml: number;
 }
 
 /** Итог анализа фото — те же показатели + суммарная гидратация */
-export interface FoodAnalysisTotals extends NutritionTotals {
-  water_ml: number;
-}
+export type FoodAnalysisTotals = NutritionTotals;
 
 export interface FoodLogBase {
   id: number;
@@ -42,6 +42,7 @@ export interface FoodLogBase {
   total_carbs_g: number;
   total_fiber_g: number;
   total_sugar_g: number;
+  total_water_ml: number;
 }
 
 export interface FoodLog extends FoodLogBase {
@@ -84,6 +85,10 @@ export interface FoodItemIn {
   carbs_g: number;
   fiber_g?: number;
   sugar_g?: number;
+  /** Гидратация этого конкретного пункта — ОБЯЗАТЕЛЬНО прокидывать при
+   *  логировании/повторении, иначе FoodItem.water_ml в БД останется 0
+   *  (см. ScannerPage.handleFoodConfirm и api/food.ts.repeat) */
+  water_ml?: number;
 }
 
 export interface BarcodeLogIn {

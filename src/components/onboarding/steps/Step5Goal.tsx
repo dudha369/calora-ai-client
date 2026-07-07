@@ -1,55 +1,57 @@
+import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
 import type { OnboardingData, Goal } from '../../../interfaces/Onboarding';
 
-interface Props {
+interface Step5GoalProps {
   data: Partial<OnboardingData>;
   onChange: (patch: Partial<OnboardingData>, isValid: boolean) => void;
 }
 
-const OPTIONS: { value: Goal; label: string; description: string }[] = [
-  {
-    value: 'lose',
-    label: '🔥 Похудеть',
-    description: 'Дефицит калорий, акцент на кардио и питании',
-  },
-  {
-    value: 'maintain',
-    label: '⚖️ Поддержать вес',
-    description: 'Баланс — удерживать текущую форму',
-  },
-  {
-    value: 'gain',
-    label: '💪 Набрать мышечную массу',
-    description: 'Профицит калорий, акцент на белке и силовых',
-  },
-];
+export const Step5Goal = ({ data, onChange }: Step5GoalProps) => {
+  const { t } = useTranslation('onboarding');
 
-export const Step5Goal = ({ data, onChange }: Props) => (
-  <StepShell
-    title="Какова твоя цель?"
-    subtitle="Определяет дефицит или профицит калорий и основной акцент приложения"
-  >
-    <div className="flex flex-col gap-3">
-      {OPTIONS.map((opt) => (
-        <OptionCard
-          key={opt.value}
-          label={opt.label}
-          description={opt.description}
-          isSelected={data.goal === opt.value}
-          onClick={() =>
-            onChange(
-              // если меняем цель на «поддержать» — сбрасываем желаемый вес
-              {
-                goal: opt.value,
-                target_weight:
-                  opt.value === 'maintain' ? undefined : data.target_weight,
-              },
-              true,
-            )
-          }
-        />
-      ))}
-    </div>
-  </StepShell>
-);
+  const OPTIONS: { value: Goal; label: string; description: string }[] = [
+    {
+      value: 'lose',
+      label: t('step5.lose'),
+      description: t('step5.lose_desc'),
+    },
+    {
+      value: 'maintain',
+      label: t('step5.maintain'),
+      description: t('step5.maintain_desc'),
+    },
+    {
+      value: 'gain',
+      label: t('step5.gain'),
+      description: t('step5.gain_desc'),
+    },
+  ];
+
+  return (
+    <StepShell title={t('step5.title')} subtitle={t('step5.subtitle')}>
+      <div className="flex flex-col gap-3">
+        {OPTIONS.map((opt) => (
+          <OptionCard
+            key={opt.value}
+            label={opt.label}
+            description={opt.description}
+            isSelected={data.goal === opt.value}
+            onClick={() =>
+              onChange(
+                // если меняем цель на «поддержать» — сбрасываем желаемый вес
+                {
+                  goal: opt.value,
+                  target_weight:
+                    opt.value === 'maintain' ? undefined : data.target_weight,
+                },
+                true,
+              )
+            }
+          />
+        ))}
+      </div>
+    </StepShell>
+  );
+};

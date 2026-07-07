@@ -37,7 +37,6 @@ export const ProgressBar = ({
         fill={theme.section_separator_color}
       />
 
-      {/* Линия текущего прогресса */}
       <rect
         x={0}
         y={0}

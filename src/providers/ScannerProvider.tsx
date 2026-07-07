@@ -1,4 +1,4 @@
-import { useRef, useCallback, type ReactNode } from 'react';
+import { useRef, useCallback, useState, type ReactNode } from 'react';
 import ScannerContext from '../context/ScannerContext';
 
 export default function ScannerProvider({ children }: { children: ReactNode }) {
@@ -12,8 +12,12 @@ export default function ScannerProvider({ children }: { children: ReactNode }) {
     captureRef.current?.();
   }, []);
 
+  const [isLiveCamera, setLiveCamera] = useState(false);
+
   return (
-    <ScannerContext.Provider value={{ registerCapture, triggerCapture }}>
+    <ScannerContext.Provider
+      value={{ registerCapture, triggerCapture, isLiveCamera, setLiveCamera }}
+    >
       {children}
     </ScannerContext.Provider>
   );

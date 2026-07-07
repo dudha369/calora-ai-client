@@ -68,12 +68,12 @@ export function useScannerCapture(
 
   // ── Регистрация callback для FAB-кнопки нижней панели ────────────────────
   useEffect(() => {
-    registerCapture(() => {
+    registerCapture(async () => {
       if (photo) {
         // Есть фото → retake
         setPhoto(null);
       } else if (method === 'stream') {
-        const dataUrl = takePhotoRef.current();
+        const dataUrl = await takePhotoRef.current();
         if (dataUrl) setPhoto(dataUrl);
       } else {
         // iOS → открываем нативный file picker

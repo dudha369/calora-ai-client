@@ -1,0 +1,21 @@
+{
+  "calories_remaining": "calories remaining",
+  "from_target": "from target",
+  "calories": "Calories",
+  "protein": "Protein",
+  "fat": "Fat",
+  "carbs": "Carbs",
+  "sugars": "Sugars",
+  "fiber": "Fiber",
+  "water": "Water",
+  "daily_meals": "Daily Meals",
+  "update_data": "Update data",
+  "food": "Food",
+  "compound": "Compound",
+  "products_other": "{{count}} products",
+  "more_dishes_one": "+ {{count}} more dish",
+  "more_dishes_other": "+ {{count}} more dishes",
+  "macros": "P {{p}} F {{f}} C {{c}}",
+  "no_logs": "No logs",
+  "tap_to_log": "Tap + to log meal"
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { ProgressBar } from './ProgressBar';
 
@@ -13,6 +14,7 @@ export const NutritionCard = ({
   max = 0,
 }: NutritionCardProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('common');
 
   return (
     <div
@@ -21,7 +23,9 @@ export const NutritionCard = ({
         backgroundColor: theme.section_bg_color,
       }}
     >
-      <span className="text-base font-semibold">{value}g</span>
+      <span className="text-base font-semibold">
+        {value} {t('units.g')}
+      </span>
 
       <ProgressBar value={value} max={max} width={80} strokeWidth={8} />
 

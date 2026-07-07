@@ -1,0 +1,14 @@
+{
+  "recognizing": "Recognizing...",
+  "error": "Error",
+  "try_again": "Try again",
+  "dish_rating": "Dish rating",
+  "analyze": "Analyze",
+  "cancel": "Cancel",
+  "clarification": "Please add clarification so the AI can more accurately recognize the dish and its ingredients",
+  "clarification_example": "For example: compound, weight, place of buy...",
+  "optional": "*optional",
+  "ready_to_analyze?": "Ready to analyze your dish?",
+  "press_to_analyze": "Press camera button below to take photo of your dish or scan product barcode",
+  "captured_photo": "Captured photo"
+}

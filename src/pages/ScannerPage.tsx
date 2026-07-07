@@ -11,11 +11,13 @@ import { CameraView } from '../components/CameraView';
 import { BarcodeResultModal } from '../components/BarcodeResultModal';
 import { FoodResultModal } from '../components/FoodResultModal';
 import { FoodNotesSheet } from '../components/FoodNotesSheet';
-import { ModalWindow } from '../components/ModalWindow';
+import { BottomSheet } from '../components/BottomSheet';
 
 import { food, todayApiDate } from '../api/food';
 import type { ProductData } from '../types/productData';
 import type { AnalyzedDish } from '../interfaces/api/food';
+import { useScanner } from '../hooks/useScanner.ts';
+import { useTranslation } from 'react-i18next';
 
 interface ScannerLocationState {
   photo?: string;
@@ -25,6 +27,7 @@ export const ScannerPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation('scanner_page');
   const theme = useTheme();
 
   const state = location.state as ScannerLocationState | null;
@@ -34,6 +37,23 @@ export const ScannerPage = () => {
   );
 
   const { status, runAnalysis } = useFoodAnalysis(photo);
+
+  // ── Сообщаем NavigationBar когда камера реально стримит живую картинку ──
+  //
+  // "Живой стрим" = ScannerPage смонтирован И фото ещё не снято (photo === null).
+  // Именно в этот момент имеет смысл counter-rotation иконок навбара —
+  // как только фото сделано, пользователь переходит к редактированию
+  // результата (FoodResultModal/BarcodeResultModal), где удобнее устойчивый
+  // portrait UI, а не повёрнутые иконки.
+  //
+  // setLiveCamera(false) при размонтировании — обязателен, иначе при уходе
+  // со страницы (back button, навигация) navbar решит, что камера всё ещё
+  // активна, и продолжит вращать иконки на всех остальных страницах.
+  const { setLiveCamera } = useScanner();
+  useEffect(() => {
+    setLiveCamera(photo === null);
+    return () => setLiveCamera(false);
+  }, [photo, setLiveCamera]);
 
   const pendingPhotoKeyRef = useRef<string | null>(null);
 
@@ -70,6 +90,7 @@ export const ScannerPage = () => {
     queryClient.invalidateQueries({ queryKey: ['food', date] });
     queryClient.invalidateQueries({ queryKey: ['stats', 'daily', date] });
     queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+    queryClient.invalidateQueries({ queryKey: ['user'] });
     if (hadWater) {
       queryClient.invalidateQueries({ queryKey: ['water', date] });
     }
@@ -99,7 +120,7 @@ export const ScannerPage = () => {
     });
 
     invalidateLoggedQueries(false);
-    clearPhoto();
+
     navigate('/');
   };
 
@@ -120,13 +141,14 @@ export const ScannerPage = () => {
         carbs_g: dish.carbs_g,
         fiber_g: dish.fiber_g,
         sugar_g: dish.sugar_g,
+        water_ml: dish.water_ml,
       })),
       photo_key: status.result.photo_key,
       water_ml: totalWaterMl > 0 ? totalWaterMl : undefined,
     });
 
     invalidateLoggedQueries(totalWaterMl > 0);
-    clearPhoto();
+
     navigate('/');
   };
 
@@ -145,7 +167,7 @@ export const ScannerPage = () => {
         onFileChange={handleFileChange}
       />
 
-      {status.kind === 'detecting' && (
+      {status.kind === 'recognizing' && (
         <div
           className="absolute inset-x-4 bottom-6 z-10 rounded-2xl py-3 text-center text-sm font-medium backdrop-blur-sm"
           style={{
@@ -153,22 +175,16 @@ export const ScannerPage = () => {
             color: theme.text_color,
           }}
         >
-          Распознаём…
+          {t('recognizing')}
         </div>
       )}
 
-      {status.kind === 'ready' && <FoodNotesSheet onSubmit={runAnalysis} />}
-
-      {status.kind === 'analyzing' && (
-        <div
-          className="absolute inset-x-4 bottom-6 z-10 rounded-2xl py-3 text-center text-sm font-medium backdrop-blur-sm"
-          style={{
-            backgroundColor: `${theme.bg_color}CC`,
-            color: theme.text_color,
-          }}
-        >
-          Анализируем фото…
-        </div>
+      {(status.kind === 'ready' || status.kind === 'analyzing') && (
+        <FoodNotesSheet
+          onSubmit={runAnalysis}
+          onClose={clearPhoto}
+          isProcessing={status.kind === 'analyzing'}
+        />
       )}
 
       {status.kind === 'barcode' && (
@@ -188,10 +204,10 @@ export const ScannerPage = () => {
       )}
 
       {status.kind === 'error' && (
-        <ModalWindow
-          title="Ошибка"
+        <BottomSheet
+          title={t('error')}
           onClose={clearPhoto}
-          actionLabel="Попробовать снова"
+          actionLabel={t('try_again')}
           iconCustomEmojiId="5260687119092817530"
           onAction={handleRetry}
         >
@@ -201,7 +217,7 @@ export const ScannerPage = () => {
           >
             {status.message}
           </p>
-        </ModalWindow>
+        </BottomSheet>
       )}
     </>
   );

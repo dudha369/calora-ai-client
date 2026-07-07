@@ -1,6 +1,9 @@
 import { useState } from 'react';
-import { ModalWindow } from './ModalWindow';
-import { NutritionTable, type NutritionRow } from './NutritionTable';
+import { BottomSheet } from './BottomSheet';
+import {
+  NutritionGrid,
+  type NutritionGridStats,
+} from './NutritionStats/NutritionGrid';
 import type { ProductData } from '../types/productData';
 import { useTheme } from '../context/ThemeContext';
 
@@ -17,9 +20,9 @@ interface BarcodeResultModalProps {
 
 const DEFAULT_PORTION_G = 100;
 
-const scale = (value: number | null, factor: number): string => {
-  if (value == null) return '—';
-  return `${(value * factor).toFixed(1).replace(/\.0$/, '')}`;
+const scale = (value: number | null, factor: number): number => {
+  if (value == null) return 0;
+  return value * factor;
 };
 
 export const BarcodeResultModal = ({
@@ -45,25 +48,29 @@ export const BarcodeResultModal = ({
   const factor = portionG / 100;
   const p = product.per100g;
 
-  const rows: NutritionRow[] = [
-    {
-      label: 'Калории',
-      value: `${Math.round((p.calories ?? 0) * factor)} ккал`,
-      primary: true,
-    },
-    { label: 'Белки', value: `${scale(p.protein, factor)} г` },
-    { label: 'Жиры', value: `${scale(p.fat, factor)} г` },
-    { label: 'Углеводы', value: `${scale(p.carbs, factor)} г` },
-  ];
+  const data: NutritionGridStats = {
+    total_calories: Math.round((p.calories ?? 0) * factor),
+    total_protein_g: scale(p.protein, factor),
+    total_fat_g: scale(p.fat, factor),
+    total_carbs_g: scale(p.carbs, factor),
+    total_sugar_g: scale(p.sugars, factor),
+    total_fiber_g: scale(p.fiber, factor),
+    total_water_ml: 0,
+  };
 
   return (
-    <ModalWindow
+    <BottomSheet
       title="Продукт найден"
       onClose={onClose}
-      cancelLabel="Отмена"
       actionLabel="Добавить"
+      iconCustomEmojiId="5274008024585871702"
       onAction={handleConfirm}
       isProcessing={isConfirming}
+      secondaryAction={{
+        text: 'Отменить',
+        iconCustomEmojiId: '5260342697075416641',
+        position: 'left',
+      }}
     >
       <p
         className="mt-1 text-center text-sm font-medium"
@@ -119,7 +126,7 @@ export const BarcodeResultModal = ({
         )}
       </div>
 
-      <NutritionTable rows={rows} />
-    </ModalWindow>
+      <NutritionGrid data={data} />
+    </BottomSheet>
   );
 };

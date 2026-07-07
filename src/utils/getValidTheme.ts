@@ -1,6 +1,7 @@
 import type { ThemeParams } from 'telegram-web-app';
 import type { Theme, ThemeMode } from '../interfaces/Theme';
 import { makeContrast } from './colors';
+import type { RGB } from '@tma.js/types';
 
 const LIGHT: Theme = {
   bg_color: '#ffffff',
@@ -40,9 +41,9 @@ function isHexColor(value: string | undefined): value is string {
   return typeof value === 'string' && /^#?[0-9a-fA-F]{6}$/.test(value);
 }
 
-function normalizeHex(value: string | undefined, fallback: string): string {
+function normalizeHex(value: string | undefined, fallback: RGB): RGB {
   if (!isHexColor(value)) return fallback;
-  return value.startsWith('#') ? value : `#${value}`;
+  return (value.startsWith('#') ? value : `#${value}`) as RGB;
 }
 
 function isDarkTheme(bgColor: string): boolean {
@@ -110,7 +111,7 @@ export function normalizeTheme(theme: Theme): Theme {
   const secondaryMatchesBg = secondary_bg_color === bg_color;
 
   if (sectionMatchesBg && secondaryMatchesBg) {
-    const contrast = makeContrast(bg_color);
+    const contrast = makeContrast(bg_color) as RGB;
     return {
       ...theme,
       section_bg_color: contrast,

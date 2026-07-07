@@ -4,12 +4,9 @@ export interface NutritionPer {
   calories: number | null; // ккал
   protein: number | null; // г
   fat: number | null; // г
-  saturatedFat: number | null; // г (насыщенные жиры)
   carbs: number | null; // г
   sugars: number | null; // г (из них сахара)
   fiber: number | null; // г (клетчатка)
-  salt: number | null; // г
-  sodium: number | null; // г (натрий)
 }
 
 // КБЖУ для произвольного кол-ва граммов — используется при логировании приёма пищи

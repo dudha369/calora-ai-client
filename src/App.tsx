@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { LoadingScreen } from './components/loading/LoadingScreen';
 import { ErrorScreen } from './components/loading/ErrorScreen';
 import { NavigationBar } from './components/NavigationBar/NavigationBar';
@@ -11,19 +12,19 @@ import {
 
 import { useTelegram } from './hooks/useTelegram';
 import { useTelegramLanguage } from './hooks/useTelegramLanguage';
+import { useOrientationLock } from './hooks/useOrientationLock.ts';
+import { settingsButton } from '@tma.js/sdk-react';
 import { useTheme } from './context/ThemeContext';
 import { useUserSession } from './hooks/useUserSession';
 import UserContext from './context/UserContext';
 import { ScrollContainerContext } from './context/ScrollContainerContext';
 import ScannerProvider from './providers/ScannerProvider';
 
-import { useEffect, useRef } from 'react';
-import { settingsButton } from '@tma.js/sdk-react';
-
 export function App() {
   const { ready, safeTop, safeBottom } = useTelegram();
   const theme = useTheme();
   useTelegramLanguage();
+  useOrientationLock();
 
   const scrollContainerRef = useRef<HTMLElement>(null);
 
@@ -56,7 +57,7 @@ export function App() {
     <div
       className="relative flex h-dvh flex-col"
       style={{
-        backgroundColor: theme.bg_color, // secondary_
+        backgroundColor: theme.bg_color,
         color: theme.text_color,
         paddingTop: safeTop,
       }}

@@ -1,14 +1,16 @@
 import { useTheme } from '../../context/ThemeContext';
 import type { FoodItem } from '../../interfaces/api/food';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   item: FoodItem;
-  /** Последняя строка — без нижней разделительной линии */
   isLast: boolean;
 }
 
 export const FoodItemRow = ({ item, isLast }: Props) => {
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
+  const { t: tc } = useTranslation('common');
 
   return (
     <div
@@ -27,16 +29,21 @@ export const FoodItemRow = ({ item, isLast }: Props) => {
           {item.food_name}
         </p>
         <p className="text-xs" style={{ color: theme.hint_color }}>
-          {item.portion_g} г · Б {item.protein_g} · Ж {item.fat_g} · У{' '}
-          {item.carbs_g}
+          {item.portion_g} {tc('units.g')}
+          <b> · </b>
+          {t('macros', {
+            p: Math.round(item.protein_g),
+            f: Math.round(item.fat_g),
+            c: Math.round(item.carbs_g),
+          })}
         </p>
       </div>
 
       <span
-        className="shrink-0 text-sm font-semibold tabular-nums"
+        className="shrink-0 text-base font-bold tabular-nums"
         style={{ color: theme.text_color }}
       >
-        {item.calories} ккал
+        {item.calories} {tc('units.kcal')}
       </span>
     </div>
   );

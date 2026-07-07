@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
 } from 'react';
+import { isIOSDevice } from '../utils/isIOSDevice';
 
 export type FacingMode = 'user' | 'environment';
 export type CameraMethod = 'stream' | 'input';
@@ -23,16 +24,9 @@ export interface UseCameraReturn extends CameraState {
   inputRef: RefObject<HTMLInputElement | null>;
   startCamera: (facing?: FacingMode) => Promise<void>;
   stopCamera: () => void;
-  takePhoto: () => string | null;
+  takePhoto: () => Promise<string | null>; // Изменили на Promise
   switchCamera: () => Promise<void>;
   openInputCamera: () => void;
-}
-
-function isIOS(): boolean {
-  return (
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  );
 }
 
 export function useCamera(): UseCameraReturn {
@@ -40,13 +34,14 @@ export function useCamera(): UseCameraReturn {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const imageCaptureRef = useRef<ImageCapture>(null); // Храним инстанс ImageCapture
 
   const [isReady, setIsReady] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<FacingMode>('environment');
 
-  const method: CameraMethod = isIOS() ? 'input' : 'stream';
+  const method: CameraMethod = isIOSDevice() ? 'input' : 'stream';
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
@@ -56,6 +51,7 @@ export function useCamera(): UseCameraReturn {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    imageCaptureRef.current = null;
     setIsStreaming(false);
     setIsReady(false);
   }, []);
@@ -73,11 +69,18 @@ export function useCamera(): UseCameraReturn {
             facingMode: facing,
             width: { ideal: 1920 },
             height: { ideal: 1080 },
+            advanced: [{ focusMode: 'continuous' }] as any, // Форсируем автофокус
           },
           audio: false,
         });
 
         streamRef.current = stream;
+
+        // Инициализируем ImageCapture, если он поддерживается
+        const track = stream.getVideoTracks()[0];
+        if (typeof window !== 'undefined' && 'ImageCapture' in window) {
+          imageCaptureRef.current = new window.ImageCapture(track);
+        }
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
@@ -123,20 +126,48 @@ export function useCamera(): UseCameraReturn {
 
   useEffect(() => () => stopCamera(), [stopCamera]);
 
-  const takePhoto = useCallback((): string | null => {
+  const takePhoto = useCallback(async (): Promise<string | null> => {
     const video = videoRef.current;
+
+    if (!video || !isReady) return null;
+
+    // 🔥 СРАЗУ ставим видео на паузу. Это даст пользователю мгновенный визуальный
+    // отклик (замороженный кадр), пока под капотом формируется тяжелый Base64.
+    video.pause();
+
+    // 1. Пробуем сделать нативное фото через ImageCapture
+    if (imageCaptureRef.current) {
+      try {
+        const blob = await imageCaptureRef.current.takePhoto();
+        return await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(blob);
+        });
+      } catch (err) {
+        console.warn('ImageCapture отвалился, пробуем через canvas:', err);
+      }
+    }
+
+    // 2. Запасной вариант (Фоллбек на Canvas)
     const canvas = canvasRef.current;
-    if (!video || !canvas || !isReady) return null;
+    if (!canvas) {
+      await video.play(); // Если что-то пошло не так, отпускаем паузу
+      return null;
+    }
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+    if (!ctx) {
+      await video.play();
+      return null;
+    }
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    return canvas.toDataURL('image/jpeg', 0.92);
+    return canvas.toDataURL('image/jpeg', 0.9);
   }, [isReady]);
 
   return {

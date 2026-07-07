@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 
 interface CaloriesArcProps {
@@ -14,6 +15,7 @@ export function CaloriesArc({
   strokeWidth,
 }: CaloriesArcProps) {
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
 
   const arcLength = Math.PI * radius;
   const progress = Math.min(value / max, 1);
@@ -67,7 +69,7 @@ export function CaloriesArc({
           {Math.max(max - value, 0)}
         </span>
         <span className="text-lg" style={{ color: theme.subtitle_text_color }}>
-          calories remaining
+          {t('calories_remaining')}
         </span>
       </div>
     </div>

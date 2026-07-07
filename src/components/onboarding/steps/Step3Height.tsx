@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { useTheme } from '../../../context/ThemeContext';
 import type {
@@ -17,13 +18,16 @@ function cmToFeet(cm: number): string {
   return `${ft}' ${inc}"`;
 }
 
-interface Props {
+interface Step3HeightProps {
   data: Partial<OnboardingData>;
   onChange: (patch: Partial<OnboardingData>, isValid: boolean) => void;
 }
 
-export const Step3Height = ({ data, onChange }: Props) => {
+export const Step3Height = ({ data, onChange }: Step3HeightProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('onboarding');
+  const { t: tc } = useTranslation('common');
+
   const [cm, setCm] = useState(data.height ?? CM_DEFAULT);
   const [unit, setUnit] = useState<HeightUnit>(data.height_unit ?? 'cm');
 
@@ -43,10 +47,7 @@ export const Step3Height = ({ data, onChange }: Props) => {
   };
 
   return (
-    <StepShell
-      title="Твой рост"
-      subtitle="Основной физический параметр для расчёта базового обмена веществ"
-    >
+    <StepShell title={t('step3.title')} subtitle={t('step3.subtitle')}>
       <div className="flex flex-col gap-5">
         {/* Value + unit toggle */}
         <div className="flex items-center justify-between">
@@ -55,12 +56,14 @@ export const Step3Height = ({ data, onChange }: Props) => {
             style={{ color: theme.text_color }}
           >
             {unit === 'cm' ? `${cm}` : cmToFeet(cm)}
-            <span
-              className="ml-1 text-2xl font-normal"
-              style={{ color: theme.hint_color }}
-            >
-              {unit === 'cm' ? 'см' : ''}
-            </span>
+            {unit === 'cm' && (
+              <span
+                className="ml-1 text-2xl font-normal"
+                style={{ color: theme.hint_color }}
+              >
+                {tc('units.cm')}
+              </span>
+            )}
           </span>
           <button
             onClick={toggleUnit}
@@ -70,7 +73,7 @@ export const Step3Height = ({ data, onChange }: Props) => {
               color: theme.button_color,
             }}
           >
-            {unit === 'cm' ? '→ Футы' : '→ См'}
+            {unit === 'cm' ? t('step3.to_imperial') : t('step3.to_metric')}
           </button>
         </div>
 
@@ -89,8 +92,12 @@ export const Step3Height = ({ data, onChange }: Props) => {
             className="flex justify-between text-xs"
             style={{ color: theme.hint_color }}
           >
-            <span>{CM_MIN} см</span>
-            <span>{CM_MAX} см</span>
+            <span>
+              {CM_MIN} {tc('units.cm')}
+            </span>
+            <span>
+              {CM_MAX} {tc('units.cm')}
+            </span>
           </div>
         </div>
       </div>

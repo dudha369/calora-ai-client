@@ -25,15 +25,9 @@ export function calcNutritionForAmount(
       per100g.calories !== null ? round1(per100g.calories * factor) : null,
     protein: per100g.protein !== null ? round1(per100g.protein * factor) : null,
     fat: per100g.fat !== null ? round1(per100g.fat * factor) : null,
-    saturatedFat:
-      per100g.saturatedFat !== null
-        ? round1(per100g.saturatedFat * factor)
-        : null,
     carbs: per100g.carbs !== null ? round1(per100g.carbs * factor) : null,
     sugars: per100g.sugars !== null ? round1(per100g.sugars * factor) : null,
     fiber: per100g.fiber !== null ? round1(per100g.fiber * factor) : null,
-    salt: per100g.salt !== null ? round1(per100g.salt * factor) : null,
-    sodium: per100g.sodium !== null ? round1(per100g.sodium * factor) : null,
   };
 }
 

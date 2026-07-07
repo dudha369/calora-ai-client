@@ -1,8 +1,10 @@
 import { Sprout } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 
 export const LoadingScreen = () => {
   const theme = useTheme();
+  const { t } = useTranslation('common');
 
   return (
     <div
@@ -20,7 +22,7 @@ export const LoadingScreen = () => {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-6 text-sm font-medium tracking-widest uppercase"
         style={{ color: theme.hint_color }}
       >
-        Loading…
+        {t('loading')}
       </p>
     </div>
   );

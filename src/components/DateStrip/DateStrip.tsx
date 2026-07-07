@@ -134,7 +134,7 @@ export const DateStrip = ({
   const viewportWidth = count * itemWidth + (count - 1) * GAP;
 
   return (
-    <div ref={wrapperRef} className="w-full" data-no-swipe>
+    <div ref={wrapperRef} className="w-full">
       <div
         ref={emblaRef}
         className="mx-auto overflow-hidden"

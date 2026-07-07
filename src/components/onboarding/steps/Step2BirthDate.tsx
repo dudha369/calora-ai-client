@@ -1,9 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
-/** Min age 13, max age 90 */
 const MIN_YEAR_OFFSET = 13;
 const MAX_YEAR_OFFSET = 90;
 
@@ -22,20 +22,29 @@ function isValidDate(dateStr: string): boolean {
   return age >= MIN_YEAR_OFFSET && age <= MAX_YEAR_OFFSET;
 }
 
-interface Props {
+interface Step2BirthDateProps {
   data: Partial<OnboardingData>;
   onChange: (patch: Partial<OnboardingData>, isValid: boolean) => void;
 }
 
-export const Step2BirthDate = ({ data, onChange }: Props) => {
+export const Step2BirthDate = ({ data, onChange }: Step2BirthDateProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('onboarding');
   const [raw, setRaw] = useState(data.birth_date ?? '');
 
   const now = new Date();
-  const maxDate = new Date(now.getFullYear() - MIN_YEAR_OFFSET, now.getMonth(), now.getDate())
+  const maxDate = new Date(
+    now.getFullYear() - MIN_YEAR_OFFSET,
+    now.getMonth(),
+    now.getDate(),
+  )
     .toISOString()
     .split('T')[0];
-  const minDate = new Date(now.getFullYear() - MAX_YEAR_OFFSET, now.getMonth(), now.getDate())
+  const minDate = new Date(
+    now.getFullYear() - MAX_YEAR_OFFSET,
+    now.getMonth(),
+    now.getDate(),
+  )
     .toISOString()
     .split('T')[0];
 
@@ -49,10 +58,7 @@ export const Step2BirthDate = ({ data, onChange }: Props) => {
   const age = raw && isValidDate(raw) ? getAge(raw) : null;
 
   return (
-    <StepShell
-      title="Дата рождения"
-      subtitle="Возраст вычисляется автоматически и обновляет нормы каждый год"
-    >
+    <StepShell title={t('step2.title')} subtitle={t('step2.subtitle')}>
       <div className="flex flex-col gap-2">
         <input
           type="date"
@@ -73,10 +79,10 @@ export const Step2BirthDate = ({ data, onChange }: Props) => {
           style={{ color: hasError ? '#ff3b30' : theme.hint_color }}
         >
           {hasError
-            ? `Возраст должен быть от ${MIN_YEAR_OFFSET} до ${MAX_YEAR_OFFSET} лет`
+            ? t('step2.error', { min: MIN_YEAR_OFFSET, max: MAX_YEAR_OFFSET })
             : age !== null
-              ? `Тебе ${age} ${age % 10 === 1 && age !== 11 ? 'год' : (age % 10 >= 2 && age % 10 <= 4 && (age < 12 || age > 14)) ? 'года' : 'лет'}`
-              : `От ${MIN_YEAR_OFFSET} до ${MAX_YEAR_OFFSET} лет`}
+              ? t('step2.age', { count: age })
+              : t('step2.hint', { min: MIN_YEAR_OFFSET, max: MAX_YEAR_OFFSET })}
         </p>
       </div>
     </StepShell>

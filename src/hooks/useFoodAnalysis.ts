@@ -37,7 +37,7 @@ function resolveErrorMessage(err: unknown): string {
 export type AnalysisStatus =
   | { kind: 'idle' }
   /** Локальное декодирование штрихкода + (если найден) запрос в OpenFoodFacts */
-  | { kind: 'detecting' }
+  | { kind: 'recognizing' }
   | { kind: 'barcode'; product: ProductData }
   /** Штрихкода нет (или он не найден в OFF) — ждём подтверждения/уточнения перед ИИ */
   | { kind: 'ready' }
@@ -79,7 +79,7 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
       return;
     }
 
-    setStatus({ kind: 'detecting' });
+    setStatus({ kind: 'recognizing' });
 
     (async () => {
       try {

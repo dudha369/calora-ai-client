@@ -2,43 +2,66 @@ import { useEffect, useRef } from 'react';
 import { mainButton } from '@tma.js/sdk-react';
 import { useTelegram } from './useTelegram';
 import type { MainButtonOptions } from '../interfaces/MainButtonOptions';
+import { useTheme } from '../context/ThemeContext.ts';
 
 export function useMainButton({
-  text,
-  iconCustomEmojiId,
+  text = '',
+  iconCustomEmojiId = '',
+  bgColor,
+  textColor,
   isEnabled,
   isVisible = true,
   isLoading = false,
   onClick,
 }: MainButtonOptions) {
   const { ready } = useTelegram();
-
   const onClickRef = useRef(onClick);
+  const theme = useTheme();
+
   useEffect(() => {
     onClickRef.current = onClick;
   }, [onClick]);
 
-  // Монтирование кнопки
   useEffect(() => {
     if (!ready) return;
 
-    mainButton.setParams({ isVisible });
-
-    return () => {
-      mainButton.setParams({ isVisible: false });
-    };
-  }, [ready, isVisible]);
-
-  // Обработчик клика
-  useEffect(() => {
-    if (!ready) return;
-
-    return mainButton.onClick(() => {
-      if (onClickRef.current) onClickRef.current();
+    const unsubscribe = mainButton.onClick(() => {
+      onClickRef.current?.();
     });
+
+    return () => unsubscribe();
   }, [ready]);
 
-  // Обновление параметров кнопки
+  useEffect(() => {
+    if (!ready) return;
+
+    mainButton.setParams({
+      bgColor,
+      textColor,
+      iconCustomEmojiId: undefined,
+    });
+
+    const timer = setTimeout(() => {
+      mainButton.setParams({
+        text,
+        iconCustomEmojiId,
+        isEnabled: isEnabled && !isLoading,
+        isVisible,
+      });
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [
+    ready,
+    text,
+    iconCustomEmojiId,
+    bgColor,
+    textColor,
+    isEnabled,
+    isVisible,
+    isLoading,
+  ]);
+
   useEffect(() => {
     if (!ready) return;
 
@@ -47,11 +70,21 @@ export function useMainButton({
     } else {
       mainButton.hideLoader();
     }
+  }, [ready, isLoading]);
 
-    mainButton.setParams({
-      text,
-      isEnabled: isEnabled && !isLoading,
-      iconCustomEmojiId,
-    });
-  }, [ready, text, iconCustomEmojiId, isEnabled, isLoading]);
+  useEffect(() => {
+    if (!ready) return;
+
+    return () => {
+      mainButton.hideLoader();
+
+      mainButton.setParams({
+        isVisible: false,
+        text: '',
+        iconCustomEmojiId: undefined,
+        bgColor: theme.button_color,
+        textColor: theme.button_text_color,
+      });
+    };
+  }, [ready, theme]);
 }

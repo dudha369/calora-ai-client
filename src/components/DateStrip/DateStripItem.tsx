@@ -1,8 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
+import { getIntlLocale, capitalizeFirst } from '../../utils/locale';
 import { withOpacity } from '../../utils/colors';
 import { MARKER_FOOD_COLOR, MARKER_WATER_COLOR } from '../../constants/markers';
-
-const DAY_NAMES = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'] as const;
+import { useMemo } from 'react';
 
 interface Props {
   date: Date;
@@ -28,10 +29,17 @@ export const DateStripItem = ({
   itemWidth,
 }: Props) => {
   const theme = useTheme();
+  const { i18n } = useTranslation();
+  const locale = getIntlLocale(i18n.language);
   const isDisabled = isFuture || isBeforeMin;
 
-  const weekday = DAY_NAMES[date.getDay()];
-  const day = date.getDate();
+  const dayName = useMemo(
+    () =>
+      capitalizeFirst(
+        new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(date),
+      ),
+    [date, locale],
+  );
 
   let bg: string;
   let border: string;
@@ -60,18 +68,18 @@ export const DateStripItem = ({
     nameColor = theme.hint_color;
   }
 
-  let dot_bg: string;
+  let bar_bg: string;
 
   if (hasFood && hasWater) {
-    dot_bg = `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`;
+    bar_bg = `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`;
   } else if (hasFood) {
-    dot_bg = MARKER_FOOD_COLOR;
+    bar_bg = MARKER_FOOD_COLOR;
   } else if (hasWater) {
-    dot_bg = MARKER_WATER_COLOR;
+    bar_bg = MARKER_WATER_COLOR;
   } else if (isDisabled) {
-    dot_bg = withOpacity(theme.text_color, 0.25);
+    bar_bg = withOpacity(theme.text_color, 0.25);
   } else {
-    dot_bg = theme.hint_color;
+    bar_bg = theme.hint_color;
   }
 
   return (
@@ -91,19 +99,19 @@ export const DateStripItem = ({
         className="text-sm leading-none font-medium"
         style={{ color: nameColor }}
       >
-        {weekday}
+        {dayName}
       </span>
       <span
         className="text-[27px] leading-none font-semibold tracking-[-0.03em]"
         style={{ color: numColor }}
       >
-        {day}
+        {date.getDate()}
       </span>
 
       <span
         className="h-1 w-1/2 rounded-full"
         style={{
-          background: dot_bg,
+          background: bar_bg,
         }}
       />
     </button>

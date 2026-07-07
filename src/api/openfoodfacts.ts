@@ -55,9 +55,6 @@ interface OFFNutriments {
   // Жиры
   fat_100g?: number;
   fat_serving?: number;
-  // Насыщенные жиры
-  'saturated-fat_100g'?: number;
-  'saturated-fat_serving'?: number;
   // Углеводы
   carbohydrates_100g?: number;
   carbohydrates_serving?: number;
@@ -67,12 +64,6 @@ interface OFFNutriments {
   // Клетчатка
   fiber_100g?: number;
   fiber_serving?: number;
-  // Соль
-  salt_100g?: number;
-  salt_serving?: number;
-  // Натрий
-  sodium_100g?: number;
-  sodium_serving?: number;
 }
 
 interface OFFProduct {
@@ -110,12 +101,9 @@ function extractNutritionPer100g(n: OFFNutriments): NutritionPer {
     calories: n['energy-kcal_100g'] ?? null,
     protein: n['proteins_100g'] ?? null,
     fat: n['fat_100g'] ?? null,
-    saturatedFat: n['saturated-fat_100g'] ?? null,
     carbs: n['carbohydrates_100g'] ?? null,
     sugars: n['sugars_100g'] ?? null,
     fiber: n['fiber_100g'] ?? null,
-    salt: n['salt_100g'] ?? null,
-    sodium: n['sodium_100g'] ?? null,
   };
 }
 
@@ -137,12 +125,9 @@ function extractNutritionPerServingFromAPI(
     calories: n['energy-kcal_serving'] ?? null,
     protein: n['proteins_serving'] ?? null,
     fat: n['fat_serving'] ?? null,
-    saturatedFat: n['saturated-fat_serving'] ?? null,
     carbs: n['carbohydrates_serving'] ?? null,
     sugars: n['sugars_serving'] ?? null,
     fiber: n['fiber_serving'] ?? null,
-    salt: n['salt_serving'] ?? null,
-    sodium: n['sodium_serving'] ?? null,
   };
 }
 
@@ -157,15 +142,9 @@ function scaleNutrition(per100g: NutritionPer, amountG: number): NutritionPer {
       per100g.calories !== null ? round1(per100g.calories * factor) : null,
     protein: per100g.protein !== null ? round1(per100g.protein * factor) : null,
     fat: per100g.fat !== null ? round1(per100g.fat * factor) : null,
-    saturatedFat:
-      per100g.saturatedFat !== null
-        ? round1(per100g.saturatedFat * factor)
-        : null,
     carbs: per100g.carbs !== null ? round1(per100g.carbs * factor) : null,
     sugars: per100g.sugars !== null ? round1(per100g.sugars * factor) : null,
     fiber: per100g.fiber !== null ? round1(per100g.fiber * factor) : null,
-    salt: per100g.salt !== null ? round1(per100g.salt * factor) : null,
-    sodium: per100g.sodium !== null ? round1(per100g.sodium * factor) : null,
   };
 }
 

@@ -1,55 +1,66 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { useTheme } from '../../../context/ThemeContext';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
-const OPTIONS = [
-  'Нет особенностей',
-  'Сахарный диабет 2 типа',
-  'Высокое давление',
-  'Повышенный холестерин',
-  'Заболевания почек',
-];
+const OPTION_KEYS = [
+  'none',
+  'diabetes',
+  'hypertension',
+  'cholesterol',
+  'kidney',
+] as const;
+type MedicalKey = (typeof OPTION_KEYS)[number];
 
-const NONE = 'Нет особенностей';
+const LEGACY_MAP: Record<string, MedicalKey> = {
+  'Нет особенностей': 'none',
+  'Сахарный диабет 2 типа': 'diabetes',
+  'Высокое давление': 'hypertension',
+  'Повышенный холестерин': 'cholesterol',
+  'Заболевания почек': 'kidney',
+};
 
-interface Props {
+function migrateValues(values: string[]): MedicalKey[] {
+  return values.map((v) => (LEGACY_MAP[v] ?? v) as MedicalKey);
+}
+
+interface Step10MedicalProps {
   data: Partial<OnboardingData>;
   onChange: (patch: Partial<OnboardingData>, isValid: boolean) => void;
 }
 
-export const Step10Medical = ({ data, onChange }: Props) => {
+export const Step10Medical = ({ data, onChange }: Step10MedicalProps) => {
   const theme = useTheme();
-  const [selected, setSelected] = useState<string[]>(
-    data.medical_conditions ?? [],
+  const { t } = useTranslation('onboarding');
+
+  const [selected, setSelected] = useState<MedicalKey[]>(() =>
+    migrateValues(data.medical_conditions ?? []),
   );
 
-  const toggle = (opt: string) => {
-    let next: string[];
-    if (opt === NONE) {
-      next = selected.includes(NONE) ? [] : [NONE];
+  const toggle = (key: MedicalKey) => {
+    let next: MedicalKey[];
+    if (key === 'none') {
+      next = selected.includes('none') ? [] : ['none'];
     } else {
-      const without = selected.filter((s) => s !== NONE);
-      next = without.includes(opt)
-        ? without.filter((s) => s !== opt)
-        : [...without, opt];
+      const without = selected.filter((s) => s !== 'none');
+      next = without.includes(key)
+        ? without.filter((s) => s !== key)
+        : [...without, key];
     }
     setSelected(next);
     onChange({ medical_conditions: next }, true);
   };
 
   return (
-    <StepShell
-      title="Медицинские особенности"
-      subtitle="Только для точности рекомендаций ИИ. Данные не передаются третьим лицам. Можно пропустить"
-    >
+    <StepShell title={t('step10.title')} subtitle={t('step10.subtitle')}>
       <div className="flex flex-col gap-3">
-        {OPTIONS.map((opt) => {
-          const active = selected.includes(opt);
+        {OPTION_KEYS.map((key) => {
+          const active = selected.includes(key);
           return (
             <button
-              key={opt}
-              onClick={() => toggle(opt)}
+              key={key}
+              onClick={() => toggle(key)}
               className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all duration-150"
               style={{
                 backgroundColor: active
@@ -59,7 +70,6 @@ export const Step10Medical = ({ data, onChange }: Props) => {
                 border: `1px solid ${active ? theme.button_color : theme.section_separator_color}`,
               }}
             >
-              {/* Custom checkbox */}
               <span
                 className="flex size-5 flex-shrink-0 items-center justify-center rounded-full border-2"
                 style={{
@@ -83,13 +93,13 @@ export const Step10Medical = ({ data, onChange }: Props) => {
                   </svg>
                 )}
               </span>
-              <span className="text-sm font-medium">{opt}</span>
+              <span className="text-sm font-medium">{t(`step10.${key}`)}</span>
             </button>
           );
         })}
       </div>
       <p className="-mt-2 px-1 text-xs" style={{ color: theme.hint_color }}>
-        ⚠️ Используется только для фильтрации советов ИИ
+        {t('step10.warning')}
       </p>
     </StepShell>
   );

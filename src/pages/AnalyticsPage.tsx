@@ -102,7 +102,8 @@ const MacroBar = ({
 
 export const AnalyticsPage = () => {
   const { date } = useParams();
-  console.log(date);
+  const correctDate = date ?? new Date();
+  console.log(correctDate);
 
   const theme = useTheme();
   const today = useMemo(() => toApiDate(startOfDay(new Date())), []);
