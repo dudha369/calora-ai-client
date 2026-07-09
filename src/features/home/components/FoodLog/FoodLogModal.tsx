@@ -11,10 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { getIntlLocale } from '@/shared/lib/locale';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
-import {
-  NutritionEditGrid,
-  type NutritionValues,
-} from '@/shared/ui/NutritionEditGrid';
+import { NumberField } from '@/shared/ui/NumberField';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
@@ -84,11 +81,16 @@ function nutritionToItem(name: string, v: NutritionValues): EditableItem {
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-interface FoodLogModalProps {
+export interface FoodLogModalProps {
   log: FoodLog;
   isDeleting: boolean;
   onClose: () => void;
   onDelete: (logId: number) => void;
+  onCopy: (result: CopyMealResult) => void;
+  onEdit: (
+    logId: number,
+    items: EditableItem[],
+  ) => void;
 }
 
 export const FoodLogModal = ({
@@ -96,6 +98,8 @@ export const FoodLogModal = ({
   isDeleting,
   onClose,
   onDelete,
+  onCopy,
+  onEdit,
 }: FoodLogModalProps) => {
   const theme = useTheme();
   const { safeTop } = useTelegram();
@@ -115,6 +119,13 @@ export const FoodLogModal = ({
 
   // ─── Derived values ───────────────────────────────────────────────────────
 
+  const [editMode, setEditMode] = useState(false);
+  const [editItems, setEditItems] = useState<EditableItem[]>(() =>
+    log.items.map(toEditable),
+  );
+  const [copyMode, setCopyMode] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
   const formattedTime = new Date(log.logged_at).toLocaleTimeString(
     getIntlLocale(i18n.language),
     { hour: '2-digit', minute: '2-digit' },
@@ -122,8 +133,9 @@ export const FoodLogModal = ({
 
   const portion_g = log.items.reduce((s, i) => s + i.portion_g, 0);
   const isSingleIngredient = log.items.length === 1;
-  const mainDish = log.items[0]?.food_name ?? t('food');
-  const cleanDish = mainDish.trim();
+  const displayName =
+    log.meal_name ?? log.items[0]?.food_name ?? t('food');
+  const cleanDish = displayName.trim();
   const lastSpaceIndex = cleanDish.lastIndexOf(' ');
   const textBeforeLastWord =
     lastSpaceIndex === -1 ? '' : cleanDish.substring(0, lastSpaceIndex);
@@ -225,6 +237,8 @@ export const FoodLogModal = ({
 
   const handleCopyText = async () => {
     await navigator.clipboard.writeText(mainDish);
+  const handleCopyText = async () => {
+    await navigator.clipboard.writeText(displayName);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -241,6 +255,19 @@ export const FoodLogModal = ({
           setMode('view');
           onClose();
         }}
+      />
+    );
+  }
+
+  // ─── Copy meal sheet ──────────────────────────────────────────────────────
+
+  if (copyMode) {
+    return (
+      <CopyMealSheet
+        log={log}
+        isProcessing={isRepeating}
+        onConfirm={onCopy}
+        onClose={() => setCopyMode(false)}
       />
     );
   }
@@ -357,24 +384,22 @@ export const FoodLogModal = ({
             )}
 
             <div className="flex flex-col gap-0.5 px-1">
-              {isSingleIngredient && (
-                <p
-                  className="text-lg font-bold"
-                  style={{ color: theme.text_color }}
-                >
-                  {textBeforeLastWord && `${textBeforeLastWord} `}
-                  <span className="whitespace-nowrap">
-                    {lastWord}
-                    <button
-                      onClick={handleCopyText}
-                      aria-label={tc('buttons.copy')}
-                      className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
-                    >
-                      <Copy size={16} />
-                    </button>
-                  </span>
-                </p>
-              )}
+              <p
+                className="text-lg font-bold"
+                style={{ color: theme.text_color }}
+              >
+                {textBeforeLastWord && `${textBeforeLastWord} `}
+                <span className="whitespace-nowrap">
+                  {lastWord}
+                  <button
+                    onClick={handleCopyText}
+                    aria-label={tc('buttons.copy')}
+                    className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </span>
+              </p>
 
               <div className="flex items-center justify-between">
                 <div className="flex gap-1.5">
