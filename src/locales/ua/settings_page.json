@@ -1,6 +1,10 @@
 {
   "language": "Мова",
-  "failed_to_delete": "Не вдалося видалити акаунт. Перевір з’єднання і спробуй ще раз.",
+  "theme": "Тема",
+  "theme_auto": "Авто (Telegram)",
+  "theme_light": "Світла",
+  "theme_dark": "Темна",
+  "failed_to_delete": "Не вдалося видалити акаунт. Перевір з'єднання і спробуй ще раз.",
   "delete_account": "Видалити акаунт",
   "delete_account_title": "Видалити акаунт?",
   "confirm": "Підтвердити",

@@ -1,5 +1,9 @@
 {
   "language": "Язык",
+  "theme": "Тема",
+  "theme_auto": "Авто (Telegram)",
+  "theme_light": "Светлая",
+  "theme_dark": "Тёмная",
   "failed_to_delete": "Не удалось удалить аккаунт. Проверь соединение и попробуй ещё раз.",
   "delete_account": "Удалить аккаунт",
   "delete_account_title": "Удалить аккаунт?",
