@@ -2,7 +2,6 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import { useActiveDates } from '../../hooks/useActiveDates';
 import { isSameDay, startOfDay, toApiDate } from '@/shared/lib/date';
 import { buildCalendarCells } from '../../lib/calendarMonths';
-import { withOpacity } from '@/shared/lib/colors';
 import { getMarkerBackground } from '../../lib/getMarkerBackground';
 
 interface MonthGridProps {
