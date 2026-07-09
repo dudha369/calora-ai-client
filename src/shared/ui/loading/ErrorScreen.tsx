@@ -1,5 +1,5 @@
 import type { ElementType } from 'react';
-import { useTranslation, Trans } from 'react-i18next'; // Импортируем Trans для работы с JSX в переводах
+import { useTranslation, Trans } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import {
   WifiOff,
@@ -7,9 +7,15 @@ import {
   AlertTriangle,
   ShieldAlert,
   Lock,
+  Wrench,
 } from 'lucide-react';
 
-export type ErrorType = 'network' | 'general' | 'no_telegram' | 'access_denied';
+export type ErrorType =
+  | 'network'
+  | 'general'
+  | 'no_telegram'
+  | 'access_denied'
+  | 'maintenance';
 
 const CONFIG: Record<ErrorType, { Icon: ElementType; showRetry: boolean }> = {
   network: {
@@ -28,14 +34,23 @@ const CONFIG: Record<ErrorType, { Icon: ElementType; showRetry: boolean }> = {
     Icon: Lock,
     showRetry: false,
   },
+  maintenance: {
+    Icon: Wrench,
+    showRetry: true,
+  },
 };
 
 interface ErrorScreenProps {
   errorType: ErrorType;
   onRetry?: () => void;
+  customMessage?: string;
 }
 
-export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
+export const ErrorScreen = ({
+  errorType,
+  onRetry,
+  customMessage,
+}: ErrorScreenProps) => {
   const theme = useTheme();
   const { t } = useTranslation('common');
   const { Icon, showRetry } = CONFIG[errorType];
@@ -47,11 +62,16 @@ export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
     >
       <Icon
         className="animate-pulse"
-        style={{ color: theme.destructive_text_color }}
+        style={{
+          color:
+            errorType === 'maintenance'
+              ? '#f59e0b'
+              : theme.destructive_text_color,
+        }}
         size={64}
       />
 
-      <div>
+      <div className="px-6">
         <p
           className="text-center text-base font-medium tracking-widest uppercase"
           style={{ color: theme.text_color }}
@@ -60,7 +80,7 @@ export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
         </p>
 
         <p
-          className="text-center text-sm font-medium"
+          className="mt-1 text-center text-sm font-medium"
           style={{ color: theme.hint_color }}
         >
           {errorType === 'no_telegram' ? (
@@ -75,6 +95,8 @@ export const ErrorScreen = ({ errorType, onRetry }: ErrorScreenProps) => {
                 ),
               }}
             />
+          ) : customMessage ? (
+            customMessage
           ) : (
             t(`errors.${errorType}.subtitle`)
           )}
