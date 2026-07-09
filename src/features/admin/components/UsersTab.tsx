@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   useQuery,
   useInfiniteQuery,
@@ -352,12 +353,15 @@ function FoodLogCard({ fl }: { fl: AdminFoodLog }) {
         </div>
       </div>
 
-      {lightbox && fl.photo_url && (
-        <PhotoLightbox
-          src={fl.photo_url}
-          onClose={() => setLightbox(false)}
-        />
-      )}
+      {lightbox &&
+        fl.photo_url &&
+        createPortal(
+          <PhotoLightbox
+            src={fl.photo_url}
+            onClose={() => setLightbox(false)}
+          />,
+          document.body,
+        )}
     </>
   );
 }
