@@ -15,7 +15,7 @@ import { useTheme } from '@/shared/context/ThemeContext';
 
 interface FoodResultModalProps {
   result: FoodAnalyzeResponse;
-  onConfirm: (dishes: AnalyzedDish[]) => Promise<void>;
+  onConfirm: (dishes: AnalyzedDish[], mealName: string) => Promise<void>;
   onClose: () => void;
 }
 
@@ -58,8 +58,10 @@ export const FoodResultModal = ({
 }: FoodResultModalProps) => {
   const theme = useTheme();
   const [dishes, setDishes] = useState<AnalyzedDish[]>(result.dishes);
+  const [mealName, setMealName] = useState(result.meal_name ?? '');
   const [isConfirming, setIsConfirming] = useState(false);
   const [syncEnabled, setSyncEnabled] = useState(false);
+  const isMultiDish = dishes.length > 1;
 
   // Snapshot of original values per dish for proportional sync
   const [baseValues] = useState<NutritionValues[]>(() =>
@@ -112,7 +114,9 @@ export const FoodResultModal = ({
   const handleConfirm = async () => {
     setIsConfirming(true);
     try {
-      await onConfirm(dishes);
+      const finalName =
+        mealName.trim() || dishes[0]?.name || '';
+      await onConfirm(dishes, finalName);
     } finally {
       setIsConfirming(false);
     }
@@ -134,6 +138,21 @@ export const FoodResultModal = ({
       }}
     >
       <div className="flex flex-col gap-3">
+        {/* Editable meal name — shown only for multi-dish */}
+        {isMultiDish && (
+          <input
+            type="text"
+            value={mealName}
+            onChange={(e) => setMealName(e.target.value)}
+            placeholder="Название приёма пищи"
+            className="w-full rounded-xl px-3 py-2.5 text-base font-bold outline-none"
+            style={{
+              backgroundColor: theme.secondary_bg_color,
+              color: theme.text_color,
+            }}
+          />
+        )}
+
         {dishes.map((dish, i) => (
           <div
             key={i}

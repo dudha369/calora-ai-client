@@ -94,8 +94,9 @@ export const FoodLogModal = ({
 
   const portion_g = log.items.reduce((s, i) => s + i.portion_g, 0);
   const isSingleIngredient = log.items.length === 1;
-  const mainDish = log.items[0]?.food_name ?? t('food');
-  const cleanDish = mainDish.trim();
+  const displayName =
+    log.meal_name ?? log.items[0]?.food_name ?? t('food');
+  const cleanDish = displayName.trim();
   const lastSpaceIndex = cleanDish.lastIndexOf(' ');
   const textBeforeLastWord =
     lastSpaceIndex === -1 ? '' : cleanDish.substring(0, lastSpaceIndex);
@@ -103,7 +104,7 @@ export const FoodLogModal = ({
     lastSpaceIndex === -1 ? cleanDish : cleanDish.substring(lastSpaceIndex + 1);
 
   const handleCopyText = async () => {
-    await navigator.clipboard.writeText(mainDish);
+    await navigator.clipboard.writeText(displayName);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -337,24 +338,22 @@ export const FoodLogModal = ({
             )}
 
             <div className="flex flex-col gap-0.5 px-1">
-              {isSingleIngredient && (
-                <p
-                  className="text-lg font-bold"
-                  style={{ color: theme.text_color }}
-                >
-                  {textBeforeLastWord && `${textBeforeLastWord} `}
-                  <span className="whitespace-nowrap">
-                    {lastWord}
-                    <button
-                      onClick={handleCopyText}
-                      aria-label={tc('buttons.copy')}
-                      className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
-                    >
-                      <Copy size={16} />
-                    </button>
-                  </span>
-                </p>
-              )}
+              <p
+                className="text-lg font-bold"
+                style={{ color: theme.text_color }}
+              >
+                {textBeforeLastWord && `${textBeforeLastWord} `}
+                <span className="whitespace-nowrap">
+                  {lastWord}
+                  <button
+                    onClick={handleCopyText}
+                    aria-label={tc('buttons.copy')}
+                    className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
+                  >
+                    <Copy size={16} />
+                  </button>
+                </span>
+              </p>
 
               <div className="flex items-center justify-between">
                 <div className="flex gap-1.5">

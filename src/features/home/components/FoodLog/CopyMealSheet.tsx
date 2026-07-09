@@ -32,7 +32,9 @@ export const CopyMealSheet = ({
   const { t } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
 
-  const [name, setName] = useState(log.items[0]?.food_name ?? '');
+  const [name, setName] = useState(
+    log.meal_name ?? log.items[0]?.food_name ?? '',
+  );
   const [includePhoto, setIncludePhoto] = useState(!!log.photo_url);
 
   const originalPortion = log.items.reduce((s, i) => s + i.portion_g, 0);

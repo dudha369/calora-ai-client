@@ -154,7 +154,10 @@ export const ScannerPage = () => {
     navigate('/');
   };
 
-  const handleFoodConfirm = async (dishes: AnalyzedDish[]) => {
+  const handleFoodConfirm = async (
+    dishes: AnalyzedDish[],
+    mealName: string,
+  ) => {
     if (status.kind !== 'food') return;
     pendingPhotoKeyRef.current = null;
 
@@ -174,6 +177,7 @@ export const ScannerPage = () => {
         water_ml: dish.water_ml,
       })),
       photo_key: status.result.photo_key,
+      meal_name: mealName || undefined,
       water_ml: totalWaterMl > 0 ? totalWaterMl : undefined,
     });
 
