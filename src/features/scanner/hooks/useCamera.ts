@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { isIOSDevice } from '@/shared/lib/isIOSDevice';
 
 export type FacingMode = 'user' | 'environment';
@@ -72,6 +73,7 @@ function normalizeImageBlob(blob: Blob): Promise<string> {
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useCamera(): UseCameraReturn {
+  const { t } = useTranslation('scanner_page');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -134,7 +136,7 @@ export function useCamera(): UseCameraReturn {
         const msg =
           err instanceof Error
             ? err.message
-            : 'Не удалось получить доступ к камере';
+            : t('camera_access_error');
         setError(msg);
         setIsStreaming(false);
       }

@@ -6,8 +6,9 @@ import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { users } from '@/shared/api/users';
 import type { StreakInfo, TodayProgress } from '@/shared/types/api/streak';
+import { useTranslation } from 'react-i18next';
 
-interface Props {
+interface StreakPopupProps {
   currentStreak: number;
   onClose: () => void;
 }
@@ -16,6 +17,7 @@ const MAX_RESTORES_PER_MONTH = 3;
 
 const CaloriesBar = ({ p }: { p: TodayProgress }) => {
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
   const scale = p.calories_max * 1.2;
   const pct = (v: number) =>
     `${Math.min(Math.max((v / scale) * 100, 0), 100).toFixed(1)}%`;
@@ -58,7 +60,7 @@ const CaloriesBar = ({ p }: { p: TodayProgress }) => {
         style={{ color: theme.hint_color }}
       >
         <span>0</span>
-        <span>{p.calories_goal} ккал</span>
+        <span>{p.calories_goal} {t('units.kcal', { ns: 'common' })}</span>
       </div>
     </div>
   );
@@ -66,28 +68,25 @@ const CaloriesBar = ({ p }: { p: TodayProgress }) => {
 
 const StatusLine = ({ p }: { p: TodayProgress }) => {
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
 
   if (p.status === 'met') {
     return (
       <p className="text-sm font-medium" style={{ color: '#34c759' }}>
-        ✅ Норма выполнена — серия продлена!
+        {t('streak_norm_met')}
       </p>
     );
   }
   if (p.status === 'over') {
     return (
       <p className="text-sm" style={{ color: theme.hint_color }}>
-        Превышение нормы. Серия была продлена ранее.
+        {t('streak_over')}
       </p>
     );
   }
   return (
     <p className="text-sm" style={{ color: theme.hint_color }}>
-      Ещё{' '}
-      <span className="font-semibold" style={{ color: theme.text_color }}>
-        {p.calories_remaining} ккал
-      </span>{' '}
-      до допуска
+      {t('streak_remaining', { count: p.calories_remaining })}
     </p>
   );
 };
@@ -115,8 +114,9 @@ const RestoreCharges = ({ available }: { available: number }) => {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export const StreakPopup = ({ currentStreak, onClose }: Props) => {
+export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
   const queryClient = useQueryClient();
   const [restoreError, setRestoreError] = useState<string | null>(null);
 
@@ -147,7 +147,7 @@ export const StreakPopup = ({ currentStreak, onClose }: Props) => {
       setRestoreError(null);
     },
     onError: () => {
-      setRestoreError('Не удалось восстановить. Попробуй ещё раз.');
+      setRestoreError(t('streak_restore_error'));
     },
   });
 
@@ -161,12 +161,12 @@ export const StreakPopup = ({ currentStreak, onClose }: Props) => {
   // оба Telegram-button скрыты (встроено в BottomSheet).
   return (
     <BottomSheet
-      title="Серия"
+      title={t('streak_title')}
       onClose={onClose}
       secondaryAction={{
-        text: 'Закрыть',
+        text: t('streak_close'),
       }}
-      actionLabel={data?.can_restore ? 'Восстановить серию' : undefined}
+      actionLabel={data?.can_restore ? t('restore_streak') : undefined}
       onAction={data?.can_restore ? () => doRestore() : undefined}
       isProcessing={isRestoring}
     >
@@ -187,7 +187,7 @@ export const StreakPopup = ({ currentStreak, onClose }: Props) => {
               </span>
             </div>
             <span className="text-xs" style={{ color: theme.hint_color }}>
-              текущая
+              {t('streak_current')}
             </span>
           </div>
 
@@ -205,7 +205,7 @@ export const StreakPopup = ({ currentStreak, onClose }: Props) => {
               </span>
             </div>
             <span className="text-xs" style={{ color: theme.hint_color }}>
-              рекорд
+              {t('streak_record')}
             </span>
           </div>
         </div>
@@ -227,7 +227,7 @@ export const StreakPopup = ({ currentStreak, onClose }: Props) => {
           <div className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
               <span className="text-sm" style={{ color: theme.hint_color }}>
-                Щиты серии
+                {t('streak_shields')}
               </span>
               <RestoreCharges available={data.streak_restores_available} />
             </div>
@@ -247,11 +247,9 @@ export const StreakPopup = ({ currentStreak, onClose }: Props) => {
           className="text-xs leading-relaxed"
           style={{ color: theme.hint_color }}
         >
-          Серия продлевается при соблюдении нормы калорий
           {data?.today_progress
-            ? ` (допуск от ${data.today_progress.calories_min} ккал).`
-            : '.'}{' '}
-          Щиты обновляются с каждой новой серией и в начале месяца.
+            ? t('streak_rule', { min: data.today_progress.calories_min })
+            : t('streak_rule_short')}
         </p>
       </div>
     </BottomSheet>

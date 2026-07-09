@@ -1,11 +1,13 @@
 import axios from 'axios';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { decodeBarcode } from '../lib/decodeBarcode';
 import { fetchProductByBarcode } from '../lib/openfoodfacts';
 import { food } from '@/shared/api/food';
 import { compressImage } from '../lib/compressImage';
 import type { FoodAnalyzeResponse } from '@/shared/types/api/food';
 import type { ProductData } from '../types/productData';
+import type { TFunction } from 'i18next';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -16,7 +18,7 @@ function dataUrlToFile(dataUrl: string, filename = 'photo.jpg'): File {
   return new File([bytes], filename, { type: mime });
 }
 
-function resolveErrorMessage(err: unknown): string {
+function resolveErrorMessage(err: unknown, t: TFunction): string {
   let detail: string | undefined;
 
   if (axios.isAxiosError(err)) {
@@ -26,10 +28,10 @@ function resolveErrorMessage(err: unknown): string {
   }
 
   if (detail === 'no_food_detected') {
-    return 'На фотографии не найдена еда. Убедитесь, что продукт в кадре, и попробуйте ещё раз.';
+    return t('no_food_detected');
   }
   if (err instanceof Error) return err.message;
-  return 'Не удалось проанализировать фото. Попробуй ещё раз.';
+  return t('analysis_error');
 }
 
 // ── State machine ─────────────────────────────────────────────────────────────
@@ -68,6 +70,7 @@ export interface UseFoodAnalysisReturn {
  * завершившегося предыдущего вызова.
  */
 export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
+  const { t } = useTranslation('scanner_page');
   const [status, setStatus] = useState<AnalysisStatus>({ kind: 'idle' });
   const requestIdRef = useRef(0);
 
@@ -121,7 +124,7 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
           }
         } catch (err) {
           if (requestIdRef.current === requestId) {
-            setStatus({ kind: 'error', message: resolveErrorMessage(err) });
+            setStatus({ kind: 'error', message: resolveErrorMessage(err, t) });
           }
         }
       })();

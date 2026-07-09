@@ -10,5 +10,8 @@
   "optional": "*optional",
   "ready_to_analyze?": "Ready to analyze your dish?",
   "press_to_analyze": "Press camera button below to take photo of your dish or scan product barcode",
-  "captured_photo": "Captured photo"
+  "captured_photo": "Captured photo",
+  "camera_access_error": "Could not access the camera",
+  "no_food_detected": "No food detected in the photo. Make sure the product is in frame and try again.",
+  "analysis_error": "Could not analyze the photo. Please try again."
 }

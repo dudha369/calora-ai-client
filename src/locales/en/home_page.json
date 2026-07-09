@@ -22,5 +22,16 @@
   "streak_pending": "Streak pending",
   "streak_lost": "Streak lost",
   "cancel": "Cancel",
-  "restore_streak": "Restore streak"
+  "restore_streak": "Restore streak",
+  "streak_title": "Streak",
+  "streak_close": "Close",
+  "streak_current": "current",
+  "streak_record": "record",
+  "streak_norm_met": "✅ Goal met — streak extended!",
+  "streak_over": "Over the limit. Streak was extended earlier.",
+  "streak_remaining": "{{count}} kcal to go",
+  "streak_shields": "Streak shields",
+  "streak_restore_error": "Could not restore. Please try again.",
+  "streak_rule": "Streak extends when you meet your calorie goal (range from {{min}} kcal). Shields refresh with each new streak and at the start of the month.",
+  "streak_rule_short": "Streak extends when you meet your calorie goal. Shields refresh with each new streak and at the start of the month."
 }
