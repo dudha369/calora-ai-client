@@ -4,6 +4,7 @@ import type {
   FoodAnalyzeResponse,
   FoodByDateResponse,
   FoodLogIn,
+  FoodItemIn,
   BarcodeLogIn,
   CreateFoodLogResponse,
   FoodLog,
@@ -58,4 +59,37 @@ export const food = {
       })),
       // Нет явного water_ml на уровне лога — backend суммирует из items
     } satisfies FoodLogIn),
+
+  /**
+   * Обновляет ранее залогированную запись.
+   * PUT /api/food/{log_id} — backend атомарно заменяет items,
+   * пересчитывает total-поля и пересинхронизирует WaterLog.
+   */
+  update: (
+    logId: number,
+    items: Array<{
+      food_name: string;
+      portion_g: number;
+      calories: number;
+      protein_g: number;
+      fat_g: number;
+      carbs_g: number;
+      fiber_g?: number;
+      sugar_g?: number;
+      water_ml?: number;
+    }>,
+  ) =>
+    request<CreateFoodLogResponse>(`food/${logId}`, 'PUT', {
+      items: items.map((i) => ({
+        food_name: i.food_name,
+        portion_g: i.portion_g,
+        calories: i.calories,
+        protein_g: i.protein_g,
+        fat_g: i.fat_g,
+        carbs_g: i.carbs_g,
+        fiber_g: i.fiber_g ?? 0,
+        sugar_g: i.sugar_g ?? 0,
+        water_ml: i.water_ml ?? 0,
+      })),
+    }),
 };

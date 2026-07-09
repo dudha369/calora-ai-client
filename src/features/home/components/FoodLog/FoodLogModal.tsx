@@ -1,15 +1,87 @@
-import { Clock, UtensilsCrossed, Copy, Scale } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import {
+  Clock,
+  UtensilsCrossed,
+  Copy,
+  Scale,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getIntlLocale } from '@/shared/lib/locale';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
+import {
+  NutritionEditGrid,
+  type NutritionValues,
+} from '@/shared/ui/NutritionEditGrid';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
 import { useTheme } from '@/shared/context/ThemeContext';
-import type { FoodLog } from '@/shared/types/api/food';
+import { food } from '@/shared/api/food';
+import { round1 } from '@/features/home/lib/nutrition';
+import { toApiDate } from '@/shared/lib/date';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { cn } from '@/shared/lib/cn';
+import type { FoodLog, FoodItem } from '@/shared/types/api/food';
+
+// ─── Editable item ──────────────────────────────────────────────────────────
+
+interface EditableItem {
+  food_name: string;
+  portion_g: number;
+  calories: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  fiber_g: number;
+  sugar_g: number;
+  water_ml: number;
+}
+
+function toEditable(item: FoodItem): EditableItem {
+  return {
+    food_name: item.food_name,
+    portion_g: item.portion_g,
+    calories: item.calories,
+    protein_g: item.protein_g,
+    fat_g: item.fat_g,
+    carbs_g: item.carbs_g,
+    fiber_g: item.fiber_g,
+    sugar_g: item.sugar_g,
+    water_ml: item.water_ml,
+  };
+}
+
+function itemToNutrition(item: EditableItem): NutritionValues {
+  return {
+    portion_g: item.portion_g,
+    calories: item.calories,
+    protein_g: item.protein_g,
+    fat_g: item.fat_g,
+    carbs_g: item.carbs_g,
+    fiber_g: item.fiber_g,
+    sugar_g: item.sugar_g,
+    water_ml: item.water_ml,
+  };
+}
+
+function nutritionToItem(name: string, v: NutritionValues): EditableItem {
+  return {
+    food_name: name,
+    portion_g: v.portion_g,
+    calories: v.calories,
+    protein_g: v.protein_g,
+    fat_g: v.fat_g,
+    carbs_g: v.carbs_g,
+    fiber_g: v.fiber_g,
+    sugar_g: v.sugar_g,
+    water_ml: v.water_ml,
+  };
+}
+
+// ─── Component ──────────────────────────────────────────────────────────────
 
 interface FoodLogModalProps {
   log: FoodLog;
@@ -32,25 +104,22 @@ export const FoodLogModal = ({
   const { safeTop } = useTelegram();
   const { t, i18n } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
+  const queryClient = useQueryClient();
+
+  const [editMode, setEditMode] = useState(false);
+  const [editItems, setEditItems] = useState<EditableItem[]>([]);
+  const [baseItems, setBaseItems] = useState<NutritionValues[]>([]);
+  const [syncEnabled, setSyncEnabled] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const formattedTime = new Date(log.logged_at).toLocaleTimeString(
     getIntlLocale(i18n.language),
-    {
-      hour: '2-digit',
-      minute: '2-digit',
-    },
+    { hour: '2-digit', minute: '2-digit' },
   );
 
-  const portion_g = log.items.reduce(
-    (sum, current) => sum + current.portion_g,
-    0,
-  );
-
-  const [isCopied, setIsCopied] = useState(false);
-
+  const portion_g = log.items.reduce((s, i) => s + i.portion_g, 0);
   const isSingleIngredient = log.items.length === 1;
   const mainDish = log.items[0]?.food_name ?? t('food');
-
   const cleanDish = mainDish.trim();
   const lastSpaceIndex = cleanDish.lastIndexOf(' ');
   const textBeforeLastWord =
@@ -58,11 +127,171 @@ export const FoodLogModal = ({
   const lastWord =
     lastSpaceIndex === -1 ? cleanDish : cleanDish.substring(lastSpaceIndex + 1);
 
+  // ─── Edit mutations ───────────────────────────────────────────────────────
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { mutate: editLog } = useMutation({
+    mutationFn: (items: EditableItem[]) => food.update(log.id, items),
+    onMutate: () => setIsEditing(true),
+    onSettled: () => setIsEditing(false),
+    onSuccess: () => {
+      const dateStr = toApiDate(new Date(log.logged_at));
+      queryClient.invalidateQueries({ queryKey: ['food', dateStr] });
+      queryClient.invalidateQueries({
+        queryKey: ['stats', 'daily', dateStr],
+      });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      onClose();
+    },
+  });
+
+  const isProcessing = isDeleting || isRepeating || isEditing;
+
+  // ─── Edit mode helpers ────────────────────────────────────────────────────
+
+  const enterEditMode = () => {
+    const items = log.items.map(toEditable);
+    setEditItems(items);
+    setBaseItems(items.map(itemToNutrition));
+    setSyncEnabled(false);
+    setEditMode(true);
+  };
+
+  const exitEditMode = () => {
+    setEditMode(false);
+    onClose();
+  };
+
+  const updateItemName = (index: number, name: string) =>
+    setEditItems((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, food_name: name } : item,
+      ),
+    );
+
+  const updateItemNutrition = useCallback(
+    (index: number, values: NutritionValues) =>
+      setEditItems((prev) =>
+        prev.map((item, i) =>
+          i === index ? nutritionToItem(item.food_name, values) : item,
+        ),
+      ),
+    [],
+  );
+
+  const removeItem = (index: number) =>
+    setEditItems((prev) => prev.filter((_, i) => i !== index));
+
+  const editTotals = useMemo(
+    () =>
+      editItems.reduce(
+        (acc, d) => ({
+          total_calories: acc.total_calories + d.calories,
+          total_protein_g: round1(acc.total_protein_g + d.protein_g),
+          total_fat_g: round1(acc.total_fat_g + d.fat_g),
+          total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
+          total_fiber_g: round1(acc.total_fiber_g + d.fiber_g),
+          total_sugar_g: round1(acc.total_sugar_g + d.sugar_g),
+          total_water_ml: acc.total_water_ml + d.water_ml,
+        }),
+        {
+          total_calories: 0,
+          total_protein_g: 0,
+          total_fat_g: 0,
+          total_carbs_g: 0,
+          total_fiber_g: 0,
+          total_sugar_g: 0,
+          total_water_ml: 0,
+        },
+      ),
+    [editItems],
+  );
+
+  const handleSaveEdit = () => {
+    if (editItems.length === 0) return;
+    editLog(editItems);
+  };
+
   const handleCopy = async () => {
     await navigator.clipboard.writeText(mainDish);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
+
+  // ─── Edit mode render ─────────────────────────────────────────────────────
+
+  if (editMode) {
+    return (
+      <>
+        <BottomSheet
+          title={t('edit_meal', { defaultValue: 'Редактирование' })}
+          onClose={exitEditMode}
+          actionLabel={tc('buttons.save', { defaultValue: 'Сохранить' })}
+          iconCustomEmojiId="5274008024585871702"
+          onAction={handleSaveEdit}
+          isProcessing={isEditing}
+          actionDisabled={editItems.length === 0}
+          secondaryAction={{
+            text: tc('buttons.cancel', { defaultValue: 'Отменить' }),
+            iconCustomEmojiId: '5260342697075416641',
+            onClick: exitEditMode,
+            position: 'left',
+          }}
+        >
+          <div className="flex flex-col gap-3">
+            {editItems.map((item, i) => (
+              <div
+                key={i}
+                className="flex flex-col gap-2 rounded-2xl p-3"
+                style={{ backgroundColor: theme.section_bg_color }}
+              >
+                {/* Name + delete */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={item.food_name}
+                    onChange={(e) => updateItemName(i, e.target.value)}
+                    className="min-w-0 flex-1 rounded-xl px-3 py-2 text-sm font-semibold outline-none"
+                    style={{
+                      backgroundColor: theme.secondary_bg_color,
+                      color: theme.text_color,
+                    }}
+                  />
+                  {editItems.length > 1 && (
+                    <button
+                      onClick={() => removeItem(i)}
+                      aria-label={tc('buttons.delete', {
+                        defaultValue: 'Удалить',
+                      })}
+                      className="shrink-0 rounded-lg p-2 transition-opacity active:opacity-60"
+                      style={{ color: theme.destructive_text_color }}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Editable nutrition grid */}
+                <NutritionEditGrid
+                  values={itemToNutrition(item)}
+                  baseValues={baseItems[i] ?? itemToNutrition(item)}
+                  syncEnabled={syncEnabled}
+                  onSyncToggle={() => setSyncEnabled((s) => !s)}
+                  onChange={(v) => updateItemNutrition(i, v)}
+                />
+              </div>
+            ))}
+
+            {/* Totals — only for multi-item */}
+            {editItems.length > 1 && <NutritionGrid data={editTotals} />}
+          </div>
+        </BottomSheet>
+      </>
+    );
+  }
+
+  // ─── View mode render ─────────────────────────────────────────────────────
 
   return (
     <>
@@ -126,12 +355,27 @@ export const FoodLogModal = ({
                 </p>
               )}
 
-              <div className="flex gap-1.5">
-                <Label
-                  icon={<Scale size={12} />}
-                  text={`${portion_g} ${tc('units.g')}`}
-                />
-                <Label icon={<Clock size={12} />} text={formattedTime} />
+              <div className="flex items-center justify-between">
+                <div className="flex gap-1.5">
+                  <Label
+                    icon={<Scale size={12} />}
+                    text={`${portion_g} ${tc('units.g')}`}
+                  />
+                  <Label icon={<Clock size={12} />} text={formattedTime} />
+                </div>
+
+                <button
+                  onClick={enterEditMode}
+                  disabled={isProcessing}
+                  aria-label={t('edit_meal', { defaultValue: 'Редактировать' })}
+                  className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-opacity active:opacity-60 disabled:opacity-40"
+                  style={{
+                    backgroundColor: `${theme.button_color}20`,
+                    color: theme.button_color,
+                  }}
+                >
+                  <Pencil size={12} />
+                </button>
               </div>
             </div>
           </div>
@@ -147,7 +391,6 @@ export const FoodLogModal = ({
                 >
                   {t('compound')}
                 </span>
-
                 <span className="text-xs" style={{ color: theme.hint_color }}>
                   {t('products', { count: log.items.length })}
                 </span>
