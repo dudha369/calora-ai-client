@@ -108,6 +108,10 @@ export interface FoodLogIn {
   meal_name?: string | null;
   /** Суммарная гидратация из AnalyzedDish[] — авто-создаёт WaterLog на бэкенде */
   water_ml?: number;
+  /** Копирование фото из существующего FoodLog (по id).
+   *  Если указан и photo_key не задан — сервер берёт photo_key из
+   *  указанного лога (только если он принадлежит тому же юзеру). */
+  copy_photo_from_log_id?: number;
 }
 
 export interface CreateFoodLogResponse {

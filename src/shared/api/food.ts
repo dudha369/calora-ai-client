@@ -56,6 +56,22 @@ export const food = {
         sugar_g: item.sugar_g,
         water_ml: item.water_ml,
       })),
+    } satisfies FoodLogIn),
+
+  /**
+   * Повторяет запись с кастомными items (из меню копирования).
+   * Если includePhoto=true, передаёт copy_photo_from_log_id — сервер
+   * сам достанет photo_key из исходного лога и привяжет к новому.
+   */
+  repeatCustom: (
+    sourceLogId: number,
+    items: FoodItemIn[],
+    includePhoto: boolean,
+  ) =>
+    request<CreateFoodLogResponse>('food/log', 'POST', {
+      log_date: todayApiDate(),
+      items,
+      ...(includePhoto ? { copy_photo_from_log_id: sourceLogId } : {}),
       meal_name: log.meal_name,
       // Нет явного water_ml на уровне лога — backend суммирует из items
     } satisfies FoodLogIn),

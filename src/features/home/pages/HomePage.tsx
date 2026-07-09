@@ -9,7 +9,7 @@ import { Calendar } from '../components/DateStrip/Calendar';
 import { DayCarousel } from '../components/NutritionStats/DayCarousel';
 import { useDateStrip } from '../hooks/useDateStrip';
 import { food } from '@/shared/api/food';
-import { startOfDay, toApiDate } from '@/shared/lib/date';
+import { startOfDay } from '@/shared/lib/date';
 import { getFlameColor } from '../lib/getFlameColor';
 import { useActiveDates } from '../hooks/useActiveDates';
 import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
@@ -216,6 +216,10 @@ export const HomePage = () => {
         <FoodLogModal
           log={currentFoodLog}
           isDeleting={foodLogDeleting}
+          onClose={() =>
+            !foodLogDeleting && setFoodLogModalOpen(false)
+          }
+          onDelete={deleteLog}
           isRepeating={foodLogRepeating}
           isEditing={foodLogEditing}
           onClose={() =>
