@@ -1,6 +1,6 @@
 import { request, requestRaw } from './request';
 import type { Profile } from '../types/Profile';
-import type { Goal } from '../types/Goal';
+import type { DailyGoal } from '../types/DailyGoal';
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -76,7 +76,7 @@ export interface AdminQuest {
 export interface AdminUserDetail {
   user: AdminUser & { in_whitelist: boolean };
   profile: Profile | null;
-  goal: Goal | null;
+  goal: DailyGoal | null;
   food_logs: AdminFoodLog[];
   total_food_logs: number;
   quests: AdminQuest[];

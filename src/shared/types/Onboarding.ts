@@ -1,5 +1,5 @@
 export type Gender = 'male' | 'female';
-export type Goal = 'lose' | 'maintain' | 'gain';
+export type GoalType = 'lose' | 'maintain' | 'gain';
 export type ActivityLevel = 1.2 | 1.375 | 1.55 | 1.725 | 1.9;
 export type WaterTrack = 'auto' | 'manual' | 'none';
 export type HeightUnit = 'cm' | 'ft';
@@ -12,7 +12,7 @@ export interface OnboardingData {
   height_unit?: HeightUnit;
   weight?: number;
   weight_unit?: WeightUnit;
-  goal?: Goal;
+  goal?: GoalType;
   target_weight?: number;
   activity_level?: ActivityLevel;
   dietary_restrictions?: string[];

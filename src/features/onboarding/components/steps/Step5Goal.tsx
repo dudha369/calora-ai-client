@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
-import type { OnboardingData, Goal } from '@/shared/types/Onboarding';
+import type { OnboardingData, GoalType } from '@/shared/types/Onboarding';
 
 interface Step5GoalProps {
   data: Partial<OnboardingData>;
@@ -11,7 +11,7 @@ interface Step5GoalProps {
 export const Step5Goal = ({ data, onChange }: Step5GoalProps) => {
   const { t } = useTranslation('onboarding');
 
-  const OPTIONS: { value: Goal; label: string; description: string }[] = [
+  const OPTIONS: { value: GoalType; label: string; description: string }[] = [
     {
       value: 'lose',
       label: t('step5.lose'),
