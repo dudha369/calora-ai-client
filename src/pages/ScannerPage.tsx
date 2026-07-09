@@ -45,26 +45,34 @@ export const ScannerPage = () => {
 
   const { status, runAnalysis } = useFoodAnalysis(photo);
 
-  // ── FIX: исключаем сканер из CSS portrait lock ────────────────────────────
+  // ── Ориентация зависит от состояния (сканирование vs результат) ──────────
   //
-  // CSS в index.css: body:not([data-page="scanner"]) { transform: rotate() }
-  // Без этого атрибута body вращался и на сканере → видео с камеры тоже
-  // вращалось вместе с body → камера показывала картинку в неправильную сторону.
+  // Сканирование (photo === null):
+  //   • data-page="scanner" → исключает body из CSS portrait lock
+  //   • Разблокируем ориентацию → телефон может повернуться в landscape
+  //   • NavigationBar переключается в вертикальный sidebar-режим
   //
-  // Также разблокируем физическую ориентацию через API чтобы телефон мог
-  // физически повернуться в landscape — для удобной съёмки горизонтальных блюд.
-  // При уходе со страницы — восстанавливаем блокировку.
+  // Результат (photo !== null):
+  //   • Убираем data-page → CSS portrait lock снова активен
+  //   • Блокируем ориентацию → стабильный portrait UI для просмотра результата
+  //   • NavigationBar возвращается в обычный горизонтальный режим
   useEffect(() => {
-    document.body.setAttribute('data-page', 'scanner');
-    getTg()?.unlockOrientation?.();
-    screen.orientation?.unlock?.();
+    if (photo === null) {
+      document.body.setAttribute('data-page', 'scanner');
+      getTg()?.unlockOrientation?.();
+      screen.orientation?.unlock?.();
+    } else {
+      document.body.removeAttribute('data-page');
+      getTg()?.lockOrientation?.();
+      screen.orientation?.lock?.('portrait').catch(() => null);
+    }
 
     return () => {
       document.body.removeAttribute('data-page');
       getTg()?.lockOrientation?.();
       screen.orientation?.lock?.('portrait').catch(() => null);
     };
-  }, []);
+  }, [photo]);
 
   // ── Сообщаем NavigationBar когда камера реально стримит живую картинку ────
   //
