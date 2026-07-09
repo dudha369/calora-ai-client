@@ -1,13 +1,13 @@
 import { type ReactNode } from 'react';
 import { useTheme } from '@/shared/context/ThemeContext';
 
-interface Props {
+interface StepShellProps {
   title: string;
   subtitle: string;
   children: ReactNode;
 }
 
-export const StepShell = ({ title, subtitle, children }: Props) => {
+export const StepShell = ({ title, subtitle, children }: StepShellProps) => {
   const theme = useTheme();
   return (
     <div className="flex flex-col gap-6 px-4 pt-6 pb-8">

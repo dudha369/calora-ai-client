@@ -7,7 +7,7 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import { users } from '@/shared/api/users';
 import type { StreakInfo, TodayProgress } from '@/shared/types/api/streak';
 
-interface Props {
+interface StreakPopupProps {
   currentStreak: number;
   onClose: () => void;
 }
@@ -115,7 +115,7 @@ const RestoreCharges = ({ available }: { available: number }) => {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export const StreakPopup = ({ currentStreak, onClose }: Props) => {
+export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
   const theme = useTheme();
   const queryClient = useQueryClient();
   const [restoreError, setRestoreError] = useState<string | null>(null);

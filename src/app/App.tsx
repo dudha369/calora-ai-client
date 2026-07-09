@@ -86,7 +86,7 @@ export function App() {
             <ScrollContainerContext.Provider value={scrollContainerRef}>
               <main
                 className={`relative flex flex-1 flex-col overflow-y-auto overscroll-y-contain ${
-                  location.pathname.includes('/admin')
+                  location.pathname.startsWith('/admin')
                     ? 'w-full'
                     : 'mx-auto w-full max-w-screen-sm'
                 }`}
@@ -99,7 +99,7 @@ export function App() {
             </ScrollContainerContext.Provider>
 
             {location.pathname !== '/onboarding' &&
-              !location.pathname.includes('/admin') && (
+              !location.pathname.startsWith('/admin') && (
                 <NavigationBar safeBottom={safeBottom} />
               )}
           </ScannerProvider>

@@ -2,7 +2,7 @@ import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { ErrorScreen } from './ErrorScreen';
 import type { ErrorType } from './ErrorScreen';
 
-interface Props {
+interface ErrorBoundaryProps {
   children: ReactNode;
 }
 
