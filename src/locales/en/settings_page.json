@@ -1,5 +1,9 @@
 {
   "language": "Language",
+  "theme": "Theme",
+  "theme_auto": "Auto (Telegram)",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
   "failed_to_delete": "Failed to delete the account. Check your connection and try again.",
   "delete_account": "Delete account",
   "delete_account_title": "Delete account?",
