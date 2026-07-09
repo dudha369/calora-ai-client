@@ -62,13 +62,8 @@ export const SettingsPage = () => {
     { key: 'dark', label: t('theme_dark'), icon: Moon },
   ];
 
-  const currentThemeLabel = themeOptions.find((o) => o.key === mode)?.label ?? t('theme_auto');
-
   // ── Language ──
   const currentLang = languageOptions.find((o) => o.code === language);
-  const currentLangLabel = currentLang
-    ? `${currentLang.flag} ${currentLang.label}`
-    : language.toUpperCase();
 
   return (
     <section className="flex flex-col gap-4">

@@ -60,9 +60,8 @@
 }
 
 /*
- * Убираем фон html/body чтобы при CSS portrait lock не было видно
- * полосок/артефактов за границами повёрнутого body.
- * --tg-theme-bg-color инжектится Telegram Mini App SDK.
+ * html фон совпадает с Telegram-темой, чтобы при CSS portrait lock
+ * за краями повёрнутого body не было видно чужого фона.
  */
 html {
   background-color: var(--tg-theme-bg-color, #000);
@@ -71,24 +70,30 @@ html {
 @media screen and (orientation: landscape) {
   body:not([data-page="scanner"]) {
     position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    /*
+     * Размеры body = portrait dimensions в landscape viewport:
+     *   width  ← viewport height (короткая сторона)
+     *   height ← viewport width  (длинная сторона)
+     *
+     * max(dvh, vh) берёт наибольшее значение, чтобы body точно
+     * покрыл экран даже если dvh/dvw не совпадают с viewport
+     * (Telegram WebView, системный UI, safe area).
+     */
+    width: max(100dvh, 100vh);
+    height: max(100dvw, 100vw);
+
+    /* Центрируем и вращаем */
+    position: fixed;
     top: 50%;
     left: 50%;
-
-    /* dvh/dvw точнее на мобильных (учитывают динамический UI браузера) */
-    width: 100dvh;
-    height: 100dvw;
-
     transform-origin: center center;
     transform: translate(-50%, -50%) rotate(var(--portrait-lock-rotate));
 
     overflow: hidden;
-  }
-
-  /* Фолбек для браузеров без dvh/dvw */
-  @supports not (width: 100dvh) {
-    body:not([data-page="scanner"]) {
-      width: 100vh;
-      height: 100vw;
-    }
   }
 }
