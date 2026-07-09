@@ -56,6 +56,7 @@ export const food = {
         sugar_g: item.sugar_g,
         water_ml: item.water_ml,
       })),
+      meal_name: log.meal_name,
       // Нет явного water_ml на уровне лога — backend суммирует из items
     } satisfies FoodLogIn),
 

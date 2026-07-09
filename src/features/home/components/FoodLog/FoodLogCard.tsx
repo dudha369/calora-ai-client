@@ -32,7 +32,7 @@ export const FoodLogCard = ({
   };
 
   const defaultFoodName = t('food');
-  const firstItemName = log.items[0]?.food_name ?? defaultFoodName;
+  const displayName = log.meal_name ?? log.items[0]?.food_name ?? defaultFoodName;
 
   return (
     <div
@@ -50,7 +50,7 @@ export const FoodLogCard = ({
         {log.photo_url ? (
           <img
             src={log.photo_url}
-            alt={firstItemName}
+            alt={displayName}
             className="h-full w-full object-cover"
           />
         ) : (
@@ -63,7 +63,7 @@ export const FoodLogCard = ({
           className="truncate text-[16px] font-semibold"
           style={{ color: theme.text_color }}
         >
-          {firstItemName}
+          {displayName}
         </p>
 
         <div className="text-xs">

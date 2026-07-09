@@ -36,6 +36,8 @@ export interface FoodLogBase {
   log_date: string;
   logged_at: string;
   photo_url: string | null;
+  /** Обобщающее название приёма пищи (из AI). null для старых записей и баркодов. */
+  meal_name: string | null;
   total_calories: number;
   total_protein_g: number;
   total_fat_g: number;
@@ -67,6 +69,8 @@ export interface AnalyzedDish {
 }
 
 export interface FoodAnalyzeResponse {
+  /** Обобщающее название: одно блюдо — его имя, несколько — краткое обобщение. */
+  meal_name: string;
   dishes: AnalyzedDish[];
   total: FoodAnalysisTotals;
   portion_note: string;
@@ -100,6 +104,8 @@ export interface FoodLogIn {
   log_date: string;
   items: FoodItemIn[];
   photo_key?: string | null;
+  /** Обобщающее название приёма пищи (из AI). */
+  meal_name?: string | null;
   /** Суммарная гидратация из AnalyzedDish[] — авто-создаёт WaterLog на бэкенде */
   water_ml?: number;
 }
