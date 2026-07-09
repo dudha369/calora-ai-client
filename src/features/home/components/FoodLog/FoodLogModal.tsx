@@ -19,7 +19,7 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog, FoodItem } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { cn } from '@/shared/lib/cn';
-import { round1 } from '@/features/home/lib/nutrition';
+import { sumNutritionTotals } from '@/features/home/lib/nutrition';
 
 // ─── Editable item type (matches FoodItem but mutable) ──────────────────────
 
@@ -124,28 +124,10 @@ export const FoodLogModal = ({
     setEditItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const editTotals = useMemo(() => {
-    return editItems.reduce(
-      (acc, d) => ({
-        total_calories: acc.total_calories + d.calories,
-        total_protein_g: round1(acc.total_protein_g + d.protein_g),
-        total_fat_g: round1(acc.total_fat_g + d.fat_g),
-        total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
-        total_fiber_g: round1(acc.total_fiber_g + d.fiber_g),
-        total_sugar_g: round1(acc.total_sugar_g + d.sugar_g),
-        total_water_ml: acc.total_water_ml + d.water_ml,
-      }),
-      {
-        total_calories: 0,
-        total_protein_g: 0,
-        total_fat_g: 0,
-        total_carbs_g: 0,
-        total_fiber_g: 0,
-        total_sugar_g: 0,
-        total_water_ml: 0,
-      },
-    );
-  }, [editItems]);
+  const editTotals = useMemo(
+    () => sumNutritionTotals(editItems),
+    [editItems],
+  );
 
   const handleSaveEdit = () => {
     if (editItems.length === 0) return;
