@@ -18,6 +18,7 @@ import {
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
+import { CopyMealSheet, type CopyMealResult } from './CopyMealSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog, FoodItem } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram';
@@ -381,7 +382,7 @@ export const FoodLogModal = ({
         onClose={onClose}
         actionLabel={tc('buttons.copy')}
         iconCustomEmojiId="5258477770735885832"
-        onAction={() => onRepeat(log)}
+        onAction={() => setCopyMode(true)}
         isProcessing={isRepeating}
         secondaryAction={{
           text: tc('buttons.delete'),
@@ -427,7 +428,7 @@ export const FoodLogModal = ({
                   <span className="whitespace-nowrap">
                     {lastWord}
                     <button
-                      onClick={handleCopy}
+                      onClick={handleCopyText}
                       aria-label={tc('buttons.copy')}
                       className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
                     >
