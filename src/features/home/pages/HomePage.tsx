@@ -9,7 +9,7 @@ import { Calendar } from '../components/DateStrip/Calendar';
 import { DayCarousel } from '../components/NutritionStats/DayCarousel';
 import { useDateStrip } from '../hooks/useDateStrip';
 import { food } from '@/shared/api/food';
-import { startOfDay, toApiDate } from '@/shared/lib/date';
+import { startOfDay } from '@/shared/lib/date';
 import { getFlameColor } from '../lib/getFlameColor';
 import { useActiveDates } from '../hooks/useActiveDates';
 import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
@@ -50,7 +50,6 @@ export const HomePage = () => {
   const [foodLogModalOpen, setFoodLogModalOpen] = useState(false);
   const [currentFoodLog, setCurrentFoodLog] = useState<FoodLog | undefined>();
   const [foodLogDeleting, setFoodLogDeleting] = useState(false);
-  const [foodLogRepeating, setFoodLogRepeating] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const onClick = useCallback((log: FoodLog) => {
@@ -73,20 +72,6 @@ export const HomePage = () => {
       queryClient.invalidateQueries({
         queryKey: ['stats', 'daily', selectedDateStr],
       });
-      queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      setFoodLogModalOpen(false);
-    },
-  });
-
-  const { mutate: repeatLog } = useMutation({
-    mutationFn: (log: FoodLog) => food.repeat(log),
-    onMutate: () => setFoodLogRepeating(true),
-    onSettled: () => setFoodLogRepeating(false),
-    onSuccess: () => {
-      const todayStr = toApiDate(new Date());
-      queryClient.invalidateQueries({ queryKey: ['food', todayStr] });
-      queryClient.invalidateQueries({ queryKey: ['stats', 'daily', todayStr] });
       queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
       setFoodLogModalOpen(false);
@@ -184,12 +169,10 @@ export const HomePage = () => {
         <FoodLogModal
           log={currentFoodLog}
           isDeleting={foodLogDeleting}
-          isRepeating={foodLogRepeating}
           onClose={() =>
-            !foodLogDeleting && !foodLogRepeating && setFoodLogModalOpen(false)
+            !foodLogDeleting && setFoodLogModalOpen(false)
           }
           onDelete={deleteLog}
-          onRepeat={repeatLog}
         />
       )}
     </div>

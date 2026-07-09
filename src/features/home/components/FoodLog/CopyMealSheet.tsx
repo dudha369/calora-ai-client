@@ -8,7 +8,7 @@ import {
   NutritionGrid,
   type NutritionGridStats,
 } from '../NutritionStats/NutritionGrid';
-import type { FoodLog, FoodItem, FoodItemIn } from '@/shared/types/api/food';
+import type { FoodLog, FoodItemIn } from '@/shared/types/api/food';
 
 export interface CopyMealResult {
   items: FoodItemIn[];

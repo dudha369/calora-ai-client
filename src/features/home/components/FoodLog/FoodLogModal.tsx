@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   Clock,
   UtensilsCrossed,
@@ -8,7 +8,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { getIntlLocale } from '@/shared/lib/locale';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import {
@@ -24,6 +24,8 @@ import type { FoodLog, FoodItem } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { cn } from '@/shared/lib/cn';
 import { round1 } from '@/features/home/lib/nutrition';
+import { food } from '@/shared/api/food';
+import { toApiDate } from '@/shared/lib/date';
 
 // ─── Editable item type (matches FoodItem but mutable) ──────────────────────
 
@@ -53,31 +55,47 @@ function toEditable(item: FoodItem): EditableItem {
   };
 }
 
+function itemToNutrition(item: EditableItem): NutritionValues {
+  return {
+    portion_g: item.portion_g,
+    calories: item.calories,
+    protein_g: item.protein_g,
+    fat_g: item.fat_g,
+    carbs_g: item.carbs_g,
+    fiber_g: item.fiber_g,
+    sugar_g: item.sugar_g,
+    water_ml: item.water_ml,
+  };
+}
+
+function nutritionToItem(name: string, v: NutritionValues): EditableItem {
+  return {
+    food_name: name,
+    portion_g: v.portion_g,
+    calories: v.calories,
+    protein_g: v.protein_g,
+    fat_g: v.fat_g,
+    carbs_g: v.carbs_g,
+    fiber_g: v.fiber_g,
+    sugar_g: v.sugar_g,
+    water_ml: v.water_ml,
+  };
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 interface FoodLogModalProps {
   log: FoodLog;
   isDeleting: boolean;
-  isRepeating: boolean;
-  isEditing: boolean;
   onClose: () => void;
   onDelete: (logId: number) => void;
-  onRepeat: (log: FoodLog) => void;
-  onEdit: (
-    logId: number,
-    items: EditableItem[],
-  ) => void;
 }
 
 export const FoodLogModal = ({
   log,
   isDeleting,
-  isRepeating,
-  isEditing,
   onClose,
   onDelete,
-  onRepeat,
-  onEdit,
 }: FoodLogModalProps) => {
   const theme = useTheme();
   const { safeTop } = useTelegram();
@@ -85,16 +103,17 @@ export const FoodLogModal = ({
   const { t: tc } = useTranslation('common');
   const queryClient = useQueryClient();
 
-  const [editMode, setEditMode] = useState(false);
+  // ─── State ────────────────────────────────────────────────────────────────
+
+  type Mode = 'view' | 'edit' | 'copy';
+  const [mode, setMode] = useState<Mode>('view');
+
   const [editItems, setEditItems] = useState<EditableItem[]>([]);
   const [baseItems, setBaseItems] = useState<NutritionValues[]>([]);
   const [syncEnabled, setSyncEnabled] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
-  const [editMode, setEditMode] = useState(false);
-  const [editItems, setEditItems] = useState<EditableItem[]>(() =>
-    log.items.map(toEditable),
-  );
+  // ─── Derived values ───────────────────────────────────────────────────────
 
   const formattedTime = new Date(log.logged_at).toLocaleTimeString(
     getIntlLocale(i18n.language),
@@ -111,26 +130,33 @@ export const FoodLogModal = ({
   const lastWord =
     lastSpaceIndex === -1 ? cleanDish : cleanDish.substring(lastSpaceIndex + 1);
 
-  // ─── Edit mutations ───────────────────────────────────────────────────────
+  // ─── Mutations ────────────────────────────────────────────────────────────
 
-  const [isEditing, setIsEditing] = useState(false);
+  const invalidateAfterChange = (dateStr: string) => {
+    queryClient.invalidateQueries({ queryKey: ['food', dateStr] });
+    queryClient.invalidateQueries({ queryKey: ['stats', 'daily', dateStr] });
+    queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+    queryClient.invalidateQueries({ queryKey: ['user'] });
+  };
 
-  const { mutate: editLog } = useMutation({
+  const { mutate: editLog, isPending: isEditing } = useMutation({
     mutationFn: (items: EditableItem[]) => food.update(log.id, items),
-    onMutate: () => setIsEditing(true),
-    onSettled: () => setIsEditing(false),
     onSuccess: () => {
-      const dateStr = toApiDate(new Date(log.logged_at));
-      queryClient.invalidateQueries({ queryKey: ['food', dateStr] });
-      queryClient.invalidateQueries({
-        queryKey: ['stats', 'daily', dateStr],
-      });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      invalidateAfterChange(toApiDate(new Date(log.logged_at)));
       onClose();
     },
   });
 
-  const isProcessing = isDeleting || isRepeating || isEditing;
+  const { mutate: repeatCustom, isPending: isRepeating } = useMutation({
+    mutationFn: (result: CopyMealResult) =>
+      food.repeatCustom(log.id, result.items, result.includePhoto),
+    onSuccess: () => {
+      invalidateAfterChange(toApiDate(new Date()));
+      onClose();
+    },
+  });
+
+  const isProcessing = isDeleting || isEditing || isRepeating;
 
   // ─── Edit mode helpers ────────────────────────────────────────────────────
 
@@ -139,11 +165,11 @@ export const FoodLogModal = ({
     setEditItems(items);
     setBaseItems(items.map(itemToNutrition));
     setSyncEnabled(false);
-    setEditMode(true);
+    setMode('edit');
   };
 
   const exitEditMode = () => {
-    setEditMode(false);
+    setMode('view');
     onClose();
   };
 
@@ -197,71 +223,31 @@ export const FoodLogModal = ({
     editLog(editItems);
   };
 
-  const handleCopy = async () => {
+  const handleCopyText = async () => {
     await navigator.clipboard.writeText(mainDish);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  // ─── Edit mode helpers ────────────────────────────────────────────────────
+  // ─── Copy mode render ─────────────────────────────────────────────────────
 
-  const updateItem = <K extends keyof EditableItem>(
-    index: number,
-    key: K,
-    value: EditableItem[K],
-  ) => {
-    setEditItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [key]: value } : item)),
+  if (mode === 'copy') {
+    return (
+      <CopyMealSheet
+        log={log}
+        isProcessing={isRepeating}
+        onConfirm={repeatCustom}
+        onClose={() => {
+          setMode('view');
+          onClose();
+        }}
+      />
     );
-  };
-
-  const removeItem = (index: number) => {
-    setEditItems((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const editTotals = useMemo(() => {
-    return editItems.reduce(
-      (acc, d) => ({
-        total_calories: acc.total_calories + d.calories,
-        total_protein_g: round1(acc.total_protein_g + d.protein_g),
-        total_fat_g: round1(acc.total_fat_g + d.fat_g),
-        total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
-        total_fiber_g: round1(acc.total_fiber_g + d.fiber_g),
-        total_sugar_g: round1(acc.total_sugar_g + d.sugar_g),
-        total_water_ml: acc.total_water_ml + d.water_ml,
-      }),
-      {
-        total_calories: 0,
-        total_protein_g: 0,
-        total_fat_g: 0,
-        total_carbs_g: 0,
-        total_fiber_g: 0,
-        total_sugar_g: 0,
-        total_water_ml: 0,
-      },
-    );
-  }, [editItems]);
-
-  const handleSaveEdit = () => {
-    if (editItems.length === 0) return;
-    onEdit(log.id, editItems);
-  };
-
-  const enterEditMode = () => {
-    setEditItems(log.items.map(toEditable));
-    setEditMode(true);
-  };
-
-  const exitEditMode = () => {
-    setEditMode(false);
-    onClose();
-  };
-
-  const isProcessing = isDeleting || isRepeating || isEditing;
+  }
 
   // ─── Edit mode render ─────────────────────────────────────────────────────
 
-  if (editMode) {
+  if (mode === 'edit') {
     return (
       <BottomSheet
         title={t('edit_meal', { defaultValue: 'Редактирование' })}
@@ -289,7 +275,7 @@ export const FoodLogModal = ({
                 <input
                   type="text"
                   value={item.food_name}
-                  onChange={(e) => updateItem(i, 'food_name', e.target.value)}
+                  onChange={(e) => updateItemName(i, e.target.value)}
                   className="min-w-0 flex-1 rounded-xl px-3 py-2 text-sm font-semibold outline-none"
                   style={{
                     backgroundColor: theme.secondary_bg_color,
@@ -310,61 +296,13 @@ export const FoodLogModal = ({
                 )}
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
-                <NumberField
-                  label={tc('nutrients.portion', { defaultValue: 'Порция' })}
-                  unit={tc('units.g')}
-                  value={item.portion_g}
-                  onChange={(v) => updateItem(i, 'portion_g', v)}
-                />
-                <NumberField
-                  label={tc('nutrients.calories', { defaultValue: 'Калории' })}
-                  unit={tc('units.kcal')}
-                  value={item.calories}
-                  onChange={(v) => updateItem(i, 'calories', Math.round(v))}
-                />
-                <NumberField
-                  label={tc('nutrients.protein', { defaultValue: 'Белки' })}
-                  unit={tc('units.g')}
-                  step={0.1}
-                  value={item.protein_g}
-                  onChange={(v) => updateItem(i, 'protein_g', v)}
-                />
-                <NumberField
-                  label={tc('nutrients.fat', { defaultValue: 'Жиры' })}
-                  unit={tc('units.g')}
-                  step={0.1}
-                  value={item.fat_g}
-                  onChange={(v) => updateItem(i, 'fat_g', v)}
-                />
-                <NumberField
-                  label={tc('nutrients.carbs', { defaultValue: 'Углеводы' })}
-                  unit={tc('units.g')}
-                  step={0.1}
-                  value={item.carbs_g}
-                  onChange={(v) => updateItem(i, 'carbs_g', v)}
-                />
-                <NumberField
-                  label={tc('nutrients.fiber', { defaultValue: 'Клетчатка' })}
-                  unit={tc('units.g')}
-                  step={0.1}
-                  value={item.fiber_g}
-                  onChange={(v) => updateItem(i, 'fiber_g', v)}
-                />
-                <NumberField
-                  label={tc('nutrients.sugar', { defaultValue: 'Сахар' })}
-                  unit={tc('units.g')}
-                  step={0.1}
-                  value={item.sugar_g}
-                  onChange={(v) => updateItem(i, 'sugar_g', v)}
-                />
-                <NumberField
-                  label={tc('nutrients.water', { defaultValue: 'Вода' })}
-                  unit={tc('units.ml', { defaultValue: 'мл' })}
-                  value={item.water_ml}
-                  onChange={(v) => updateItem(i, 'water_ml', Math.round(v))}
-                />
-              </div>
+              <NutritionEditGrid
+                values={itemToNutrition(item)}
+                baseValues={baseItems[i]}
+                syncEnabled={syncEnabled}
+                onSyncToggle={() => setSyncEnabled((prev) => !prev)}
+                onChange={(v) => updateItemNutrition(i, v)}
+              />
             </div>
           ))}
 
@@ -374,7 +312,7 @@ export const FoodLogModal = ({
     );
   }
 
-  // ─── View mode render (original) ──────────────────────────────────────────
+  // ─── View mode render ─────────────────────────────────────────────────────
 
   return (
     <>
@@ -382,7 +320,7 @@ export const FoodLogModal = ({
         onClose={onClose}
         actionLabel={tc('buttons.copy')}
         iconCustomEmojiId="5258477770735885832"
-        onAction={() => setCopyMode(true)}
+        onAction={() => setMode('copy')}
         isProcessing={isRepeating}
         secondaryAction={{
           text: tc('buttons.delete'),
