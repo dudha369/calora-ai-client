@@ -1,6 +1,6 @@
 import { type ReactNode, useState, useCallback, useEffect } from 'react';
 import { themeParams } from '@tma.js/sdk-react';
-import ThemeContext from '@/shared/context/ThemeContext';
+import { ThemeContext } from '@/shared/context/ThemeContext';
 import { getValidTheme } from '@/shared/lib/getValidTheme';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { loadAppSettings, saveAppSettings } from '@/shared/lib/appSettingsStorage';

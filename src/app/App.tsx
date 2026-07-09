@@ -11,13 +11,13 @@ import {
 } from 'react-router-dom';
 
 import { useTelegram } from '@/shared/hooks/useTelegram';
-import { useOrientationLock } from '@/features/scanner/hooks/useOrientationLock.ts';
+import { useOrientationLock } from '@/features/scanner/hooks/useOrientationLock';
 import { settingsButton } from '@tma.js/sdk-react';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { useUserSession } from '@/shared/hooks/useUserSession';
-import UserContext from '@/shared/context/UserContext';
+import { UserContext } from '@/shared/context/UserContext';
 import { ScrollContainerContext } from '@/shared/context/ScrollContainerContext';
-import ScannerProvider from '@/features/scanner/context/ScannerProvider';
+import { ScannerProvider } from '@/features/scanner/context/ScannerProvider';
 
 export function App() {
   const { ready, safeTop, safeBottom } = useTelegram();

@@ -16,7 +16,7 @@ import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { food, todayApiDate } from '@/shared/api/food';
 import type { ProductData } from '../types/productData';
 import type { AnalyzedDish } from '@/shared/types/api/food';
-import { useScanner } from '../hooks/useScanner.ts';
+import { useScanner } from '../hooks/useScanner';
 import { useTranslation } from 'react-i18next';
 
 interface ScannerLocationState {

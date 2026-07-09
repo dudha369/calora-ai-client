@@ -1,7 +1,7 @@
 import { type ChangeEvent } from 'react';
 import type { UseCameraReturn } from '../hooks/useCamera';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/shared/context/ThemeContext.ts';
+import { useTheme } from '@/shared/context/ThemeContext';
 import { Sprout, ArrowDown } from 'lucide-react';
 
 interface CameraViewProps {

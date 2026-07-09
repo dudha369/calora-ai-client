@@ -4,7 +4,7 @@ import i18n, { SUPPORTED_LANGUAGES, type AppLanguage } from '../i18n';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { loadAppSettings, saveAppSettings } from '@/shared/lib/appSettingsStorage';
 import { users } from '@/shared/api/users';
-import LanguageContext from '@/shared/context/LanguageContext';
+import { LanguageContext } from '@/shared/context/LanguageContext';
 
 function isSupportedLanguage(value: string): value is AppLanguage {
   return SUPPORTED_LANGUAGES.includes(value);

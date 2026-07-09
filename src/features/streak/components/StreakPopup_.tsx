@@ -7,7 +7,7 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import { users } from '@/shared/api/users';
 import type { StreakInfo, TodayProgress } from '@/shared/types/api/streak';
 import { useTranslation } from 'react-i18next';
-import { capitalizeFirst, getIntlLocale } from '@/shared/lib/locale.ts';
+import { capitalizeFirst, getIntlLocale } from '@/shared/lib/locale';
 
 interface StreakPopupProps {
   currentStreak: number;

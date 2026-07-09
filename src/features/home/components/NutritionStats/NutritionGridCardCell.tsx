@@ -1,4 +1,4 @@
-import { useTheme } from '@/shared/context/ThemeContext.ts';
+import { useTheme } from '@/shared/context/ThemeContext';
 
 const fmt = (n: number) => n.toFixed(1).replace(/\.0$/, '');
 

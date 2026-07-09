@@ -6,10 +6,10 @@ export interface LanguageContextValue {
   setLanguage: (lang: AppLanguage) => Promise<void>;
 }
 
-const LanguageContext = createContext<LanguageContextValue>({
+export const LanguageContext = createContext<LanguageContextValue>({
   language: 'en',
   setLanguage: async () => {},
 });
 
 export const useLanguageMode = () => useContext(LanguageContext);
-export default LanguageContext;
+

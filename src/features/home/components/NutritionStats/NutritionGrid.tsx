@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { NutritionGridCard } from './NutritionGridCard.tsx';
-import type { FoodLogBase } from '@/shared/types/api/food.ts';
-import { useUser } from '@/shared/context/UserContext.ts';
+import { NutritionGridCard } from './NutritionGridCard';
+import type { FoodLogBase } from '@/shared/types/api/food';
+import { useUser } from '@/shared/context/UserContext';
 
 export type NutritionGridStats = Pick<
   FoodLogBase,

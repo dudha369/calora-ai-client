@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useTheme } from '../../context/ThemeContext.ts';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SectionItemIconProps {
   children: ReactNode;
