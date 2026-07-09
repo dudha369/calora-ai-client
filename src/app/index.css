@@ -59,47 +59,18 @@
   --portrait-lock-rotate: -90deg;
 }
 
-/*
- * html фон совпадает с Telegram-темой, чтобы при CSS portrait lock
- * за краями повёрнутого body не было видно чужого фона.
- */
 html {
   background-color: var(--tg-theme-bg-color, #000);
   overflow: hidden;
-}
-
-/*
- * Rotation utility для иконок навбара.
- * CSS-класс вместо inline transform — надёжнее в Telegram WebView,
- * где inline transform иногда игнорируется во flex-контексте.
- * Значение передаётся через CSS custom property --icon-rot.
- */
-.nav-icon-rotate {
-  transform: rotate(var(--icon-rot, 0deg));
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  will-change: auto;
-}
-.nav-icon-rotate[style*="--icon-rot"] {
-  will-change: transform;
 }
 
 @media screen and (orientation: landscape) {
   body:not([data-page="scanner"]) {
     position: fixed;
 
-    /*
-     * Размеры body = portrait dimensions в landscape viewport:
-     *   width  ← viewport height (короткая сторона)
-     *   height ← viewport width  (длинная сторона)
-     *
-     * +4px буфер гарантирует покрытие всего экрана даже когда
-     * dvh/dvw не совпадают точно с viewport (Telegram WebView,
-     * системный UI, safe area). overflow:hidden обрезает лишнее.
-     */
     width: calc(max(100dvh, 100vh) + 4px);
     height: calc(max(100dvw, 100vw) + 4px);
 
-    /* Центрируем и вращаем */
     top: 50%;
     left: 50%;
     transform-origin: center center;

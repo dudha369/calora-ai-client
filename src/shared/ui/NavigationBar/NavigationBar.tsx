@@ -23,19 +23,15 @@ interface NavigationBarProps {
 }
 
 /**
- * Навигационная панель с двумя режимами отображения:
+ * Навигационная панель.
  *
- * 1. Обычный (horizontal) — горизонтальная полоска внизу экрана.
- *    Используется на всех страницах и на сканере в portrait.
+ * В landscape-режиме сканера весь горизонтальный navbar поворачивается
+ * целиком (rotate) и прижимается к стороне экрана, соответствующей
+ * физическому низу телефона. Иконки, подписи и порядок — всё то же самое,
+ * что и в portrait, просто повёрнуто как единый блок.
  *
- * 2. Scanner-landscape (vertical sidebar) — вертикальная полоска
- *    на стороне экрана, соответствующей физическому низу телефона.
- *    Используется только когда isLiveCamera=true и устройство в landscape.
- *    Иконки counter-rotate чтобы выглядеть прямо для пользователя.
- *
- * Позиция sidebar зависит от угла поворота:
- *   angle=90  (CCW rotation) → физический низ = RIGHT  → sidebar справа
- *   angle=270 (CW rotation)  → физический низ = LEFT   → sidebar слева
+ *   angle=90  → sidebar справа, rotate(-90deg)
+ *   angle=270 → sidebar слева,  rotate(90deg)
  */
 export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
   const theme = useTheme();
@@ -46,19 +42,69 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
   const iconRotation = isLiveCamera ? iconCounterRotationDeg(deviceAngle) : 0;
   const isBarRotated = isLiveCamera && deviceAngle !== 0;
 
-  // Landscape sidebar mode: только при живой камере в landscape
   const isLandscape =
     isLiveCamera && (deviceAngle === 90 || deviceAngle === 270);
-  const navSide: 'left' | 'right' =
-    deviceAngle === 270 ? 'left' : 'right';
 
-  // ── Landscape sidebar: фиксированная вертикальная полоска ──────────────
+  /* ── Общие элементы навигации ─────────────────────────────────────────── */
+  const renderNav = (landscape: boolean) => {
+    const barColor = landscape
+      ? `${theme.secondary_bg_color}CC`
+      : theme.secondary_bg_color;
+
+    return (
+      <nav className="flex h-16 items-center justify-evenly">
+        <NavItem
+          to="/"
+          icon={<House size={ICON_SIZE} />}
+          label={t('nav.home')}
+          iconRotation={landscape ? 0 : iconRotation}
+          isBarRotated={!landscape && isBarRotated}
+        />
+        <NavItem
+          to="/water"
+          icon={<GlassWater size={ICON_SIZE} />}
+          label={t('nav.water')}
+          iconRotation={landscape ? 0 : iconRotation}
+          isBarRotated={!landscape && isBarRotated}
+        />
+
+        <FabButton
+          to="/scanner"
+          icon={<Plus strokeWidth={3.5} size={ICON_SIZE + 12} />}
+          activeIcon={<Camera strokeWidth={2} size={ICON_SIZE + 8} />}
+          label={t('nav.scanner')}
+          navbarColor={barColor}
+          iconRotation={landscape ? 0 : iconRotation}
+        />
+
+        <NavItem
+          to="/analytics"
+          icon={<ChartNoAxesColumn size={ICON_SIZE} />}
+          label={t('nav.analytics')}
+          iconRotation={landscape ? 0 : iconRotation}
+          isBarRotated={!landscape && isBarRotated}
+        />
+        <NavItem
+          to="/profile"
+          icon={<User size={ICON_SIZE} />}
+          label={t('nav.profile')}
+          iconRotation={landscape ? 0 : iconRotation}
+          isBarRotated={!landscape && isBarRotated}
+        />
+      </nav>
+    );
+  };
+
+  // ── Landscape: весь горизонтальный navbar повёрнут на бок ──────────────
   if (isLandscape) {
+    const rotation = deviceAngle === 90 ? -90 : 90;
+    const side: 'left' | 'right' = deviceAngle === 270 ? 'left' : 'right';
+
     return (
       <footer
-        className="fixed top-0 z-50 flex items-center"
+        className="fixed top-0 z-50 flex items-center justify-center"
         style={{
-          [navSide]: 0,
+          [side]: 0,
           width: 64,
           height: '100%',
           backgroundColor: `${theme.secondary_bg_color}CC`,
@@ -66,57 +112,21 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
           WebkitBackdropFilter: 'blur(12px)',
         }}
       >
-        <nav className="flex h-full w-full flex-col items-center justify-evenly py-2">
-          <NavItem
-            to="/"
-            icon={<House size={ICON_SIZE} />}
-            label={t('nav.home')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-            vertical
-          />
-          <NavItem
-            to="/water"
-            icon={<GlassWater size={ICON_SIZE} />}
-            label={t('nav.water')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-            vertical
-          />
-
-          <FabButton
-            to="/scanner"
-            icon={<Plus strokeWidth={3.5} size={ICON_SIZE + 12} />}
-            activeIcon={<Camera strokeWidth={2} size={ICON_SIZE + 8} />}
-            label={t('nav.scanner')}
-            navbarColor={`${theme.secondary_bg_color}CC`}
-            iconRotation={iconRotation}
-            vertical
-            navSide={navSide}
-          />
-
-          <NavItem
-            to="/analytics"
-            icon={<ChartNoAxesColumn size={ICON_SIZE} />}
-            label={t('nav.analytics')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-            vertical
-          />
-          <NavItem
-            to="/profile"
-            icon={<User size={ICON_SIZE} />}
-            label={t('nav.profile')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-            vertical
-          />
-        </nav>
+        {/* Горизонтальная полоска, повёрнутая целиком */}
+        <div
+          style={{
+            width: '100vh',
+            height: 64,
+            transform: `rotate(${rotation}deg)`,
+          }}
+        >
+          {renderNav(true)}
+        </div>
       </footer>
     );
   }
 
-  // ── Обычный горизонтальный режим ──────────────────────────────────────────
+  // ── Обычный горизонтальный режим ──────────────────────────────────────
   return (
     <footer
       className="w-full shrink-0"
@@ -126,46 +136,7 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
         className="mx-auto w-full max-w-screen-sm"
         style={{ paddingBottom: safeBottom ? 10 : 0 }}
       >
-        <nav className="flex h-16 items-center justify-evenly">
-          <NavItem
-            to="/"
-            icon={<House size={ICON_SIZE} />}
-            label={t('nav.home')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-          />
-          <NavItem
-            to="/water"
-            icon={<GlassWater size={ICON_SIZE} />}
-            label={t('nav.water')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-          />
-
-          <FabButton
-            to="/scanner"
-            icon={<Plus strokeWidth={3.5} size={ICON_SIZE + 12} />}
-            activeIcon={<Camera strokeWidth={2} size={ICON_SIZE + 8} />}
-            label={t('nav.scanner')}
-            navbarColor={theme.secondary_bg_color}
-            iconRotation={iconRotation}
-          />
-
-          <NavItem
-            to="/analytics"
-            icon={<ChartNoAxesColumn size={ICON_SIZE} />}
-            label={t('nav.analytics')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-          />
-          <NavItem
-            to="/profile"
-            icon={<User size={ICON_SIZE} />}
-            label={t('nav.profile')}
-            iconRotation={iconRotation}
-            isBarRotated={isBarRotated}
-          />
-        </nav>
+        {renderNav(false)}
       </div>
     </footer>
   );
