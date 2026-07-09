@@ -1,11 +1,11 @@
 import { useTheme } from '@/shared/context/ThemeContext';
 
-interface Props {
+interface OnboardingProgressProps {
   current: number; // 0-based index of active step
   total: number;
 }
 
-export const OnboardingProgress = ({ current, total }: Props) => {
+export const OnboardingProgress = ({ current, total }: OnboardingProgressProps) => {
   const theme = useTheme();
   const pct = total > 0 ? ((current + 1) / total) * 100 : 0;
 

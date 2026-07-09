@@ -1,6 +1,6 @@
 import { useTheme } from '@/shared/context/ThemeContext';
 
-interface Props {
+interface OptionCardProps {
   label: string;
   description?: string;
   isSelected: boolean;
@@ -12,7 +12,7 @@ export const OptionCard = ({
   description,
   isSelected,
   onClick,
-}: Props) => {
+}: OptionCardProps) => {
   const theme = useTheme();
   return (
     <button

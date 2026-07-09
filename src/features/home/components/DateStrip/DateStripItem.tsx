@@ -5,7 +5,7 @@ import { withOpacity } from '@/shared/lib/colors';
 import { getMarkerBackground } from '../../lib/getMarkerBackground';
 import { useMemo } from 'react';
 
-interface Props {
+interface DateStripItemProps {
   date: Date;
   isSelected: boolean;
   isToday: boolean;
@@ -27,7 +27,7 @@ export const DateStripItem = ({
   hasWater,
   onClick,
   itemWidth,
-}: Props) => {
+}: DateStripItemProps) => {
   const theme = useTheme();
   const { i18n } = useTranslation();
   const locale = getIntlLocale(i18n.language);

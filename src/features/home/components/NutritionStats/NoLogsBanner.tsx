@@ -3,11 +3,11 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import { NoDataIcon } from '@/shared/ui/NoDataIcon';
 import { useNavigate } from 'react-router-dom';
 
-interface AddLogBannerProps {
+interface NoLogsBannerProps {
   isToday: boolean;
 }
 
-export const NoLogsBanner = ({ isToday }: AddLogBannerProps) => {
+export const NoLogsBanner = ({ isToday }: NoLogsBannerProps) => {
   const navigate = useNavigate();
 
   const theme = useTheme();
