@@ -17,5 +17,10 @@
   "more_dishes_other": "+ {{count}} more dishes",
   "macros": "P {{p}} F {{f}} C {{c}}",
   "no_logs": "No logs",
-  "tap_to_log": "Tap + to log meal"
+  "tap_to_log": "Tap + to log meal",
+  "streak_extended": "Streak extended!",
+  "streak_pending": "Streak pending",
+  "streak_lost": "Streak lost",
+  "cancel": "Cancel",
+  "restore_streak": "Restore streak"
 }

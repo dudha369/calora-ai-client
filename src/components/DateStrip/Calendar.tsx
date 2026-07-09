@@ -23,9 +23,6 @@ interface CalendarProps {
   onClose: () => void;
 }
 
-// Полноценно рендерим (и фетчим сеть) только активный слайд + 1 соседа
-// с каждой стороны — достаточно для плавности свайпа, при этом не держим
-// N параллельных useActiveDates на весь буфер окна (см. calendarMonths.ts).
 const RENDER_RADIUS = 1;
 
 export const Calendar = ({
@@ -43,8 +40,6 @@ export const Calendar = ({
   const minNorm = useMemo(() => startOfDay(minDate), [minDate]);
   const maxNorm = useMemo(() => startOfDay(maxDate), [maxDate]);
 
-  // Monday-first короткие названия дней — не зависят от месяца,
-  // поэтому вынесены из карусели и рендерятся один раз над ней.
   const dayHeaders = useMemo(
     () =>
       Array.from({ length: 7 }, (_, i) =>

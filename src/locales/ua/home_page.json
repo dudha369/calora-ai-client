@@ -21,5 +21,10 @@
   "more_dishes_other": "+ ще {{count}} страв",
   "macros": "Б {{p}} Ж {{f}} В {{c}}",
   "no_logs": "Немає записів",
-  "tap_to_log": "Натисніть + щоб додати"
+  "tap_to_log": "Натисніть + щоб додати",
+  "streak_extended": "Серію продовжено!",
+  "streak_pending": "Серію не продовжено",
+  "streak_lost": "Серію втрачено",
+  "cancel": "Закрити",
+  "restore_streak": "Відновити серію"
 }

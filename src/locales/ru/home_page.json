@@ -21,5 +21,10 @@
   "more_dishes_other": "+ ещё {{count}} блюд",
   "macros": "Б {{p}} Ж {{f}} У {{c}}",
   "no_logs": "Нет записей",
-  "tap_to_log": "Нажмите + что-бы добавить"
+  "tap_to_log": "Нажмите + что-бы добавить",
+  "streak_extended": "Серия продлена!",
+  "streak_pending": "Серия не продлена",
+  "streak_lost": "Серия потеряна",
+  "cancel": "Закрыть",
+  "restore_streak": "Восстановить серию"
 }
