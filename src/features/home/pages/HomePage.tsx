@@ -51,6 +51,7 @@ export const HomePage = () => {
   const [currentFoodLog, setCurrentFoodLog] = useState<FoodLog | undefined>();
   const [foodLogDeleting, setFoodLogDeleting] = useState(false);
   const [foodLogRepeating, setFoodLogRepeating] = useState(false);
+  const [foodLogEditing, setFoodLogEditing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const onClick = useCallback((log: FoodLog) => {
@@ -89,6 +90,38 @@ export const HomePage = () => {
       queryClient.invalidateQueries({ queryKey: ['stats', 'daily', todayStr] });
       queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      setFoodLogModalOpen(false);
+    },
+  });
+
+  const { mutate: editLog } = useMutation({
+    mutationFn: ({
+      logId,
+      items,
+    }: {
+      logId: number;
+      items: {
+        food_name: string;
+        portion_g: number;
+        calories: number;
+        protein_g: number;
+        fat_g: number;
+        carbs_g: number;
+        fiber_g: number;
+        sugar_g: number;
+        water_ml: number;
+      }[];
+    }) => food.update(logId, items),
+    onMutate: () => setFoodLogEditing(true),
+    onSettled: () => setFoodLogEditing(false),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['food', selectedDateStr] });
+      queryClient.invalidateQueries({
+        queryKey: ['stats', 'daily', selectedDateStr],
+      });
+      queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['water'] });
       setFoodLogModalOpen(false);
     },
   });
@@ -185,11 +218,16 @@ export const HomePage = () => {
           log={currentFoodLog}
           isDeleting={foodLogDeleting}
           isRepeating={foodLogRepeating}
+          isEditing={foodLogEditing}
           onClose={() =>
-            !foodLogDeleting && !foodLogRepeating && setFoodLogModalOpen(false)
+            !foodLogDeleting &&
+            !foodLogRepeating &&
+            !foodLogEditing &&
+            setFoodLogModalOpen(false)
           }
           onDelete={deleteLog}
           onRepeat={repeatLog}
+          onEdit={(logId, items) => editLog({ logId, items })}
         />
       )}
     </div>

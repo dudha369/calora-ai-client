@@ -1,37 +1,88 @@
-import { Clock, UtensilsCrossed, Copy, Scale } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import {
+  Clock,
+  UtensilsCrossed,
+  Copy,
+  Scale,
+  Pencil,
+  Trash2,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/locale.ts';
 import { BottomSheet } from '@/shared/ui/BottomSheet.tsx';
+import { NumberField } from '@/shared/ui/NumberField';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
 import { useTheme } from '@/shared/context/ThemeContext';
-import type { FoodLog } from '@/shared/types/api/food';
-import { useState } from 'react';
+import type { FoodLog, FoodItem } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram.ts';
 import { cn } from '@/shared/lib/cn';
+import { round1 } from '@/features/home/lib/nutrition';
+
+// ─── Editable item type (matches FoodItem but mutable) ──────────────────────
+
+interface EditableItem {
+  food_name: string;
+  portion_g: number;
+  calories: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  fiber_g: number;
+  sugar_g: number;
+  water_ml: number;
+}
+
+function toEditable(item: FoodItem): EditableItem {
+  return {
+    food_name: item.food_name,
+    portion_g: item.portion_g,
+    calories: item.calories,
+    protein_g: item.protein_g,
+    fat_g: item.fat_g,
+    carbs_g: item.carbs_g,
+    fiber_g: item.fiber_g,
+    sugar_g: item.sugar_g,
+    water_ml: item.water_ml,
+  };
+}
+
+// ─── Component ──────────────────────────────────────────────────────────────
 
 interface FoodLogModalProps {
   log: FoodLog;
   isDeleting: boolean;
   isRepeating: boolean;
+  isEditing: boolean;
   onClose: () => void;
   onDelete: (logId: number) => void;
   onRepeat: (log: FoodLog) => void;
+  onEdit: (
+    logId: number,
+    items: EditableItem[],
+  ) => void;
 }
 
 export const FoodLogModal = ({
   log,
   isDeleting,
   isRepeating,
+  isEditing,
   onClose,
   onDelete,
   onRepeat,
+  onEdit,
 }: FoodLogModalProps) => {
   const theme = useTheme();
   const { safeTop } = useTelegram();
   const { t, i18n } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
+
+  const [editMode, setEditMode] = useState(false);
+  const [editItems, setEditItems] = useState<EditableItem[]>(() =>
+    log.items.map(toEditable),
+  );
 
   const formattedTime = new Date(log.logged_at).toLocaleTimeString(
     getIntlLocale(i18n.language),
@@ -63,6 +114,178 @@ export const FoodLogModal = ({
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
+
+  // ─── Edit mode helpers ────────────────────────────────────────────────────
+
+  const updateItem = <K extends keyof EditableItem>(
+    index: number,
+    key: K,
+    value: EditableItem[K],
+  ) => {
+    setEditItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, [key]: value } : item)),
+    );
+  };
+
+  const removeItem = (index: number) => {
+    setEditItems((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const editTotals = useMemo(() => {
+    return editItems.reduce(
+      (acc, d) => ({
+        total_calories: acc.total_calories + d.calories,
+        total_protein_g: round1(acc.total_protein_g + d.protein_g),
+        total_fat_g: round1(acc.total_fat_g + d.fat_g),
+        total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
+        total_fiber_g: round1(acc.total_fiber_g + d.fiber_g),
+        total_sugar_g: round1(acc.total_sugar_g + d.sugar_g),
+        total_water_ml: acc.total_water_ml + d.water_ml,
+      }),
+      {
+        total_calories: 0,
+        total_protein_g: 0,
+        total_fat_g: 0,
+        total_carbs_g: 0,
+        total_fiber_g: 0,
+        total_sugar_g: 0,
+        total_water_ml: 0,
+      },
+    );
+  }, [editItems]);
+
+  const handleSaveEdit = () => {
+    if (editItems.length === 0) return;
+    onEdit(log.id, editItems);
+  };
+
+  const enterEditMode = () => {
+    setEditItems(log.items.map(toEditable));
+    setEditMode(true);
+  };
+
+  const exitEditMode = () => {
+    setEditMode(false);
+  };
+
+  const isProcessing = isDeleting || isRepeating || isEditing;
+
+  // ─── Edit mode render ─────────────────────────────────────────────────────
+
+  if (editMode) {
+    return (
+      <BottomSheet
+        title={t('edit_meal', { defaultValue: 'Редактирование' })}
+        onClose={exitEditMode}
+        actionLabel={tc('buttons.save', { defaultValue: 'Сохранить' })}
+        iconCustomEmojiId="5274008024585871702"
+        onAction={handleSaveEdit}
+        isProcessing={isEditing}
+        actionDisabled={editItems.length === 0}
+        secondaryAction={{
+          text: tc('buttons.cancel', { defaultValue: 'Отменить' }),
+          iconCustomEmojiId: '5260342697075416641',
+          onClick: exitEditMode,
+          position: 'left',
+        }}
+      >
+        <div className="flex flex-col gap-2.5">
+          {editItems.map((item, i) => (
+            <div
+              key={i}
+              className="flex flex-col gap-2.5 rounded-2xl p-3"
+              style={{ backgroundColor: theme.section_bg_color }}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item.food_name}
+                  onChange={(e) => updateItem(i, 'food_name', e.target.value)}
+                  className="min-w-0 flex-1 rounded-xl px-3 py-2 text-sm font-semibold outline-none"
+                  style={{
+                    backgroundColor: theme.secondary_bg_color,
+                    color: theme.text_color,
+                  }}
+                />
+                {editItems.length > 1 && (
+                  <button
+                    onClick={() => removeItem(i)}
+                    aria-label={tc('buttons.delete', {
+                      defaultValue: 'Удалить',
+                    })}
+                    className="shrink-0 rounded-lg p-2 transition-opacity active:opacity-60"
+                    style={{ color: theme.destructive_text_color }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <NumberField
+                  label={tc('nutrients.portion', { defaultValue: 'Порция' })}
+                  unit={tc('units.g')}
+                  value={item.portion_g}
+                  onChange={(v) => updateItem(i, 'portion_g', v)}
+                />
+                <NumberField
+                  label={tc('nutrients.calories', { defaultValue: 'Калории' })}
+                  unit={tc('units.kcal')}
+                  value={item.calories}
+                  onChange={(v) => updateItem(i, 'calories', Math.round(v))}
+                />
+                <NumberField
+                  label={tc('nutrients.protein', { defaultValue: 'Белки' })}
+                  unit={tc('units.g')}
+                  step={0.1}
+                  value={item.protein_g}
+                  onChange={(v) => updateItem(i, 'protein_g', v)}
+                />
+                <NumberField
+                  label={tc('nutrients.fat', { defaultValue: 'Жиры' })}
+                  unit={tc('units.g')}
+                  step={0.1}
+                  value={item.fat_g}
+                  onChange={(v) => updateItem(i, 'fat_g', v)}
+                />
+                <NumberField
+                  label={tc('nutrients.carbs', { defaultValue: 'Углеводы' })}
+                  unit={tc('units.g')}
+                  step={0.1}
+                  value={item.carbs_g}
+                  onChange={(v) => updateItem(i, 'carbs_g', v)}
+                />
+                <NumberField
+                  label={tc('nutrients.fiber', { defaultValue: 'Клетчатка' })}
+                  unit={tc('units.g')}
+                  step={0.1}
+                  value={item.fiber_g}
+                  onChange={(v) => updateItem(i, 'fiber_g', v)}
+                />
+                <NumberField
+                  label={tc('nutrients.sugar', { defaultValue: 'Сахар' })}
+                  unit={tc('units.g')}
+                  step={0.1}
+                  value={item.sugar_g}
+                  onChange={(v) => updateItem(i, 'sugar_g', v)}
+                />
+                <NumberField
+                  label={tc('nutrients.water', { defaultValue: 'Вода' })}
+                  unit={tc('units.ml', { defaultValue: 'мл' })}
+                  value={item.water_ml}
+                  onChange={(v) => updateItem(i, 'water_ml', Math.round(v))}
+                />
+              </div>
+            </div>
+          ))}
+
+          <NutritionGrid data={editTotals} />
+        </div>
+      </BottomSheet>
+    );
+  }
+
+  // ─── View mode render (original) ──────────────────────────────────────────
 
   return (
     <>
@@ -126,12 +349,27 @@ export const FoodLogModal = ({
                 </p>
               )}
 
-              <div className="flex gap-1.5">
-                <Label
-                  icon={<Scale size={12} />}
-                  text={`${portion_g} ${tc('units.g')}`}
-                />
-                <Label icon={<Clock size={12} />} text={formattedTime} />
+              <div className="flex items-center justify-between">
+                <div className="flex gap-1.5">
+                  <Label
+                    icon={<Scale size={12} />}
+                    text={`${portion_g} ${tc('units.g')}`}
+                  />
+                  <Label icon={<Clock size={12} />} text={formattedTime} />
+                </div>
+
+                <button
+                  onClick={enterEditMode}
+                  disabled={isProcessing}
+                  aria-label={t('edit_meal', { defaultValue: 'Редактировать' })}
+                  className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-opacity active:opacity-60 disabled:opacity-40"
+                  style={{
+                    backgroundColor: `${theme.button_color}20`,
+                    color: theme.button_color,
+                  }}
+                >
+                  <Pencil size={12} />
+                </button>
               </div>
             </div>
           </div>
