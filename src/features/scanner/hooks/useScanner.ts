@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import ScannerContext from '../context/ScannerContext';
+import { ScannerContext } from '../context/ScannerContext';
 
 export const useScanner = () => {
   const ctx = useContext(ScannerContext);

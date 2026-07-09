@@ -14,7 +14,7 @@ const DEFAULT_VALUE: ThemeContextValue = {
   setMode: async () => {},
 };
 
-const ThemeContext = createContext<ThemeContextValue>(DEFAULT_VALUE);
+export const ThemeContext = createContext<ThemeContextValue>(DEFAULT_VALUE);
 
 /**
  * Хук для получения текущей темы.
@@ -32,4 +32,4 @@ export const useThemeMode = () => {
   return { mode, setMode };
 };
 
-export default ThemeContext;
+

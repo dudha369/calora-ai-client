@@ -6,10 +6,10 @@ interface UserContextType {
   isLoading: boolean;
 }
 
-const UserContext = createContext<UserContextType>({
+export const UserContext = createContext<UserContextType>({
   user_data: undefined,
   isLoading: true,
 });
 
 export const useUser = () => useContext(UserContext);
-export default UserContext;
+

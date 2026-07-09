@@ -3,7 +3,7 @@ import type { UserData } from '../types/UserData';
 import type {
   RestoreStreakResponse,
   StreakInfo,
-} from '../types/api/streak.ts';
+} from '../types/api/streak';
 
 export const users = {
   /** GET /api/users/me — текущий пользователь + профиль + цели */

@@ -1,8 +1,8 @@
 import {
   NutritionGridCardCell,
   type NutritionGridCardCellProps,
-} from './NutritionGridCardCell.tsx';
-import { useTheme } from '@/shared/context/ThemeContext.ts';
+} from './NutritionGridCardCell';
+import { useTheme } from '@/shared/context/ThemeContext';
 
 interface NutritionGridRow {
   first: NutritionGridCardCellProps;

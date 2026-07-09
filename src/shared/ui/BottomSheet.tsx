@@ -13,7 +13,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useBackButton } from '../hooks/useBackButton';
 import { useSecondaryButton } from '../hooks/useSecondaryButton';
 import { useMainButton } from '../hooks/useMainButton';
-import { useModalAnimation } from '../hooks/useModalAnimation.ts';
+import { useModalAnimation } from '../hooks/useModalAnimation';
 import type { SecondaryButtonPosition } from '@tma.js/sdk-react';
 import { cn } from '../lib/cn';
 import type { RGB } from '@tma.js/types';

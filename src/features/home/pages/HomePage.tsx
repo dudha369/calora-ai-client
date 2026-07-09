@@ -11,8 +11,8 @@ import { useDateStrip } from '../hooks/useDateStrip';
 import { food } from '@/shared/api/food';
 import { startOfDay, toApiDate } from '@/shared/lib/date';
 import { getFlameColor } from '../lib/getFlameColor';
-import { useActiveDates } from '../hooks/useActiveDates.ts';
-import { FoodLogModal } from '../components/FoodLog/FoodLogModal.tsx';
+import { useActiveDates } from '../hooks/useActiveDates';
+import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
 import type { FoodLog } from '@/shared/types/api/food';
 import { StreakPopup } from '@/features/streak/components/StreakPopup';
 

@@ -8,15 +8,15 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getIntlLocale } from '@/shared/lib/locale.ts';
-import { BottomSheet } from '@/shared/ui/BottomSheet.tsx';
+import { getIntlLocale } from '@/shared/lib/locale';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { NumberField } from '@/shared/ui/NumberField';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
 import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog, FoodItem } from '@/shared/types/api/food';
-import { useTelegram } from '@/shared/hooks/useTelegram.ts';
+import { useTelegram } from '@/shared/hooks/useTelegram';
 import { cn } from '@/shared/lib/cn';
 import { round1 } from '@/features/home/lib/nutrition';
 
