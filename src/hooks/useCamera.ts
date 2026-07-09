@@ -29,6 +29,48 @@ export interface UseCameraReturn extends CameraState {
   openInputCamera: () => void;
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+/**
+ * Нормализует ориентацию фото из ImageCapture.takePhoto().
+ *
+ * ImageCapture может вернуть изображение с EXIF-ротацией, которая
+ * корректно обрабатывается <img>, но может быть проигнорирована
+ * сервером при анализе. Проводим через Image→Canvas чтобы:
+ *   1. Применить EXIF-ротацию (браузер делает это автоматически в Image)
+ *   2. Получить чистый JPEG без orientation metadata
+ */
+function normalizeImageBlob(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        reject(new Error('Canvas 2D context unavailable'));
+        return;
+      }
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL('image/jpeg', 0.92));
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load captured image for normalization'));
+    };
+
+    img.src = url;
+  });
+}
+
+// ── Hook ──────────────────────────────────────────────────────────────────────
+
 export function useCamera(): UseCameraReturn {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -139,11 +181,9 @@ export function useCamera(): UseCameraReturn {
     if (imageCaptureRef.current) {
       try {
         const blob = await imageCaptureRef.current.takePhoto();
-        return await new Promise<string>((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(blob);
-        });
+        // Нормализуем ориентацию: Image применяет EXIF-ротацию,
+        // Canvas снимает metadata → чистый правильно-ориентированный JPEG
+        return await normalizeImageBlob(blob);
       } catch (err) {
         console.warn('ImageCapture отвалился, пробуем через canvas:', err);
       }

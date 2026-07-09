@@ -19,6 +19,10 @@ interface FabButtonProps {
   label: string;
   navbarColor: string;
   iconRotation?: number;
+  /** Вертикальный режим (sidebar в landscape scanner) */
+  vertical?: boolean;
+  /** Сторона viewport где расположен sidebar */
+  navSide?: 'left' | 'right';
 }
 
 export const FabButton = ({
@@ -28,6 +32,8 @@ export const FabButton = ({
   label,
   navbarColor,
   iconRotation = 0,
+  vertical = false,
+  navSide,
 }: FabButtonProps) => {
   const theme = useTheme();
   const { triggerCapture } = useScanner();
@@ -67,6 +73,15 @@ export const FabButton = ({
 
   const iconTransition = iconRotation !== 0 ? ICON_ROTATION_SPRING : 'none';
 
+  // ── Смещение FAB наружу из панели ──────────────────────────────────────────
+  // Horizontal: вверх (-translate-y-3)
+  // Vertical: наружу от sidebar (влево или вправо)
+  const fabTranslate = vertical
+    ? navSide === 'right'
+      ? '-translate-x-3'
+      : 'translate-x-3'
+    : '-translate-y-3';
+
   return (
     <>
       {isIOS && (
@@ -84,12 +99,16 @@ export const FabButton = ({
         to={to}
         title={label}
         onClick={handleClick}
-        className="relative z-10 flex h-16 w-16 -translate-y-3 items-center justify-center rounded-full"
+        className={cn(
+          'relative z-10 flex items-center justify-center rounded-full',
+          vertical ? 'h-14 w-14' : 'h-16 w-16',
+          fabTranslate,
+        )}
         style={{
           color: theme.button_text_color,
           backgroundColor: theme.button_color,
-          outline: `${navbarColor} solid 5px`,
-          boxShadow: `0 6px 16px ${navbarColor}`,
+          outline: `${navbarColor} solid ${vertical ? 4 : 5}px`,
+          boxShadow: vertical ? 'none' : `0 6px 16px ${navbarColor}`,
         }}
       >
         {({ isActive }) => (
