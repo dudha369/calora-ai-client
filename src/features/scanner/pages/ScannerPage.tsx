@@ -129,6 +129,7 @@ export const ScannerPage = () => {
   const handleBarcodeConfirm = async (
     product: ProductData,
     portionG: number,
+    waterMl: number,
   ) => {
     const factor = portionG / 100;
     const p = product.per100g;
@@ -145,11 +146,12 @@ export const ScannerPage = () => {
           carbs_g: Number(((p.carbs ?? 0) * factor).toFixed(1)),
           fiber_g: Number(((p.fiber ?? 0) * factor).toFixed(1)),
           sugar_g: Number(((p.sugars ?? 0) * factor).toFixed(1)),
+          water_ml: waterMl,
         },
       ],
     });
 
-    invalidateLoggedQueries(false);
+    invalidateLoggedQueries(waterMl > 0);
 
     navigate('/');
   };
