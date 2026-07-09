@@ -4,7 +4,6 @@ import type {
   FoodAnalyzeResponse,
   FoodByDateResponse,
   FoodLogIn,
-  FoodItemIn,
   BarcodeLogIn,
   CreateFoodLogResponse,
   FoodLog,
