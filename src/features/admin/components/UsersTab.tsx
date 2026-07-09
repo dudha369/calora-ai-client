@@ -1,11 +1,17 @@
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  useQuery,
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { useTheme } from '@/shared/context/ThemeContext';
 import {
   admin,
   type AdminUser,
   type AdminUserList,
   type AdminUserDetail,
+  type AdminFoodLog,
 } from '@/shared/api/admin';
 import {
   Search,
@@ -19,6 +25,9 @@ import {
   Clock,
   Loader2,
   Flame,
+  Image as ImageIcon,
+  ChevronDown,
+  X,
 } from 'lucide-react';
 
 const FILTERS = [
@@ -167,6 +176,21 @@ export const UsersTab = ({ selectedUserId, onSelectUser }: UsersTabProps) => {
 
 // ── User row ────────────────────────────────────────────────────────
 
+function formatRelativeTime(isoString: string | null): string {
+  if (!isoString) return 'never';
+  const d = new Date(isoString);
+  const now = Date.now();
+  const diff = now - d.getTime();
+  const mins = Math.floor(diff / 60_000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return d.toLocaleDateString('ru', { day: 'numeric', month: 'short' });
+}
+
 function UserRow({ user, onClick }: { user: AdminUser; onClick: () => void }) {
   const theme = useTheme();
   return (
@@ -198,6 +222,9 @@ function UserRow({ user, onClick }: { user: AdminUser; onClick: () => void }) {
         </div>
         <span className="text-xs" style={{ color: theme.hint_color }}>
           {user.username ? `@${user.username}` : `ID: ${user.telegram_id}`}
+          {user.last_active_at && (
+            <> · {formatRelativeTime(user.last_active_at)}</>
+          )}
         </span>
       </div>
       <div className="flex shrink-0 flex-col items-end gap-0.5">
@@ -219,6 +246,122 @@ function UserRow({ user, onClick }: { user: AdminUser; onClick: () => void }) {
   );
 }
 
+// ── Photo lightbox ─────────────────────────────────────────────────
+
+function PhotoLightbox({
+  src,
+  onClose,
+}: {
+  src: string;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/20"
+      >
+        <X size={20} className="text-white" />
+      </button>
+      <img
+        src={src}
+        alt="Food photo"
+        className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
+// ── Food log card with photo ────────────────────────────────────────
+
+function FoodLogCard({ fl }: { fl: AdminFoodLog }) {
+  const theme = useTheme();
+  const [lightbox, setLightbox] = useState(false);
+
+  const dateTime = new Date(fl.logged_at);
+  const timeStr = dateTime.toLocaleTimeString('ru', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const dateStr = dateTime.toLocaleDateString('ru', {
+    day: 'numeric',
+    month: 'short',
+  });
+
+  return (
+    <>
+      <div
+        className="flex gap-3 border-b py-3 last:border-0"
+        style={{ borderColor: theme.section_separator_color }}
+      >
+        {/* Photo thumbnail */}
+        {fl.photo_url ? (
+          <button
+            onClick={() => setLightbox(true)}
+            className="relative size-14 shrink-0 overflow-hidden rounded-xl"
+          >
+            <img
+              src={fl.photo_url}
+              alt=""
+              className="size-full object-cover"
+            />
+          </button>
+        ) : (
+          <div
+            className="flex size-14 shrink-0 items-center justify-center rounded-xl"
+            style={{ backgroundColor: `${theme.hint_color}15` }}
+          >
+            <ImageIcon size={18} style={{ color: theme.hint_color }} />
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs" style={{ color: theme.hint_color }}>
+              {dateStr}, {timeStr}
+            </span>
+            <span
+              className="text-xs font-semibold"
+              style={{ color: theme.text_color }}
+            >
+              {fl.total_calories} kcal
+            </span>
+          </div>
+          <div
+            className="flex gap-3 text-xs"
+            style={{ color: theme.hint_color }}
+          >
+            <span>P: {fl.total_protein_g}g</span>
+            <span>F: {fl.total_fat_g}g</span>
+            <span>C: {fl.total_carbs_g}g</span>
+          </div>
+          {fl.items.map((item, idx) => (
+            <span
+              key={idx}
+              className="truncate text-xs"
+              style={{ color: theme.subtitle_text_color }}
+            >
+              • {item.food_name} ({item.portion_g}g, {item.calories} kcal)
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {lightbox && fl.photo_url && (
+        <PhotoLightbox
+          src={fl.photo_url}
+          onClose={() => setLightbox(false)}
+        />
+      )}
+    </>
+  );
+}
+
 // ── User detail ─────────────────────────────────────────────────────
 
 function UserDetailView({
@@ -234,6 +377,24 @@ function UserDetailView({
   const { data, isLoading } = useQuery<AdminUserDetail>({
     queryKey: ['admin', 'user', userId],
     queryFn: async () => (await admin.getUserDetail(userId)).data,
+  });
+
+  // Paginated food logs (infinite scroll / load more)
+  const {
+    data: foodPages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ['admin', 'user', userId, 'food-logs'],
+    queryFn: async ({ pageParam }) => {
+      const res = await admin.getUserFoodLogs(userId, pageParam, 20);
+      return res.data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined,
+    enabled: !!data,
   });
 
   const resetMut = useMutation({
@@ -282,6 +443,10 @@ function UserDetailView({
   const p = data.profile;
   const g = data.goal;
 
+  const allFoodLogs: AdminFoodLog[] =
+    foodPages?.pages.flatMap((p) => p.food_logs) ?? data.food_logs;
+  const totalFoodLogs = data.total_food_logs;
+
   return (
     <div className="flex flex-col gap-3">
       {/* User header */}
@@ -304,6 +469,11 @@ function UserDetailView({
         <span className="text-xs" style={{ color: theme.hint_color }}>
           {u.username ? `@${u.username} · ` : ''}ID: {u.telegram_id}
         </span>
+        {u.last_active_at && (
+          <span className="text-xs" style={{ color: theme.hint_color }}>
+            Last active: {formatRelativeTime(u.last_active_at)}
+          </span>
+        )}
         <div className="flex gap-4 pt-1">
           <MiniStat label="Streak" value={u.current_streak} />
           <MiniStat label="Max" value={u.max_streak} />
@@ -337,37 +507,28 @@ function UserDetailView({
         </DetailSection>
       )}
 
-      {/* Food logs */}
-      {data.food_logs.length > 0 && (
-        <DetailSection title={`Food Logs (${data.food_logs.length})`}>
-          {data.food_logs.map((fl) => (
-            <div
-              key={fl.id}
-              className="flex flex-col gap-0.5 border-b py-2 last:border-0"
-              style={{ borderColor: theme.section_separator_color }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: theme.hint_color }}>
-                  {fl.log_date}
-                </span>
-                <span
-                  className="text-xs font-semibold"
-                  style={{ color: theme.text_color }}
-                >
-                  {fl.total_calories} kcal
-                </span>
-              </div>
-              {fl.items.map((item, idx) => (
-                <span
-                  key={idx}
-                  className="text-xs"
-                  style={{ color: theme.subtitle_text_color }}
-                >
-                  • {item.food_name} ({item.portion_g}g, {item.calories} kcal)
-                </span>
-              ))}
-            </div>
+      {/* Food logs with photos and pagination */}
+      {totalFoodLogs > 0 && (
+        <DetailSection title={`Food Logs (${totalFoodLogs})`}>
+          {allFoodLogs.map((fl) => (
+            <FoodLogCard key={fl.id} fl={fl} />
           ))}
+
+          {hasNextPage && (
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-medium transition-opacity active:opacity-70 disabled:opacity-50"
+              style={{ color: theme.button_color }}
+            >
+              {isFetchingNextPage ? (
+                <Loader2 className="animate-spin" size={14} />
+              ) : (
+                <ChevronDown size={14} />
+              )}
+              {isFetchingNextPage ? 'Loading...' : 'Load more'}
+            </button>
+          )}
         </DetailSection>
       )}
 
