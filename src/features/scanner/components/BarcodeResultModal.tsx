@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import {
   NutritionGrid,
@@ -6,6 +6,7 @@ import {
 } from '@/features/home/components/NutritionStats/NutritionGrid';
 import type { ProductData } from '../types/productData';
 import { useTheme } from '@/shared/context/ThemeContext';
+import { estimateWaterMl } from '../lib/estimateWater';
 
 interface BarcodeResultModalProps {
   /**
@@ -14,7 +15,11 @@ interface BarcodeResultModalProps {
    * в таком случае вообще не монтируется (см. ScannerPage).
    */
   product: ProductData;
-  onConfirm: (product: ProductData, portionG: number) => Promise<void>;
+  onConfirm: (
+    product: ProductData,
+    portionG: number,
+    waterMl: number,
+  ) => Promise<void>;
   onClose: () => void;
 }
 
@@ -36,10 +41,25 @@ export const BarcodeResultModal = ({
   );
   const [isConfirming, setIsConfirming] = useState(false);
 
+  const isLiquid = useMemo(() => estimateWaterMl(product, 100) > 0, [product]);
+
+  const [waterMl, setWaterMl] = useState(() => {
+    const initial = product.servingSizeG ?? DEFAULT_PORTION_G;
+    return estimateWaterMl(product, initial);
+  });
+
+  const handlePortionChange = (newPortion: number) => {
+    const prev = portionG;
+    setPortionG(newPortion);
+    if (isLiquid && prev > 0) {
+      setWaterMl(Math.round((waterMl * newPortion) / prev));
+    }
+  };
+
   const handleConfirm = async () => {
     setIsConfirming(true);
     try {
-      await onConfirm(product, portionG);
+      await onConfirm(product, portionG, waterMl);
     } finally {
       setIsConfirming(false);
     }
@@ -55,7 +75,7 @@ export const BarcodeResultModal = ({
     total_carbs_g: scale(p.carbs, factor),
     total_sugar_g: scale(p.sugars, factor),
     total_fiber_g: scale(p.fiber, factor),
-    total_water_ml: 0,
+    total_water_ml: waterMl,
   };
 
   return (
@@ -88,48 +108,85 @@ export const BarcodeResultModal = ({
           </p>
         )}
 
-        <div className="mt-3 flex items-center gap-2">
-          <span
-            className="shrink-0 text-sm"
-            style={{ color: theme.hint_color }}
-          >
-            Порция:
-          </span>
-
-          <div className="relative flex-1">
-            <input
-              type="number"
-              inputMode="numeric"
-              value={portionG}
-              min={1}
-              onChange={(e) =>
-                setPortionG(Math.max(1, Math.round(Number(e.target.value))))
-              }
-              className="w-full rounded-xl py-2 pr-7 pl-3 text-sm outline-none"
-              style={{
-                backgroundColor: theme.secondary_bg_color,
-                color: theme.text_color,
-              }}
-            />
+        <div className="mt-3 flex flex-col gap-2">
+          <div className="flex items-center gap-2">
             <span
-              className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs"
+              className="shrink-0 text-sm"
               style={{ color: theme.hint_color }}
             >
-              г
+              Порция:
             </span>
+
+            <div className="relative flex-1">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={portionG}
+                min={1}
+                onChange={(e) =>
+                  handlePortionChange(
+                    Math.max(1, Math.round(Number(e.target.value))),
+                  )
+                }
+                className="w-full rounded-xl py-2 pr-7 pl-3 text-sm outline-none"
+                style={{
+                  backgroundColor: theme.secondary_bg_color,
+                  color: theme.text_color,
+                }}
+              />
+              <span
+                className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs"
+                style={{ color: theme.hint_color }}
+              >
+                г
+              </span>
+            </div>
+
+            {product.servingSizeG != null && (
+              <button
+                onClick={() => handlePortionChange(product.servingSizeG!)}
+                className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium"
+                style={{
+                  backgroundColor: `${theme.button_color}20`,
+                  color: theme.button_color,
+                }}
+              >
+                {product.servingSizeStr ?? `${product.servingSizeG} г`}
+              </button>
+            )}
           </div>
 
-          {product.servingSizeG != null && (
-            <button
-              onClick={() => setPortionG(product.servingSizeG!)}
-              className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium"
-              style={{
-                backgroundColor: `${theme.button_color}20`,
-                color: theme.button_color,
-              }}
-            >
-              {product.servingSizeStr ?? `${product.servingSizeG} г`}
-            </button>
+          {isLiquid && (
+            <div className="flex items-center gap-2">
+              <span
+                className="shrink-0 text-sm"
+                style={{ color: theme.hint_color }}
+              >
+                Вода:
+              </span>
+              <div className="relative flex-1">
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={waterMl}
+                  min={0}
+                  onChange={(e) =>
+                    setWaterMl(Math.max(0, Math.round(Number(e.target.value))))
+                  }
+                  className="w-full rounded-xl py-2 pr-7 pl-3 text-sm outline-none"
+                  style={{
+                    backgroundColor: theme.secondary_bg_color,
+                    color: theme.text_color,
+                  }}
+                />
+                <span
+                  className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs"
+                  style={{ color: theme.hint_color }}
+                >
+                  мл
+                </span>
+              </div>
+            </div>
           )}
         </div>
 
