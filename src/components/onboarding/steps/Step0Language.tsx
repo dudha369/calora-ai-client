@@ -1,47 +1,35 @@
 import { useEffect } from 'react';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
-import { initData } from '@tma.js/sdk-react';
+import { useLanguageMode } from '../../../context/LanguageContext';
+import { listLanguageOptions } from '../../../utils/language';
 import type { OnboardingData } from '../../../interfaces/Onboarding';
 
-interface Props {
+interface Step0LanguageProps {
   data: Partial<OnboardingData>;
   onChange: (patch: Partial<OnboardingData>, isValid: boolean) => void;
 }
 
-const OPTIONS: { value: string; label: string; flag: string }[] = [
-  { value: 'en', label: 'English', flag: '🇬🇧' },
-  { value: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { value: 'ua', label: 'Українська', flag: '🇺🇦' },
-];
+export const Step0Language = ({ onChange }: Step0LanguageProps) => {
+  const { language, setLanguage } = useLanguageMode();
+  const options = listLanguageOptions();
 
-export const Step0Language = ({ data, onChange }: Props) => {
-  // Auto-select from Telegram language if not yet chosen
+  // Шагу нечего сохранять в черновик онбординга — выбор языка уже
+  // полностью обработан (и персистентен) через LanguageProvider.
+  // Нужно только пометить шаг как проходимый.
   useEffect(() => {
-    if (data.language) return;
-    try {
-      const tgLang = initData
-        ?.user()
-        ?.language_code?.split('-')[0]
-        ?.toLowerCase();
-      const match = OPTIONS.find((o) => o.value === tgLang);
-      if (match) {
-        onChange({ language: match.value }, true);
-      }
-    } catch {
-      // initData not available
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    onChange({}, true);
+  }, [onChange]);
 
   return (
     <StepShell title="Choose language" subtitle="Выбери язык · Обери мову">
       <div className="flex flex-col gap-3">
-        {OPTIONS.map((opt) => (
+        {options.map((opt) => (
           <OptionCard
-            key={opt.value}
+            key={opt.code}
             label={`${opt.flag} ${opt.label}`}
-            isSelected={data.language === opt.value}
-            onClick={() => onChange({ language: opt.value }, true)}
+            isSelected={language === opt.code}
+            onClick={() => setLanguage(opt.code)}
           />
         ))}
       </div>

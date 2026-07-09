@@ -1,28 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
+import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale, capitalizeFirst } from '../../utils/locale';
 
 import { useTheme } from '../../context/ThemeContext';
-import { isSameDay, startOfDay, toApiDate } from '../../utils/date';
-import { useActiveDates } from '../../hooks/useActiveDates';
-
-import { MARKER_FOOD_COLOR, MARKER_WATER_COLOR } from '../../constants/markers';
-import { withOpacity } from '../../utils/colors.ts';
+import { startOfDay } from '../../utils/date';
+import {
+  generateMonthWindow,
+  isSameMonth,
+  type MonthWindowData,
+} from '../../utils/calendarMonths';
+import { MonthGrid } from './MonthGrid';
 import { BottomSheet } from '../BottomSheet.tsx';
-
-function buildCalendarCells(year: number, month: number): (Date | null)[] {
-  const firstDay = new Date(year, month, 1);
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const startDow = (firstDay.getDay() + 6) % 7;
-
-  const cells: (Date | null)[] = [];
-  for (let i = 0; i < startDow; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
-
-  return cells;
-}
 
 interface CalendarProps {
   selectedDate: Date;
@@ -31,6 +22,11 @@ interface CalendarProps {
   onSelect: (date: Date) => void;
   onClose: () => void;
 }
+
+// Полноценно рендерим (и фетчим сеть) только активный слайд + 1 соседа
+// с каждой стороны — достаточно для плавности свайпа, при этом не держим
+// N параллельных useActiveDates на весь буфер окна (см. calendarMonths.ts).
+const RENDER_RADIUS = 1;
 
 export const Calendar = ({
   selectedDate,
@@ -44,23 +40,11 @@ export const Calendar = ({
   const locale = getIntlLocale(i18n.language);
   const today = startOfDay(new Date());
 
-  // Отображаемый месяц — начинаем с месяца выбранной даты
-  const [displayYear, setDisplayYear] = useState(selectedDate.getFullYear());
-  const [displayMonth, setDisplayMonth] = useState(selectedDate.getMonth());
+  const minNorm = useMemo(() => startOfDay(minDate), [minDate]);
+  const maxNorm = useMemo(() => startOfDay(maxDate), [maxDate]);
 
-  // Intl-based month header — capitalised for RU/UA where Intl returns lowercase
-  const monthLabel = useMemo(
-    () =>
-      capitalizeFirst(
-        new Intl.DateTimeFormat(locale, {
-          month: 'long',
-          year: 'numeric',
-        }).format(new Date(displayYear, displayMonth)),
-      ),
-    [locale, displayYear, displayMonth],
-  );
-
-  // Monday-first short weekday headers
+  // Monday-first короткие названия дней — не зависят от месяца,
+  // поэтому вынесены из карусели и рендерятся один раз над ней.
   const dayHeaders = useMemo(
     () =>
       Array.from({ length: 7 }, (_, i) =>
@@ -73,54 +57,94 @@ export const Calendar = ({
     [locale],
   );
 
-  const monthStart = useMemo(
-    () => new Date(displayYear, displayMonth, 1),
-    [displayYear, displayMonth],
+  const [windowData, setWindowData] = useState<MonthWindowData>(() =>
+    generateMonthWindow(selectedDate, minNorm, maxNorm),
   );
-  const monthEnd = useMemo(
-    () => new Date(displayYear, displayMonth + 1, 0),
-    [displayYear, displayMonth],
+
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    startIndex: windowData.activeIndex,
+    containScroll: 'keepSnaps',
+  });
+
+  const windowRef = useRef(windowData);
+  useEffect(() => {
+    windowRef.current = windowData;
+  }, [windowData]);
+
+  const isSilentJump = useRef(false);
+  const [activeIndex, setActiveIndex] = useState(windowData.activeIndex);
+
+  // Свайп пальцем и клик по стрелкам ведут к одному и тому же emblaApi —
+  // единственный источник правды о "текущем" месяце, не два рассинхронных state.
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onSelect = () => {
+      if (isSilentJump.current) return;
+      setActiveIndex(emblaApi.selectedScrollSnap());
+    };
+
+    // Регенерация окна при приближении к его краю — тот же приём,
+    // что onSettle в DayCarousel.tsx.
+    const onSettle = () => {
+      const index = emblaApi.selectedScrollSnap();
+      const current = windowRef.current.months[index];
+      if (!current) return;
+
+      const isNearStart =
+        index <= 1 && !isSameMonth(windowRef.current.months[0], minNorm);
+      const isNearEnd =
+        index >= windowRef.current.months.length - 2 &&
+        !isSameMonth(
+          windowRef.current.months[windowRef.current.months.length - 1],
+          maxNorm,
+        );
+
+      if (isNearStart || isNearEnd) {
+        isSilentJump.current = true;
+        const next = generateMonthWindow(current, minNorm, maxNorm);
+
+        flushSync(() => {
+          setWindowData(next);
+          setActiveIndex(next.activeIndex);
+        });
+
+        emblaApi.reInit();
+        emblaApi.scrollTo(next.activeIndex, true);
+        isSilentJump.current = false;
+      }
+    };
+
+    emblaApi.on('select', onSelect);
+    emblaApi.on('settle', onSettle);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('settle', onSettle);
+    };
+  }, [emblaApi, minNorm, maxNorm]);
+
+  const currentMonth = windowData.months[activeIndex] ?? windowData.months[0];
+
+  const monthLabel = useMemo(
+    () =>
+      capitalizeFirst(
+        new Intl.DateTimeFormat(locale, {
+          month: 'long',
+          year: 'numeric',
+        }).format(currentMonth),
+      ),
+    [locale, currentMonth],
   );
-  const activeDates = useActiveDates(monthStart, monthEnd);
+
+  const canGoPrev = activeIndex > 0;
+  const canGoNext = activeIndex < windowData.months.length - 1;
+
+  const prevMonth = () => emblaApi?.scrollTo(activeIndex - 1);
+  const nextMonth = () => emblaApi?.scrollTo(activeIndex + 1);
 
   const handleSelect = (d: Date) => {
     onSelect(d);
     onClose();
-  };
-
-  const cells = useMemo(
-    () => buildCalendarCells(displayYear, displayMonth),
-    [displayYear, displayMonth],
-  );
-
-  const minNorm = startOfDay(minDate);
-  const maxNorm = startOfDay(maxDate);
-
-  // Можно ли листать месяцы
-  const canGoPrev =
-    displayYear > minNorm.getFullYear() ||
-    (displayYear === minNorm.getFullYear() &&
-      displayMonth > minNorm.getMonth());
-
-  const canGoNext =
-    displayYear < maxNorm.getFullYear() ||
-    (displayYear === maxNorm.getFullYear() &&
-      displayMonth < maxNorm.getMonth());
-
-  const prevMonth = () => {
-    if (!canGoPrev) return;
-    if (displayMonth === 0) {
-      setDisplayYear((y) => y - 1);
-      setDisplayMonth(11);
-    } else setDisplayMonth((m) => m - 1);
-  };
-
-  const nextMonth = () => {
-    if (!canGoNext) return;
-    if (displayMonth === 11) {
-      setDisplayYear((y) => y + 1);
-      setDisplayMonth(0);
-    } else setDisplayMonth((m) => m + 1);
   };
 
   return (
@@ -175,71 +199,36 @@ export const Calendar = ({
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1.5">
-        {cells.map((date, i) => {
-          if (!date) {
-            return <div key={`empty-${i}`} className="aspect-square" />;
-          }
-
-          const d = startOfDay(date);
-          const isDisabled = d < minNorm || d > maxNorm;
-          const isSelected = isSameDay(d, selectedDate);
-          const isItToday = isSameDay(d, today);
-
-          let bg = 'transparent';
-          let border = '2px solid transparent';
-          let txtColor = theme.text_color;
-
-          if (isSelected) {
-            bg = theme.button_color;
-            txtColor = theme.button_text_color;
-          } else if (isItToday) {
-            border = `2px dashed ${theme.text_color}`;
-          } else if (isDisabled) {
-            txtColor = `${theme.hint_color}40`;
-          }
-
-          const apiDate = toApiDate(d);
-          const hasFood = activeDates.foodDates.has(apiDate);
-          const hasWater = activeDates.waterDates.has(apiDate);
-
-          let bar_bg: string;
-
-          if (hasFood && hasWater) {
-            bar_bg = `linear-gradient(90deg, ${MARKER_FOOD_COLOR} 50%, ${MARKER_WATER_COLOR} 50%)`;
-          } else if (hasFood) {
-            bar_bg = MARKER_FOOD_COLOR;
-          } else if (hasWater) {
-            bar_bg = MARKER_WATER_COLOR;
-          } else if (isDisabled) {
-            bar_bg = withOpacity(theme.text_color, 0.25);
-          } else {
-            bar_bg = theme.hint_color;
-          }
-
-          return (
-            <button
-              key={d.toISOString()}
-              onClick={() => !isDisabled && handleSelect(d)}
-              disabled={isDisabled}
-              className="relative flex aspect-square flex-col items-center justify-center gap-0.5 rounded-2xl text-[22px] font-medium transition-colors"
-              style={{
-                backgroundColor: bg,
-                color: txtColor,
-                border,
-                cursor: isDisabled ? 'not-allowed' : 'pointer',
-              }}
-            >
-              {date.getDate()}
-              <span
-                className="absolute bottom-0.5 h-1 w-1/2 rounded-full"
-                style={{
-                  background: bar_bg,
-                }}
-              />
-            </button>
-          );
-        })}
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {windowData.months.map((m, index) => {
+            const isRendered = Math.abs(index - activeIndex) <= RENDER_RADIUS;
+            return (
+              <div
+                key={`${m.getFullYear()}-${m.getMonth()}`}
+                className="min-w-0 flex-[0_0_100%]"
+              >
+                {isRendered ? (
+                  <MonthGrid
+                    year={m.getFullYear()}
+                    month={m.getMonth()}
+                    selectedDate={selectedDate}
+                    today={today}
+                    minDate={minDate}
+                    maxDate={maxDate}
+                    onSelect={handleSelect}
+                  />
+                ) : (
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {Array.from({ length: 35 }, (_, i) => (
+                      <div key={i} className="aspect-square" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </BottomSheet>
   );

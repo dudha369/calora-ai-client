@@ -72,61 +72,69 @@ export const BarcodeResultModal = ({
         position: 'left',
       }}
     >
-      <p
-        className="mt-1 text-center text-sm font-medium"
-        style={{ color: theme.text_color }}
-      >
-        {product.name}
-      </p>
-      {product.brand && (
-        <p className="text-center text-xs" style={{ color: theme.hint_color }}>
-          {product.brand}
+      <div className="flex flex-col gap-2">
+        <p
+          className="mt-1 text-center text-sm font-medium"
+          style={{ color: theme.text_color }}
+        >
+          {product.name}
         </p>
-      )}
-
-      <div className="mt-3 flex items-center gap-2">
-        <span className="shrink-0 text-sm" style={{ color: theme.hint_color }}>
-          Порция:
-        </span>
-
-        <div className="relative flex-1">
-          <input
-            type="number"
-            inputMode="numeric"
-            value={portionG}
-            min={1}
-            onChange={(e) =>
-              setPortionG(Math.max(1, Math.round(Number(e.target.value))))
-            }
-            className="w-full rounded-xl py-2 pr-7 pl-3 text-sm outline-none"
-            style={{
-              backgroundColor: theme.secondary_bg_color,
-              color: theme.text_color,
-            }}
-          />
-          <span
-            className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs"
+        {product.brand && (
+          <p
+            className="text-center text-xs"
             style={{ color: theme.hint_color }}
           >
-            г
+            {product.brand}
+          </p>
+        )}
+
+        <div className="mt-3 flex items-center gap-2">
+          <span
+            className="shrink-0 text-sm"
+            style={{ color: theme.hint_color }}
+          >
+            Порция:
           </span>
+
+          <div className="relative flex-1">
+            <input
+              type="number"
+              inputMode="numeric"
+              value={portionG}
+              min={1}
+              onChange={(e) =>
+                setPortionG(Math.max(1, Math.round(Number(e.target.value))))
+              }
+              className="w-full rounded-xl py-2 pr-7 pl-3 text-sm outline-none"
+              style={{
+                backgroundColor: theme.secondary_bg_color,
+                color: theme.text_color,
+              }}
+            />
+            <span
+              className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs"
+              style={{ color: theme.hint_color }}
+            >
+              г
+            </span>
+          </div>
+
+          {product.servingSizeG != null && (
+            <button
+              onClick={() => setPortionG(product.servingSizeG!)}
+              className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium"
+              style={{
+                backgroundColor: `${theme.button_color}20`,
+                color: theme.button_color,
+              }}
+            >
+              {product.servingSizeStr ?? `${product.servingSizeG} г`}
+            </button>
+          )}
         </div>
 
-        {product.servingSizeG != null && (
-          <button
-            onClick={() => setPortionG(product.servingSizeG!)}
-            className="shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-medium"
-            style={{
-              backgroundColor: `${theme.button_color}20`,
-              color: theme.button_color,
-            }}
-          >
-            {product.servingSizeStr ?? `${product.servingSizeG} г`}
-          </button>
-        )}
+        <NutritionGrid data={data} />
       </div>
-
-      <NutritionGrid data={data} />
     </BottomSheet>
   );
 };

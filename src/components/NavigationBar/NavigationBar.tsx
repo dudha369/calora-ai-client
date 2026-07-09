@@ -3,7 +3,7 @@ import { NavItem } from './NavItem';
 import { FabButton } from './FabButton';
 import {
   House,
-  Droplets,
+  GlassWater,
   Plus,
   Camera,
   ChartNoAxesColumn,
@@ -50,7 +50,7 @@ export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
           />
           <NavItem
             to="/water"
-            icon={<Droplets size={ICON_SIZE} />}
+            icon={<GlassWater size={ICON_SIZE} />}
             label={t('nav.water')}
             iconRotation={iconRotation}
             isBarRotated={isBarRotated}

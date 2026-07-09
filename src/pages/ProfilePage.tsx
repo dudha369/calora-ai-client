@@ -34,9 +34,9 @@ export const ProfilePage = () => {
 
   return (
     <div className="flex flex-col gap-6 pb-4">
-      <section className="flex flex-col items-center gap-1 pt-6">
+      <section className="flex flex-col items-center gap-2 pt-1">
         <div
-          className="flex size-22 items-center justify-center rounded-full"
+          className="flex size-24 items-center justify-center rounded-full"
           style={{ backgroundColor: `${theme.button_color}20` }}
         >
           {photo_url ? (
@@ -49,8 +49,9 @@ export const ProfilePage = () => {
             <User size={48} style={{ color: theme.button_color }} />
           )}
         </div>
+
         <p
-          className="text-center font-mono text-[22px] font-semibold tracking-wider"
+          className="text-center text-[28px] leading-none font-medium tracking-tight"
           style={{ color: theme.text_color }}
         >
           {user_data?.user.full_name ?? t('default_full_name')}

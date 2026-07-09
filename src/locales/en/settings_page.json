@@ -1,0 +1,9 @@
+{
+  "language": "Language",
+  "failed_to_delete": "Failed to delete the account. Check your connection and try again.",
+  "delete_account": "Delete account",
+  "delete_account_title": "Delete account?",
+  "confirm": "Confirm",
+  "cancel": "Cancel",
+  "delete_description": "This action cannot be undone. Your profile, meal history, photos, quests, and all other data will be deleted. To keep using the app, you will need to register again."
+}

@@ -9,6 +9,7 @@ import { useTheme } from '../../context/ThemeContext';
 import type { FoodLog } from '../../interfaces/api/food';
 import { useState } from 'react';
 import { useTelegram } from '../../hooks/useTelegram.ts';
+import { cn } from '../../utils/cn';
 
 interface FoodLogModalProps {
   log: FoodLog;
@@ -47,6 +48,7 @@ export const FoodLogModal = ({
 
   const [isCopied, setIsCopied] = useState(false);
 
+  const isSingleIngredient = log.items.length === 1;
   const mainDish = log.items[0]?.food_name ?? t('food');
 
   const cleanDish = mainDish.trim();
@@ -80,46 +82,57 @@ export const FoodLogModal = ({
         }}
       >
         <div className="flex flex-col gap-3 pb-1">
-          {log.photo_url ? (
-            <img
-              src={log.photo_url}
-              alt={mainDish}
-              className="aspect-square w-full rounded-2xl object-cover"
-            />
-          ) : (
-            <div
-              className="flex aspect-2/1 w-full items-center justify-center rounded-2xl"
-              style={{ backgroundColor: theme.section_bg_color }}
-            >
-              <UtensilsCrossed size={36} style={{ color: theme.hint_color }} />
-            </div>
-          )}
-
-          <div className="flex flex-col gap-0.5 px-1">
-            {log.items.length === 1 && (
-              <p
-                className="text-lg font-bold"
-                style={{ color: theme.text_color }}
-              >
-                {textBeforeLastWord && `${textBeforeLastWord} `}
-                <span className="whitespace-nowrap">
-                  {lastWord}
-                  <button
-                    onClick={handleCopy}
-                    aria-label={tc('buttons.copy')}
-                    className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
-                  >
-                    <Copy size={16} />
-                  </button>
-                </span>
-              </p>
+          <div
+            className={cn(
+              'flex flex-col',
+              isSingleIngredient ? 'gap-1' : 'gap-2',
             )}
-            <div className="flex gap-1.5">
-              <Label
-                icon={<Scale size={12} />}
-                text={`${portion_g} ${tc('units.g')}`}
+          >
+            {log.photo_url ? (
+              <img
+                src={log.photo_url}
+                alt={mainDish}
+                className="aspect-square w-full rounded-2xl object-cover"
               />
-              <Label icon={<Clock size={12} />} text={formattedTime} />
+            ) : (
+              <div
+                className="flex aspect-2/1 w-full items-center justify-center rounded-2xl"
+                style={{ backgroundColor: theme.section_bg_color }}
+              >
+                <UtensilsCrossed
+                  size={36}
+                  style={{ color: theme.hint_color }}
+                />
+              </div>
+            )}
+
+            <div className="flex flex-col gap-0.5 px-1">
+              {isSingleIngredient && (
+                <p
+                  className="text-lg font-bold"
+                  style={{ color: theme.text_color }}
+                >
+                  {textBeforeLastWord && `${textBeforeLastWord} `}
+                  <span className="whitespace-nowrap">
+                    {lastWord}
+                    <button
+                      onClick={handleCopy}
+                      aria-label={tc('buttons.copy')}
+                      className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
+                    >
+                      <Copy size={16} />
+                    </button>
+                  </span>
+                </p>
+              )}
+
+              <div className="flex gap-1.5">
+                <Label
+                  icon={<Scale size={12} />}
+                  text={`${portion_g} ${tc('units.g')}`}
+                />
+                <Label icon={<Clock size={12} />} text={formattedTime} />
+              </div>
             </div>
           </div>
 
@@ -147,6 +160,7 @@ export const FoodLogModal = ({
                   <FoodItemRow
                     key={item.id}
                     item={item}
+                    counter={i + 1}
                     isLast={i === log.items.length - 1}
                   />
                 ))}

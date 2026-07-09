@@ -36,7 +36,7 @@ export const SectionItem = ({
         {right ? (
           right
         ) : to ? (
-          <ChevronRight color={theme.hint_color} size={20} strokeWidth={2} />
+          <ChevronRight color={theme.hint_color} size={20} strokeWidth={2.5} />
         ) : null}
       </div>
 

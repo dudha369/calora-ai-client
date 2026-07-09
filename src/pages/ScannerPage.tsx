@@ -23,6 +23,13 @@ interface ScannerLocationState {
   photo?: string;
 }
 
+type TgOrient = {
+  lockOrientation?: () => void;
+  unlockOrientation?: () => void;
+};
+const getTg = (): TgOrient | null =>
+  (window as { Telegram?: { WebApp?: TgOrient } }).Telegram?.WebApp ?? null;
+
 export const ScannerPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,17 +45,32 @@ export const ScannerPage = () => {
 
   const { status, runAnalysis } = useFoodAnalysis(photo);
 
-  // ── Сообщаем NavigationBar когда камера реально стримит живую картинку ──
+  // ── FIX: исключаем сканер из CSS portrait lock ────────────────────────────
   //
-  // "Живой стрим" = ScannerPage смонтирован И фото ещё не снято (photo === null).
-  // Именно в этот момент имеет смысл counter-rotation иконок навбара —
-  // как только фото сделано, пользователь переходит к редактированию
-  // результата (FoodResultModal/BarcodeResultModal), где удобнее устойчивый
-  // portrait UI, а не повёрнутые иконки.
+  // CSS в index.css: body:not([data-page="scanner"]) { transform: rotate() }
+  // Без этого атрибута body вращался и на сканере → видео с камеры тоже
+  // вращалось вместе с body → камера показывала картинку в неправильную сторону.
   //
-  // setLiveCamera(false) при размонтировании — обязателен, иначе при уходе
-  // со страницы (back button, навигация) navbar решит, что камера всё ещё
-  // активна, и продолжит вращать иконки на всех остальных страницах.
+  // Также разблокируем физическую ориентацию через API чтобы телефон мог
+  // физически повернуться в landscape — для удобной съёмки горизонтальных блюд.
+  // При уходе со страницы — восстанавливаем блокировку.
+  useEffect(() => {
+    document.body.setAttribute('data-page', 'scanner');
+    getTg()?.unlockOrientation?.();
+    screen.orientation?.unlock?.();
+
+    return () => {
+      document.body.removeAttribute('data-page');
+      getTg()?.lockOrientation?.();
+      screen.orientation?.lock?.('portrait').catch(() => null);
+    };
+  }, []);
+
+  // ── Сообщаем NavigationBar когда камера реально стримит живую картинку ────
+  //
+  // isLiveCamera=true → NavigationBar активирует counter-rotation иконок.
+  // Как только фото сделано (photo !== null) → иконки возвращаются в 0°,
+  // т.к. в режиме просмотра результата нужен стабильный portrait UI.
   const { setLiveCamera } = useScanner();
   useEffect(() => {
     setLiveCamera(photo === null);

@@ -1,9 +1,29 @@
-import i18n, { type AppLanguage } from '../i18n';
+import i18n, { SUPPORTED_LANGUAGES, type AppLanguage } from '../i18n';
+
+export interface LanguageOption {
+  code: AppLanguage;
+  label: string;
+  flag: string;
+}
 
 /**
- * Change application language. Called from settings or onboarding.
- * Language choice is saved server-side (onboarding draft / user profile).
+ * Строит список языков для UI прямо из _meta каждого common.json,
+ * а не из отдельно поддерживаемого массива. Новая папка языка
+ * автоматически появляется во всех пикерах приложения (онбординг,
+ * настройки, ...) — регистрировать её больше нигде не нужно.
  */
-export async function changeAppLanguage(lang: AppLanguage) {
-  await i18n.changeLanguage(lang);
+export function listLanguageOptions(): LanguageOption[] {
+  return SUPPORTED_LANGUAGES.map((code) => {
+    const meta = (
+      i18n.getResourceBundle(code, 'common') as {
+        _meta?: { label?: string; flag?: string };
+      }
+    )?._meta;
+
+    return {
+      code,
+      label: meta?.label ?? code.toUpperCase(),
+      flag: meta?.flag ?? '🏳️',
+    };
+  });
 }

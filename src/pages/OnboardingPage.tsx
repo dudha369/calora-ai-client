@@ -9,7 +9,6 @@ import { useMainButton } from '../hooks/useMainButton';
 import { useBackButton } from '../hooks/useBackButton';
 import { onboarding } from '../api/onboarding';
 
-import i18n from '../i18n';
 import { LoadingScreen } from '../components/loading/LoadingScreen';
 import { OnboardingProgress } from '../components/onboarding/OnboardingProgress';
 import { Step0Language } from '../components/onboarding/steps/Step0Language';
@@ -45,7 +44,7 @@ function getActiveSteps(data: Partial<OnboardingData>): number[] {
 function isStepValid(step: number, data: Partial<OnboardingData>): boolean {
   switch (step) {
     case 0:
-      return !!data.language;
+      return true;
     case 1:
       return !!data.gender;
     case 2:
@@ -80,8 +79,6 @@ function stepPayload(
   d: Partial<OnboardingData>,
 ): Partial<OnboardingData> {
   switch (step) {
-    case 0:
-      return { language: d.language };
     case 1:
       return { gender: d.gender };
     case 2:
@@ -178,11 +175,6 @@ export const OnboardingPage = () => {
         const resume = active.includes(savedStep) ? savedStep : active[0];
         setStep(resume);
         setValid(isStepValid(resume, merged));
-
-        // Apply saved language to i18n
-        if (merged.language) {
-          await i18n.changeLanguage(merged.language);
-        }
       } catch {
         setStep(0);
         setValid(false);
@@ -235,11 +227,6 @@ export const OnboardingPage = () => {
     setSaving(true);
 
     try {
-      // Language step: apply language to i18n immediately
-      if (currentStep === 0 && currentData.language) {
-        await i18n.changeLanguage(currentData.language);
-      }
-
       await onboarding.saveStep(
         currentStep,
         stepPayload(currentStep, currentData),
@@ -264,7 +251,7 @@ export const OnboardingPage = () => {
       if (isLast) {
         // Include timezone in the complete call
         await onboarding.complete();
-        queryClient.invalidateQueries({ queryKey: ['user'] });
+        await queryClient.invalidateQueries({ queryKey: ['user'] });
         navigate('/', { replace: true });
       } else {
         setStepHistory((h) => [...h, currentStep]);
@@ -279,7 +266,7 @@ export const OnboardingPage = () => {
     } finally {
       setSaving(false);
     }
-  }, [saving, navigate, queryClient]);
+  }, [saving, navigate, queryClient, t]);
 
   // ── derived ───────────────────────────────────────────────────────────────
   const activeSteps = getActiveSteps(data);

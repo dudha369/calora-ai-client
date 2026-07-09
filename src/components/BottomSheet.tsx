@@ -304,10 +304,7 @@ export const BottomSheet = ({
       <div
         ref={sheetRef}
         onClick={(e) => e.stopPropagation()}
-        className={cn(
-          'pointer-events-auto fixed bottom-0 flex h-auto max-h-[80dvh] w-full flex-col gap-1.5 overflow-hidden rounded-t-3xl pt-2',
-          dragToClose ? 'pt-3' : '',
-        )}
+        className="pointer-events-auto fixed bottom-0 flex h-auto max-h-[80dvh] w-full flex-col gap-1.5 overflow-hidden rounded-t-3xl pt-3"
         style={{
           backgroundColor: theme.bg_color,
           color: theme.text_color,
@@ -368,7 +365,7 @@ export const BottomSheet = ({
         )}
 
         <main
-          className="w-full flex-1 overflow-y-auto overscroll-contain px-6"
+          className="w-full flex-1 overflow-y-auto overscroll-contain px-6 pb-1"
           style={{ scrollbarGutter: 'stable' }}
         >
           {children}

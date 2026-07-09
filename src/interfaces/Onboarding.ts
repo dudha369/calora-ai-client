@@ -6,7 +6,6 @@ export type HeightUnit = 'cm' | 'ft';
 export type WeightUnit = 'kg' | 'lbs';
 
 export interface OnboardingData {
-  language?: string;
   gender?: Gender;
   birth_date?: string; // YYYY-MM-DD
   height?: number;

@@ -11,7 +11,6 @@ import {
 } from 'react-router-dom';
 
 import { useTelegram } from './hooks/useTelegram';
-import { useTelegramLanguage } from './hooks/useTelegramLanguage';
 import { useOrientationLock } from './hooks/useOrientationLock.ts';
 import { settingsButton } from '@tma.js/sdk-react';
 import { useTheme } from './context/ThemeContext';
@@ -23,8 +22,14 @@ import ScannerProvider from './providers/ScannerProvider';
 export function App() {
   const { ready, safeTop, safeBottom } = useTelegram();
   const theme = useTheme();
-  useTelegramLanguage();
-  useOrientationLock();
+
+  // FIX: передаём ready чтобы вызов происходил после viewport.requestFullscreen().
+  // screen.orientation.lock() на Chrome Android требует fullscreen context —
+  // вызов до ready даёт silent fail.
+  // FIX: убраны useForcePortraitLock и useTelegramOrientationLock —
+  // useForcePortraitLock читал физический угол и применял body-стили
+  // даже когда viewport оставался портретным → body выезжал за экран.
+  useOrientationLock(ready);
 
   const scrollContainerRef = useRef<HTMLElement>(null);
 
@@ -55,7 +60,7 @@ export function App() {
 
   return (
     <div
-      className="relative flex h-dvh flex-col"
+      className="relative flex h-full flex-col"
       style={{
         backgroundColor: theme.bg_color,
         color: theme.text_color,

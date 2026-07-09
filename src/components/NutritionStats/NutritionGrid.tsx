@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { NutritionGridCard } from './NutritionGridCard.tsx';
 import type { FoodLogBase } from '../../interfaces/api/food.ts';
-import { cn } from '../../utils/cn';
 import { useUser } from '../../context/UserContext.ts';
 
 export type NutritionGridStats = Pick<
@@ -26,24 +25,10 @@ export const NutritionGrid = ({ data }: NutritionGridProps) => {
   const { t } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
 
-  const hasExtra = !!(
-    data.total_sugar_g ||
-    data.total_fiber_g ||
-    data.total_water_ml
-  );
-
   return (
-    <div
-      className={cn(
-        'grid w-full grid-cols-4 gap-1.5',
-        hasExtra ? 'grid-rows-2' : 'grid-rows-1',
-      )}
-    >
+    <div className="grid w-full grid-cols-4 grid-rows-2 gap-1.5">
       <div
-        className={cn(
-          'relative col-span-1 flex flex-col items-center justify-center gap-0.5 rounded-2xl',
-          hasExtra ? 'row-span-2' : 'row-span-1',
-        )}
+        className="relative col-span-1 row-span-2 flex flex-col items-center justify-center gap-0.5 rounded-2xl"
         style={{ backgroundColor: theme.section_bg_color }}
       >
         <span className="text-3xl leading-none font-semibold tracking-wider">
@@ -76,7 +61,7 @@ export const NutritionGrid = ({ data }: NutritionGridProps) => {
         )}
       </div>
 
-      <div className={cn('col-span-3', hasExtra ? 'row-span-2' : 'row-span-1')}>
+      <div className="col-span-3 row-span-2">
         <NutritionGridCard
           row1={{
             first: {
@@ -95,27 +80,23 @@ export const NutritionGrid = ({ data }: NutritionGridProps) => {
               unit: tc('units.g'),
             },
           }}
-          row2={
-            hasExtra
-              ? {
-                  first: {
-                    title: t('sugars'),
-                    value: data.total_sugar_g,
-                    unit: tc('units.g'),
-                  },
-                  second: {
-                    title: t('fiber'),
-                    value: data.total_fiber_g,
-                    unit: tc('units.g'),
-                  },
-                  third: {
-                    title: t('water'),
-                    value: data.total_water_ml,
-                    unit: tc('units.ml'),
-                  },
-                }
-              : undefined
-          }
+          row2={{
+            first: {
+              title: t('sugars'),
+              value: data.total_sugar_g,
+              unit: tc('units.g'),
+            },
+            second: {
+              title: t('fiber'),
+              value: data.total_fiber_g,
+              unit: tc('units.g'),
+            },
+            third: {
+              title: t('water'),
+              value: data.total_water_ml,
+              unit: tc('units.ml'),
+            },
+          }}
         />
       </div>
     </div>

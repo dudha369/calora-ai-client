@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
+@theme {
+  --font-rounded: "Comfortaa", sans-serif;
+}
+
 @layer base {
   *,
   *::before,
@@ -13,6 +17,15 @@
   body,
   #root {
     height: 100%;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
 
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
@@ -47,7 +60,7 @@
 }
 
 @media screen and (orientation: landscape) {
-  body {
+  body:not([data-page="scanner"]) {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -58,7 +71,6 @@
     transform-origin: center center;
     transform: translate(-50%, -50%) rotate(var(--portrait-lock-rotate));
 
-    transition: transform 200ms ease;
     overflow: hidden;
   }
 }

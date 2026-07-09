@@ -1,42 +1,11 @@
 import { type ReactNode, useState, useCallback, useEffect } from 'react';
-import { cloudStorage, themeParams } from '@tma.js/sdk-react';
+import { themeParams } from '@tma.js/sdk-react';
 import ThemeContext from '../context/ThemeContext';
 import { getValidTheme } from '../utils/getValidTheme';
 import { useTelegram } from '../hooks/useTelegram';
+import { loadAppSettings, saveAppSettings } from '../utils/appSettingsStorage';
 import type { Theme, ThemeMode } from '../interfaces/Theme';
 import type { ThemeParams } from 'telegram-web-app';
-
-// ─── CloudStorage: ключ и интерфейс настроек ─────────────────────────────────
-
-const SETTINGS_KEY = 'calora_settings';
-
-interface AppSettings {
-  themeMode: ThemeMode;
-  // Место для будущих настроек: language, notifications, units и т.д.
-}
-
-async function loadSettings(): Promise<Partial<AppSettings>> {
-  try {
-    const raw = await cloudStorage.getItem(SETTINGS_KEY);
-    return raw ? (JSON.parse(raw) as Partial<AppSettings>) : {};
-  } catch {
-    return {};
-  }
-}
-
-async function saveSettings(patch: Partial<AppSettings>): Promise<void> {
-  try {
-    const existing = await loadSettings();
-    await cloudStorage.setItem(
-      SETTINGS_KEY,
-      JSON.stringify({ ...existing, ...patch }),
-    );
-  } catch {
-    // CloudStorage недоступен (dev-окружение / старый клиент) — молча игнорируем
-  }
-}
-
-// ─── CSS-переменные ───────────────────────────────────────────────────────────
 
 function applyThemeToCss(theme: Theme): void {
   const root = document.documentElement;
@@ -65,16 +34,12 @@ function applyThemeToCss(theme: Theme): void {
   );
 }
 
-// ─── Хелперы чтения текущих Telegram params ───────────────────────────────────
-
 function safeThemeParams() {
-  // 1. Пробуем SDK
   try {
     const state = themeParams.state();
     if (state && state.bg_color) return state;
   } catch {}
 
-  // 2. Fallback: нативный Telegram WebApp API
   try {
     const w = window as unknown as Record<string, any>;
     const tp = w.Telegram?.WebApp?.themeParams;
@@ -83,8 +48,6 @@ function safeThemeParams() {
 
   return undefined;
 }
-
-// ─── ThemeProvider ────────────────────────────────────────────────────────────
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { ready } = useTelegram();
@@ -96,15 +59,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return initial;
   });
 
-  // ── Загружаем сохранённый режим из CloudStorage как только Telegram готов ──
   useEffect(() => {
     if (!ready) return;
-    loadSettings().then((settings) => {
+    loadAppSettings().then((settings) => {
       if (settings.themeMode) setModeState(settings.themeMode);
     });
   }, [ready]);
 
-  // ── Пересчитываем тему при смене режима; подписываемся на Telegram-тему ────
   useEffect(() => {
     function update() {
       const next = getValidTheme(
@@ -119,15 +80,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     if (mode !== 'telegram') return;
 
-    // Реагируем на смену темы Telegram (пользователь переключил Dark Mode)
     const unsub = themeParams.state.sub(update);
     return unsub;
   }, [mode, ready]);
 
-  // ── Публичный сеттер: обновляет состояние + пишет в CloudStorage ──────────
   const setMode = useCallback(async (newMode: ThemeMode) => {
     setModeState(newMode);
-    await saveSettings({ themeMode: newMode });
+    await saveAppSettings({ themeMode: newMode });
   }, []);
 
   return (
