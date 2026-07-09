@@ -1,6 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   useRef,
+  type CSSProperties,
   type ReactNode,
   type MouseEvent,
   type ChangeEvent,
@@ -10,9 +11,6 @@ import { useScanner } from '@/features/scanner/hooks/useScanner';
 import { isIOSDevice } from '../../lib/isIOSDevice';
 import { cn } from '../../lib/cn';
 
-const ICON_ROTATION_SPRING =
-  'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
-
 interface FabButtonProps {
   to: string;
   icon: ReactNode;
@@ -20,6 +18,10 @@ interface FabButtonProps {
   label: string;
   navbarColor: string;
   iconRotation?: number;
+  /** Вертикальный режим (sidebar в landscape scanner) */
+  vertical?: boolean;
+  /** Сторона viewport где расположен sidebar */
+  navSide?: 'left' | 'right';
 }
 
 export const FabButton = ({
@@ -29,6 +31,8 @@ export const FabButton = ({
   label,
   navbarColor,
   iconRotation = 0,
+  vertical = false,
+  navSide,
 }: FabButtonProps) => {
   const theme = useTheme();
   const { triggerCapture } = useScanner();
@@ -66,6 +70,20 @@ export const FabButton = ({
     }
   };
 
+  /* CSS custom property управляет поворотом через класс .nav-icon-rotate */
+  const iconStyle: CSSProperties | undefined = iconRotation
+    ? ({ '--icon-rot': `${iconRotation}deg` } as CSSProperties)
+    : undefined;
+
+  // ── Смещение FAB наружу из панели ──────────────────────────────────────────
+  // Horizontal: вверх (-translate-y-3)
+  // Vertical: наружу от sidebar (влево или вправо)
+  const fabTranslate = vertical
+    ? navSide === 'right'
+      ? '-translate-x-3'
+      : 'translate-x-3'
+    : '-translate-y-3';
+
   return (
     <>
       {isIOS && (
@@ -83,23 +101,22 @@ export const FabButton = ({
         to={to}
         title={label}
         onClick={handleClick}
-        className="relative z-10 flex h-16 w-16 -translate-y-3 items-center justify-center rounded-full"
+        className={cn(
+          'relative z-10 flex items-center justify-center rounded-full',
+          vertical ? 'h-14 w-14' : 'h-16 w-16',
+          fabTranslate,
+        )}
         style={{
           color: theme.button_text_color,
           backgroundColor: theme.button_color,
-          outline: `${navbarColor} solid 5px`,
-          boxShadow: `0 6px 16px ${navbarColor}`,
+          outline: `${navbarColor} solid ${vertical ? 4 : 5}px`,
+          boxShadow: vertical ? 'none' : `0 6px 16px ${navbarColor}`,
         }}
       >
         {({ isActive }) => (
           <span
-            className="relative flex items-center justify-center"
-            style={{
-              transform: iconRotation
-                ? `rotate(${iconRotation}deg)`
-                : undefined,
-              transition: iconRotation ? ICON_ROTATION_SPRING : undefined,
-            }}
+            className="nav-icon-rotate relative flex items-center justify-center"
+            style={iconStyle}
           >
             <span
               className={cn(
