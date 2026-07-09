@@ -1,9 +1,47 @@
 import type { NutritionPer, NutritionForAmount } from '@/features/scanner/types/productData';
+import type { NutritionGridStats } from '@/features/home/components/NutritionStats/NutritionGrid';
 
 // ─── Nutrition calculations ───────────────────────────────────────────────────
 
 export function round1(value: number): number {
   return Math.round(value * 10) / 10;
+}
+
+/** Minimal shape an item needs to be summed into NutritionGridStats. */
+interface NutritionItem {
+  calories: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  fiber_g: number;
+  sugar_g: number;
+  water_ml: number;
+}
+
+const EMPTY_TOTALS: NutritionGridStats = {
+  total_calories: 0,
+  total_protein_g: 0,
+  total_fat_g: 0,
+  total_carbs_g: 0,
+  total_fiber_g: 0,
+  total_sugar_g: 0,
+  total_water_ml: 0,
+};
+
+/** Sum an array of nutrition items into NutritionGrid-compatible totals. */
+export function sumNutritionTotals(items: NutritionItem[]): NutritionGridStats {
+  return items.reduce(
+    (acc, d) => ({
+      total_calories: acc.total_calories + d.calories,
+      total_protein_g: round1(acc.total_protein_g + d.protein_g),
+      total_fat_g: round1(acc.total_fat_g + d.fat_g),
+      total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
+      total_fiber_g: round1(acc.total_fiber_g + d.fiber_g),
+      total_sugar_g: round1(acc.total_sugar_g + d.sugar_g),
+      total_water_ml: acc.total_water_ml + d.water_ml,
+    }),
+    { ...EMPTY_TOTALS },
+  );
 }
 
 /**
