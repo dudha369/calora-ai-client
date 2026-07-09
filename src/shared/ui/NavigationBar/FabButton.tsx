@@ -11,8 +11,7 @@ import { useScanner } from '@/features/scanner/hooks/useScanner';
 import { isIOSDevice } from '../../lib/isIOSDevice';
 import { cn } from '../../lib/cn';
 
-const ICON_ROTATION_SPRING =
-  'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+const ICON_SPRING = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
 
 interface FabButtonProps {
   to: string;
@@ -20,6 +19,7 @@ interface FabButtonProps {
   activeIcon?: ReactNode;
   label: string;
   navbarColor: string;
+  /** Угол поворота иконки (counter-rotation для scanner) */
   iconRotation?: number;
 }
 
@@ -68,7 +68,7 @@ export const FabButton = ({
   };
 
   const iconStyle: CSSProperties | undefined = iconRotation
-    ? { transform: `rotate(${iconRotation}deg)`, transition: ICON_ROTATION_SPRING }
+    ? { transform: `rotate(${iconRotation}deg)`, transition: ICON_SPRING }
     : undefined;
 
   return (

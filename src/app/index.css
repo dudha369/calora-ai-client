@@ -59,6 +59,10 @@
   --portrait-lock-rotate: -90deg;
 }
 
+/*
+ * html фон совпадает с Telegram-темой, чтобы при CSS portrait lock
+ * за краями повёрнутого body не было видно чужого фона.
+ */
 html {
   background-color: var(--tg-theme-bg-color, #000);
   overflow: hidden;
@@ -68,6 +72,11 @@ html {
   body:not([data-page="scanner"]) {
     position: fixed;
 
+    /*
+     * Размеры body = portrait dimensions в landscape viewport.
+     * +4px буфер гарантирует покрытие экрана даже когда dvh/dvw
+     * не совпадают точно с viewport (Telegram WebView, safe area).
+     */
     width: calc(max(100dvh, 100vh) + 4px);
     height: calc(max(100dvw, 100vw) + 4px);
 

@@ -2,14 +2,15 @@ import { NavLink } from 'react-router-dom';
 import type { CSSProperties, ReactNode } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
-const ICON_ROTATION_SPRING =
-  'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+const ICON_SPRING = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
 
 interface NavItemProps {
   to: string;
   icon: ReactNode;
   label: string;
+  /** Угол поворота иконки (counter-rotation для scanner) */
   iconRotation?: number;
+  /** Скрыть лейбл (когда navbar повёрнут) */
   isBarRotated?: boolean;
 }
 
@@ -23,10 +24,7 @@ export const NavItem = ({
   const theme = useTheme();
 
   const iconStyle: CSSProperties | undefined = iconRotation
-    ? {
-        transform: `rotate(${iconRotation}deg)`,
-        transition: ICON_ROTATION_SPRING,
-      }
+    ? { transform: `rotate(${iconRotation}deg)`, transition: ICON_SPRING }
     : undefined;
 
   return (
@@ -40,7 +38,6 @@ export const NavItem = ({
     >
       <div className="flex h-full flex-col items-center justify-center gap-px text-xs font-semibold">
         <div style={iconStyle}>{icon}</div>
-
         <span
           className="overflow-hidden transition-all duration-200"
           style={{
