@@ -73,6 +73,11 @@ export function App() {
         <ErrorScreen errorType="no_telegram" />
       ) : session.status === 'access_denied' ? (
         <ErrorScreen errorType="access_denied" />
+      ) : session.status === 'maintenance' ? (
+        <ErrorScreen
+          errorType="maintenance"
+          onRetry={() => window.location.reload()}
+        />
       ) : session.status === 'ready' ? (
         <UserContext.Provider
           value={{ user_data: session.userData, isLoading: false }}
