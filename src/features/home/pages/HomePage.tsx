@@ -13,6 +13,7 @@ import { startOfDay, toApiDate } from '@/shared/lib/date';
 import { getFlameColor } from '../lib/getFlameColor';
 import { useActiveDates } from '../hooks/useActiveDates';
 import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
+import type { CopyMealResult } from '../components/FoodLog/CopyMealSheet';
 import type { FoodLog } from '@/shared/types/api/food';
 import { StreakPopup } from '@/features/streak/components/StreakPopup';
 
@@ -51,12 +52,20 @@ export const HomePage = () => {
   const [currentFoodLog, setCurrentFoodLog] = useState<FoodLog | undefined>();
   const [foodLogDeleting, setFoodLogDeleting] = useState(false);
   const [foodLogRepeating, setFoodLogRepeating] = useState(false);
+  const [foodLogEditing, setFoodLogEditing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const onClick = useCallback((log: FoodLog) => {
     setCurrentFoodLog(log);
     setFoodLogModalOpen(true);
   }, []);
+
+  const invalidateAfterChange = (dateStr: string) => {
+    queryClient.invalidateQueries({ queryKey: ['food', dateStr] });
+    queryClient.invalidateQueries({ queryKey: ['stats', 'daily', dateStr] });
+    queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+    queryClient.invalidateQueries({ queryKey: ['user'] });
+  };
 
   const { mutate: deleteLog } = useMutation({
     mutationFn: (logId: number) => food.remove(logId),
@@ -69,26 +78,49 @@ export const HomePage = () => {
       setFoodLogDeleting(false);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['food', selectedDateStr] });
-      queryClient.invalidateQueries({
-        queryKey: ['stats', 'daily', selectedDateStr],
-      });
-      queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      invalidateAfterChange(selectedDateStr);
       setFoodLogModalOpen(false);
     },
   });
 
-  const { mutate: repeatLog } = useMutation({
-    mutationFn: (log: FoodLog) => food.repeat(log),
+  const { mutate: copyLog } = useMutation({
+    mutationFn: (result: CopyMealResult) =>
+      food.log({
+        log_date: toApiDate(new Date()),
+        items: result.items,
+        photo_key: result.includePhoto ? currentFoodLog?.photo_url ?? null : null,
+      }),
     onMutate: () => setFoodLogRepeating(true),
     onSettled: () => setFoodLogRepeating(false),
     onSuccess: () => {
       const todayStr = toApiDate(new Date());
-      queryClient.invalidateQueries({ queryKey: ['food', todayStr] });
-      queryClient.invalidateQueries({ queryKey: ['stats', 'daily', todayStr] });
-      queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      invalidateAfterChange(todayStr);
+      setFoodLogModalOpen(false);
+    },
+  });
+
+  const { mutate: editLog } = useMutation({
+    mutationFn: ({
+      logId,
+      items,
+    }: {
+      logId: number;
+      items: {
+        food_name: string;
+        portion_g: number;
+        calories: number;
+        protein_g: number;
+        fat_g: number;
+        carbs_g: number;
+        fiber_g: number;
+        sugar_g: number;
+        water_ml: number;
+      }[];
+    }) => food.update(logId, items),
+    onMutate: () => setFoodLogEditing(true),
+    onSettled: () => setFoodLogEditing(false),
+    onSuccess: () => {
+      invalidateAfterChange(selectedDateStr);
       setFoodLogModalOpen(false);
     },
   });
@@ -185,11 +217,16 @@ export const HomePage = () => {
           log={currentFoodLog}
           isDeleting={foodLogDeleting}
           isRepeating={foodLogRepeating}
+          isEditing={foodLogEditing}
           onClose={() =>
-            !foodLogDeleting && !foodLogRepeating && setFoodLogModalOpen(false)
+            !foodLogDeleting &&
+            !foodLogRepeating &&
+            !foodLogEditing &&
+            setFoodLogModalOpen(false)
           }
           onDelete={deleteLog}
-          onRepeat={repeatLog}
+          onCopy={copyLog}
+          onEdit={(logId, items) => editLog({ logId, items })}
         />
       )}
     </div>
