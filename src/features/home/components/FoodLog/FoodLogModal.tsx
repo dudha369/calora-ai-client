@@ -6,6 +6,7 @@ import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
+import { CopyMealSheet, type CopyMealResult } from './CopyMealSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram';
@@ -18,6 +19,8 @@ interface FoodLogModalProps {
   onClose: () => void;
   onDelete: (logId: number) => void;
   onRepeat: (log: FoodLog) => void;
+  /** New: called with custom items + photo flag from the copy menu */
+  onRepeatCustom?: (result: CopyMealResult) => void;
 }
 
 export const FoodLogModal = ({
@@ -27,27 +30,22 @@ export const FoodLogModal = ({
   onClose,
   onDelete,
   onRepeat,
+  onRepeatCustom,
 }: FoodLogModalProps) => {
   const theme = useTheme();
   const { safeTop } = useTelegram();
   const { t, i18n } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
 
-  const formattedTime = new Date(log.logged_at).toLocaleTimeString(
-    getIntlLocale(i18n.language),
-    {
-      hour: '2-digit',
-      minute: '2-digit',
-    },
-  );
-
-  const portion_g = log.items.reduce(
-    (sum, current) => sum + current.portion_g,
-    0,
-  );
-
+  const [copyMode, setCopyMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
+  const formattedTime = new Date(log.logged_at).toLocaleTimeString(
+    getIntlLocale(i18n.language),
+    { hour: '2-digit', minute: '2-digit' },
+  );
+
+  const portion_g = log.items.reduce((s, i) => s + i.portion_g, 0);
   const isSingleIngredient = log.items.length === 1;
   const mainDish = log.items[0]?.food_name ?? t('food');
 
@@ -58,11 +56,48 @@ export const FoodLogModal = ({
   const lastWord =
     lastSpaceIndex === -1 ? cleanDish : cleanDish.substring(lastSpaceIndex + 1);
 
-  const handleCopy = async () => {
+  const handleCopyText = async () => {
     await navigator.clipboard.writeText(mainDish);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
+
+  const handleCopyConfirm = (result: CopyMealResult) => {
+    if (onRepeatCustom) {
+      onRepeatCustom(result);
+    } else {
+      // Fallback: build a modified FoodLog and use onRepeat
+      const modified: FoodLog = {
+        ...log,
+        items: result.items.map((item, i) => ({
+          ...log.items[i % log.items.length],
+          ...item,
+          id: log.items[i % log.items.length]?.id ?? 0,
+          food_log_id: log.id,
+        })),
+        photo_url: result.includePhoto ? log.photo_url : null,
+      };
+      onRepeat(modified);
+    }
+  };
+
+  // ─── Copy mode ────────────────────────────────────────────────────────────
+
+  if (copyMode) {
+    return (
+      <CopyMealSheet
+        log={log}
+        isProcessing={isRepeating}
+        onConfirm={handleCopyConfirm}
+        onClose={() => {
+          setCopyMode(false);
+          onClose();
+        }}
+      />
+    );
+  }
+
+  // ─── View mode ────────────────────────────────────────────────────────────
 
   return (
     <>
@@ -70,7 +105,7 @@ export const FoodLogModal = ({
         onClose={onClose}
         actionLabel={tc('buttons.copy')}
         iconCustomEmojiId="5258477770735885832"
-        onAction={() => onRepeat(log)}
+        onAction={() => setCopyMode(true)}
         isProcessing={isRepeating}
         secondaryAction={{
           text: tc('buttons.delete'),
@@ -116,7 +151,7 @@ export const FoodLogModal = ({
                   <span className="whitespace-nowrap">
                     {lastWord}
                     <button
-                      onClick={handleCopy}
+                      onClick={handleCopyText}
                       aria-label={tc('buttons.copy')}
                       className="ml-1 inline-flex items-center justify-center rounded-xl p-1 align-middle transition-opacity hover:opacity-75"
                     >
@@ -147,7 +182,6 @@ export const FoodLogModal = ({
                 >
                   {t('compound')}
                 </span>
-
                 <span className="text-xs" style={{ color: theme.hint_color }}>
                   {t('products', { count: log.items.length })}
                 </span>
