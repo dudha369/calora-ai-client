@@ -8,6 +8,7 @@ export type SessionState =
   | { status: 'booting' }
   | { status: 'auth_error' }
   | { status: 'access_denied' }
+  | { status: 'maintenance' }
   | { status: 'ready'; userData: UserData | undefined };
 
 function isTelegramContext(ready: boolean): boolean {
@@ -25,6 +26,14 @@ function getApiStatus(error: unknown): number | undefined {
   return (error as { response?: { status?: number } } | null)?.response?.status;
 }
 
+function getApiReason(error: unknown): string | undefined {
+  return (
+    error as {
+      response?: { data?: { detail?: { reason?: string } } };
+    } | null
+  )?.response?.data?.detail?.reason;
+}
+
 export function useUserSession(ready: boolean): SessionState {
   const inTelegram = useMemo(() => isTelegramContext(ready), [ready]);
 
@@ -37,7 +46,7 @@ export function useUserSession(ready: boolean): SessionState {
     enabled: ready && inTelegram,
     retry: (failureCount, err) => {
       const status = getApiStatus(err);
-      if (status === 401 || status === 403) return false;
+      if (status === 401 || status === 403 || status === 503) return false;
       return failureCount < 1;
     },
   });
@@ -45,6 +54,8 @@ export function useUserSession(ready: boolean): SessionState {
   if (!ready || (inTelegram && isLoading)) return { status: 'booting' };
   if (!inTelegram || getApiStatus(error) === 401)
     return { status: 'auth_error' };
+  if (getApiStatus(error) === 503 && getApiReason(error) === 'maintenance_mode')
+    return { status: 'maintenance' };
   if (getApiStatus(error) === 403) return { status: 'access_denied' };
 
   return { status: 'ready', userData: data };

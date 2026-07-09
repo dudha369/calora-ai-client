@@ -30,6 +30,7 @@ export interface AdminUser {
   max_streak: number;
   quests_completed: number;
   created_at: string;
+  last_active_at: string | null;
   onboarded: boolean;
   in_whitelist: boolean;
 }
@@ -45,12 +46,23 @@ export interface AdminUserList {
 export interface AdminFoodLog {
   id: number;
   log_date: string;
+  logged_at: string;
   photo_url: string | null;
   total_calories: number;
   total_protein_g: number;
   total_fat_g: number;
   total_carbs_g: number;
+  total_fiber_g: number;
+  total_sugar_g: number;
   items: { food_name: string; portion_g: number; calories: number }[];
+}
+
+export interface AdminFoodLogList {
+  food_logs: AdminFoodLog[];
+  total: number;
+  page: number;
+  per_page: number;
+  pages: number;
 }
 
 export interface AdminQuest {
@@ -66,6 +78,7 @@ export interface AdminUserDetail {
   profile: Profile | null;
   goal: Goal | null;
   food_logs: AdminFoodLog[];
+  total_food_logs: number;
   quests: AdminQuest[];
 }
 
@@ -96,6 +109,11 @@ export const admin = {
   },
 
   getUserDetail: (id: number) => request<AdminUserDetail>(`admin/users/${id}`),
+
+  getUserFoodLogs: (id: number, page: number = 1, perPage: number = 20) =>
+    request<AdminFoodLogList>(
+      `admin/users/${id}/food-logs?page=${page}&per_page=${perPage}`,
+    ),
 
   resetUser: (id: number) => request('admin/users/' + id + '/reset', 'POST'),
   deleteUser: (id: number) => request('admin/users/' + id, 'DELETE'),

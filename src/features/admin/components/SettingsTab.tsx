@@ -23,6 +23,7 @@ const DEFAULT_FLAGS: Record<string, string> = {
   whitelist_enabled: 'false',
   maintenance_mode: 'false',
   registration_enabled: 'true',
+  maintenance_message: '',
 };
 
 export const SettingsTab = () => {
@@ -81,6 +82,8 @@ export const SettingsTab = () => {
     setLocal((prev) => ({ ...prev, [key]: next }));
   };
 
+  const isMaintenanceOn = local.maintenance_mode === 'true';
+
   return (
     <div className="flex flex-col gap-4">
       {/* Feature flags */}
@@ -128,6 +131,40 @@ export const SettingsTab = () => {
           );
         })}
       </div>
+
+      {/* Maintenance message — shown when maintenance mode is on */}
+      {isMaintenanceOn && (
+        <div
+          className="flex flex-col gap-2 rounded-2xl p-4"
+          style={{ backgroundColor: theme.section_bg_color }}
+        >
+          <span
+            className="text-xs font-semibold tracking-wider uppercase"
+            style={{ color: '#f59e0b' }}
+          >
+            Maintenance Message (optional)
+          </span>
+          <span className="text-xs" style={{ color: theme.hint_color }}>
+            Custom message shown to users. Leave empty for default text.
+          </span>
+          <textarea
+            value={local.maintenance_message ?? ''}
+            onChange={(e) =>
+              setLocal((prev) => ({
+                ...prev,
+                maintenance_message: e.target.value,
+              }))
+            }
+            placeholder="e.g. We're updating the app. Back in 30 minutes!"
+            rows={3}
+            className="w-full resize-none rounded-xl bg-transparent p-3 text-sm outline-none"
+            style={{
+              color: theme.text_color,
+              backgroundColor: `${theme.hint_color}10`,
+            }}
+          />
+        </div>
+      )}
 
       {/* Whitelist — enriched cards */}
       <WhitelistSection />
@@ -290,16 +327,16 @@ function useAvatar(telegramId: number) {
 }
 
 // ── Beautiful Telegram-style Gradients ──────────────────────────
-// Набор сочных градиентов. Один из них точь-в-точь как на твоем скриншоте!
+
 const AVATAR_GRADIENTS = [
-  'linear-gradient(135deg, #fd749b 0%, #281ac8 100%)', // Фиолетово-малиновый (как на фото)
-  'linear-gradient(135deg, #ff6a00 0%, #ee0979 100%)', // Огненный оранжевый
-  'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)', // Синий Telegram
-  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', // Яркий зеленый
-  'linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)', // Глубокий индиго
-  'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)', // Розовый коралл
-  'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)', // Голубой лед
-  'linear-gradient(135deg, #f9d423 0%, #ff4e50 100%)', // Солнечный закат
+  'linear-gradient(135deg, #fd749b 0%, #281ac8 100%)',
+  'linear-gradient(135deg, #ff6a00 0%, #ee0979 100%)',
+  'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)',
+  'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+  'linear-gradient(135deg, #8a2be2 0%, #4a00e0 100%)',
+  'linear-gradient(135deg, #f857a6 0%, #ff5858 100%)',
+  'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
+  'linear-gradient(135deg, #f9d423 0%, #ff4e50 100%)',
 ];
 
 function gradientFromId(id: number) {
@@ -327,15 +364,12 @@ function WhitelistCard({
   const theme = useTheme();
   const avatarUrl = useAvatar(user.telegram_id);
 
-  // Получаем персональный градиент по ID
   const backgroundGradient = gradientFromId(user.telegram_id);
   const initials = initialsFromName(user.full_name, user.telegram_id);
   const hasName = user.full_name && user.full_name !== String(user.telegram_id);
 
-  // Локальный стейт на случай, если картинка не загрузится (например, 404 от сервера)
   const [imgError, setImgError] = useState(false);
 
-  // Сбрасываем ошибку, если вдруг поменялся avatarUrl
   useEffect(() => {
     setImgError(false);
   }, [avatarUrl]);
@@ -345,18 +379,17 @@ function WhitelistCard({
       className="flex items-center gap-3 rounded-xl px-3 py-2.5"
       style={{ backgroundColor: `${theme.hint_color}10` }}
     >
-      {/* Avatar с умным фолбеком */}
       {avatarUrl && !imgError ? (
         <img
           src={avatarUrl}
           alt=""
           className="size-9 shrink-0 rounded-full object-cover"
-          onError={() => setImgError(true)} // Если упала 404, мягко переключаемся на CSS
+          onError={() => setImgError(true)}
         />
       ) : (
         <div
           className="flex size-9 shrink-0 items-center justify-center rounded-full shadow-sm"
-          style={{ background: backgroundGradient }} // Применяем сочный градиент
+          style={{ background: backgroundGradient }}
         >
           {initials === '#' ? (
             <UserIcon size={18} style={{ color: '#ffffff' }} />
@@ -368,7 +401,6 @@ function WhitelistCard({
         </div>
       )}
 
-      {/* Info */}
       <div className="flex min-w-0 flex-1 flex-col">
         <span
           className="truncate text-sm font-semibold"
@@ -381,7 +413,6 @@ function WhitelistCard({
         </span>
       </div>
 
-      {/* Remove */}
       <button
         onClick={onRemove}
         disabled={removing}
