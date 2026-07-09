@@ -35,7 +35,10 @@ export const SettingsPage = () => {
   useEffect(() => {
     if (!langDropdownOpen) return;
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setLangDropdownOpen(false);
       }
     };
@@ -77,7 +80,9 @@ export const SettingsPage = () => {
               key={opt.key}
               icon={
                 <SectionItemIcon
-                  color={isActive ? theme.button_color : `${theme.hint_color}25`}
+                  color={
+                    isActive ? theme.button_color : `${theme.hint_color}25`
+                  }
                 >
                   <Icon size={18} />
                 </SectionItemIcon>
@@ -98,29 +103,30 @@ export const SettingsPage = () => {
       </Section>
 
       {/* ── Language selector ── */}
-      <Section title={t('language')}>
+      <Section>
         <div ref={dropdownRef} className="relative">
           <SectionItem
             icon={
               <SectionItemIcon color={`${theme.button_color}15`}>
-                <span className="text-base leading-none">{currentLang?.flag ?? '🏳️'}</span>
+                <span className="text-base leading-none">
+                  {currentLang?.flag ?? '🏳️'}
+                </span>
               </SectionItemIcon>
             }
             label={t('language')}
             onClick={() => setLangDropdownOpen((prev) => !prev)}
             right={
               <div className="flex items-center gap-1.5">
-                <span
-                  className="text-sm"
-                  style={{ color: theme.hint_color }}
-                >
+                <span className="text-sm" style={{ color: theme.hint_color }}>
                   {currentLang?.label ?? language}
                 </span>
                 <ChevronDown
                   size={16}
                   style={{
                     color: theme.hint_color,
-                    transform: langDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transform: langDropdownOpen
+                      ? 'rotate(180deg)'
+                      : 'rotate(0deg)',
                     transition: 'transform 0.2s ease',
                   }}
                 />
@@ -132,7 +138,9 @@ export const SettingsPage = () => {
           <div
             className="overflow-hidden transition-all duration-200 ease-out"
             style={{
-              maxHeight: langDropdownOpen ? `${languageOptions.length * 52}px` : '0px',
+              maxHeight: langDropdownOpen
+                ? `${languageOptions.length * 52}px`
+                : '0px',
               opacity: langDropdownOpen ? 1 : 0,
             }}
           >

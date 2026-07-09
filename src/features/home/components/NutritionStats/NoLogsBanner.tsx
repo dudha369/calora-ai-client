@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { NoDataIcon } from '@/shared/ui/NoDataIcon';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/shared/lib/cn';
 
 interface NoLogsBannerProps {
   isToday: boolean;
@@ -15,7 +16,10 @@ export const NoLogsBanner = ({ isToday }: NoLogsBannerProps) => {
 
   return (
     <div
-      className="flex h-36 w-full flex-col items-center justify-center gap-1 rounded-xl py-4"
+      className={cn(
+        'flex h-36 w-full flex-col items-center justify-center gap-1 rounded-xl py-4',
+        isToday ? 'cursor-pointer' : '',
+      )}
       style={{
         backgroundColor: theme.section_bg_color,
       }}
