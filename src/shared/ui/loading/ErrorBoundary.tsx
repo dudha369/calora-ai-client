@@ -24,7 +24,7 @@ function classifyError(error: Error | null): ErrorType {
   return 'general';
 }
 
-export class ErrorBoundary extends Component<Props, State> {
+export class ErrorBoundary extends Component<ErrorBoundaryProps, State> {
   public state: State = {
     hasError: false,
     error: null,
