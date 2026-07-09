@@ -2,14 +2,16 @@ import { NavLink } from 'react-router-dom';
 import type { CSSProperties, ReactNode } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 
+const ICON_SPRING = 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+
 interface NavItemProps {
   to: string;
   icon: ReactNode;
   label: string;
+  /** Угол поворота иконки (counter-rotation для scanner) */
   iconRotation?: number;
+  /** Скрыть лейбл (когда navbar повёрнут) */
   isBarRotated?: boolean;
-  /** Вертикальный режим (sidebar в landscape scanner) */
-  vertical?: boolean;
 }
 
 export const NavItem = ({
@@ -18,51 +20,33 @@ export const NavItem = ({
   label,
   iconRotation = 0,
   isBarRotated = false,
-  vertical = false,
 }: NavItemProps) => {
   const theme = useTheme();
 
-  /* CSS custom property управляет поворотом через класс .nav-icon-rotate */
   const iconStyle: CSSProperties | undefined = iconRotation
-    ? ({ '--icon-rot': `${iconRotation}deg` } as CSSProperties)
+    ? { transform: `rotate(${iconRotation}deg)`, transition: ICON_SPRING }
     : undefined;
 
   return (
     <NavLink
       to={to}
       title={label}
-      className={
-        vertical
-          ? 'flex w-full items-center justify-center py-2 transition-colors duration-200 ease-in-out'
-          : 'h-full max-w-16 flex-1 transition-colors duration-200 ease-in-out'
-      }
+      className="h-full max-w-16 flex-1 transition-colors duration-200 ease-in-out"
       style={({ isActive }) => ({
         color: isActive ? theme.text_color : theme.hint_color,
       })}
     >
-      <div
-        className={
-          vertical
-            ? 'flex items-center justify-center'
-            : 'flex h-full flex-col items-center justify-center gap-px text-xs font-semibold'
-        }
-      >
-        <div className="nav-icon-rotate" style={iconStyle}>
-          {icon}
-        </div>
-
-        {/* Лейбл скрывается в vertical и при повороте */}
-        {!vertical && (
-          <span
-            className="overflow-hidden transition-all duration-200"
-            style={{
-              opacity: isBarRotated ? 0 : 1,
-              maxHeight: isBarRotated ? 0 : '1.2em',
-            }}
-          >
-            {label}
-          </span>
-        )}
+      <div className="flex h-full flex-col items-center justify-center gap-px text-xs font-semibold">
+        <div style={iconStyle}>{icon}</div>
+        <span
+          className="overflow-hidden transition-all duration-200"
+          style={{
+            opacity: isBarRotated ? 0 : 1,
+            maxHeight: isBarRotated ? 0 : '1.2em',
+          }}
+        >
+          {label}
+        </span>
       </div>
     </NavLink>
   );
