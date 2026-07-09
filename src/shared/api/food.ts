@@ -35,6 +35,25 @@ export const food = {
     request<DeleteResponse>(`food/photo/${photoKey}`, 'DELETE'),
 
   /**
+   * Редактирует уже залогированную запись (заменяет items, пересчитывает тоталы).
+   * Backend: PUT /api/food/{log_id}
+   */
+  update: (
+    logId: number,
+    items: {
+      food_name: string;
+      portion_g: number;
+      calories: number;
+      protein_g: number;
+      fat_g: number;
+      carbs_g: number;
+      fiber_g?: number;
+      sugar_g?: number;
+      water_ml?: number;
+    }[],
+  ) => request<CreateFoodLogResponse>(`food/${logId}`, 'PUT', { items }),
+
+  /**
    * Повторяет уже залогированную запись на сегодня.
    *
    * water_ml передаётся на уровне items — backend сам суммирует
