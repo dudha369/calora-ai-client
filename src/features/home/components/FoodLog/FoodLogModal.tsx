@@ -8,23 +8,21 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { getIntlLocale } from '@/shared/lib/locale';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
-import { NumberField } from '@/shared/ui/NumberField';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
 import { CopyMealSheet, type CopyMealResult } from './CopyMealSheet';
+import {
+  NutritionEditGrid,
+  type NutritionValues,
+} from '@/shared/ui/NutritionEditGrid';
 import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog, FoodItem } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { cn } from '@/shared/lib/cn';
 import { round1 } from '@/features/home/lib/nutrition';
-import { food } from '@/shared/api/food';
-import { toApiDate } from '@/shared/lib/date';
-
-// ─── Editable item type (matches FoodItem but mutable) ──────────────────────
 
 interface EditableItem {
   food_name: string;
@@ -79,23 +77,22 @@ function nutritionToItem(name: string, v: NutritionValues): EditableItem {
   };
 }
 
-// ─── Component ──────────────────────────────────────────────────────────────
-
 export interface FoodLogModalProps {
   log: FoodLog;
   isDeleting: boolean;
+  isRepeating?: boolean;
+  isEditing?: boolean;
   onClose: () => void;
   onDelete: (logId: number) => void;
   onCopy: (result: CopyMealResult) => void;
-  onEdit: (
-    logId: number,
-    items: EditableItem[],
-  ) => void;
+  onEdit: (logId: number, items: EditableItem[]) => void;
 }
 
 export const FoodLogModal = ({
   log,
   isDeleting,
+  isRepeating = false,
+  isEditing = false,
   onClose,
   onDelete,
   onCopy,
@@ -105,25 +102,13 @@ export const FoodLogModal = ({
   const { safeTop } = useTelegram();
   const { t, i18n } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
-  const queryClient = useQueryClient();
 
-  // ─── State ────────────────────────────────────────────────────────────────
-
-  type Mode = 'view' | 'edit' | 'copy';
-  const [mode, setMode] = useState<Mode>('view');
+  const [editMode, setEditMode] = useState(false);
+  const [copyMode, setCopyMode] = useState(false);
 
   const [editItems, setEditItems] = useState<EditableItem[]>([]);
   const [baseItems, setBaseItems] = useState<NutritionValues[]>([]);
   const [syncEnabled, setSyncEnabled] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-
-  // ─── Derived values ───────────────────────────────────────────────────────
-
-  const [editMode, setEditMode] = useState(false);
-  const [editItems, setEditItems] = useState<EditableItem[]>(() =>
-    log.items.map(toEditable),
-  );
-  const [copyMode, setCopyMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
   const formattedTime = new Date(log.logged_at).toLocaleTimeString(
@@ -133,8 +118,7 @@ export const FoodLogModal = ({
 
   const portion_g = log.items.reduce((s, i) => s + i.portion_g, 0);
   const isSingleIngredient = log.items.length === 1;
-  const displayName =
-    log.meal_name ?? log.items[0]?.food_name ?? t('food');
+  const displayName = log.meal_name ?? log.items[0]?.food_name ?? t('food');
   const cleanDish = displayName.trim();
   const lastSpaceIndex = cleanDish.lastIndexOf(' ');
   const textBeforeLastWord =
@@ -142,47 +126,18 @@ export const FoodLogModal = ({
   const lastWord =
     lastSpaceIndex === -1 ? cleanDish : cleanDish.substring(lastSpaceIndex + 1);
 
-  // ─── Mutations ────────────────────────────────────────────────────────────
-
-  const invalidateAfterChange = (dateStr: string) => {
-    queryClient.invalidateQueries({ queryKey: ['food', dateStr] });
-    queryClient.invalidateQueries({ queryKey: ['stats', 'daily', dateStr] });
-    queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
-    queryClient.invalidateQueries({ queryKey: ['user'] });
-  };
-
-  const { mutate: editLog, isPending: isEditing } = useMutation({
-    mutationFn: (items: EditableItem[]) => food.update(log.id, items),
-    onSuccess: () => {
-      invalidateAfterChange(toApiDate(new Date(log.logged_at)));
-      onClose();
-    },
-  });
-
-  const { mutate: repeatCustom, isPending: isRepeating } = useMutation({
-    mutationFn: (result: CopyMealResult) =>
-      food.repeatCustom(log.id, result.items, result.includePhoto),
-    onSuccess: () => {
-      invalidateAfterChange(toApiDate(new Date()));
-      onClose();
-    },
-  });
-
   const isProcessing = isDeleting || isEditing || isRepeating;
-
-  // ─── Edit mode helpers ────────────────────────────────────────────────────
 
   const enterEditMode = () => {
     const items = log.items.map(toEditable);
     setEditItems(items);
     setBaseItems(items.map(itemToNutrition));
     setSyncEnabled(false);
-    setMode('edit');
+    setEditMode(true);
   };
 
   const exitEditMode = () => {
-    setMode('view');
-    onClose();
+    setEditMode(false);
   };
 
   const updateItemName = (index: number, name: string) =>
@@ -232,34 +187,14 @@ export const FoodLogModal = ({
 
   const handleSaveEdit = () => {
     if (editItems.length === 0) return;
-    editLog(editItems);
+    onEdit(log.id, editItems);
   };
 
-  const handleCopyText = async () => {
-    await navigator.clipboard.writeText(mainDish);
   const handleCopyText = async () => {
     await navigator.clipboard.writeText(displayName);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
-
-  // ─── Copy mode render ─────────────────────────────────────────────────────
-
-  if (mode === 'copy') {
-    return (
-      <CopyMealSheet
-        log={log}
-        isProcessing={isRepeating}
-        onConfirm={repeatCustom}
-        onClose={() => {
-          setMode('view');
-          onClose();
-        }}
-      />
-    );
-  }
-
-  // ─── Copy meal sheet ──────────────────────────────────────────────────────
 
   if (copyMode) {
     return (
@@ -272,9 +207,7 @@ export const FoodLogModal = ({
     );
   }
 
-  // ─── Edit mode render ─────────────────────────────────────────────────────
-
-  if (mode === 'edit') {
+  if (editMode) {
     return (
       <BottomSheet
         title={t('edit_meal', { defaultValue: 'Редактирование' })}
@@ -325,7 +258,7 @@ export const FoodLogModal = ({
 
               <NutritionEditGrid
                 values={itemToNutrition(item)}
-                baseValues={baseItems[i]}
+                baseValues={baseItems[i] ?? itemToNutrition(item)}
                 syncEnabled={syncEnabled}
                 onSyncToggle={() => setSyncEnabled((prev) => !prev)}
                 onChange={(v) => updateItemNutrition(i, v)}
@@ -339,15 +272,13 @@ export const FoodLogModal = ({
     );
   }
 
-  // ─── View mode render ─────────────────────────────────────────────────────
-
   return (
     <>
       <BottomSheet
         onClose={onClose}
         actionLabel={tc('buttons.copy')}
         iconCustomEmojiId="5258477770735885832"
-        onAction={() => setMode('copy')}
+        onAction={() => setCopyMode(true)}
         isProcessing={isRepeating}
         secondaryAction={{
           text: tc('buttons.delete'),
@@ -368,7 +299,7 @@ export const FoodLogModal = ({
             {log.photo_url ? (
               <img
                 src={log.photo_url}
-                alt={mainDish}
+                alt={displayName}
                 className="aspect-square w-full rounded-2xl object-cover"
               />
             ) : (
@@ -414,13 +345,13 @@ export const FoodLogModal = ({
                   onClick={enterEditMode}
                   disabled={isProcessing}
                   aria-label={t('edit_meal', { defaultValue: 'Редактировать' })}
-                  className="flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-opacity active:opacity-60 disabled:opacity-40"
+                  className="flex items-center gap-1 rounded-full px-1.25 py-1.5 text-xs font-medium transition-opacity active:opacity-60 disabled:opacity-40"
                   style={{
                     backgroundColor: `${theme.button_color}20`,
                     color: theme.button_color,
                   }}
                 >
-                  <Pencil size={12} />
+                  <Pencil size={14} />
                 </button>
               </div>
             </div>
