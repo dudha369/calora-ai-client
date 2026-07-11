@@ -98,6 +98,7 @@ export interface FoodItemIn {
 export interface BarcodeLogIn {
   log_date: string;
   items: FoodItemIn[];
+  photo_key?: string | null;
 }
 
 export interface FoodLogIn {

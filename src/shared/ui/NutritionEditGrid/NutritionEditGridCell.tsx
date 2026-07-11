@@ -7,7 +7,6 @@ export interface NutritionEditGridCellProps {
   unit: string;
   step?: number;
   onChange: (value: number) => void;
-  /** Large style — for the calories column */
   large?: boolean;
 }
 
@@ -90,7 +89,6 @@ export const NutritionEditGridCell = ({
         {label || unit}
       </span>
 
-      {/* Vertical separator — hidden for last child in a flex row */}
       {!large && (
         <div
           className="absolute top-1/2 -right-px h-3/5 w-px -translate-y-1/2 group-last:hidden"

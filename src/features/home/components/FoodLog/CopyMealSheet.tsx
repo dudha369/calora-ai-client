@@ -89,21 +89,21 @@ export const CopyMealSheet = ({
 
   return (
     <BottomSheet
-      title={t('copy_meal', { defaultValue: 'Копирование' })}
+      title={t('copy_meal')}
       onClose={onClose}
-      actionLabel={tc('buttons.copy', { defaultValue: 'Копировать' })}
+      dragToClose={false}
+      actionLabel={tc('buttons.copy')}
       iconCustomEmojiId="5258477770735885832"
       onAction={handleConfirm}
       isProcessing={isProcessing}
       secondaryAction={{
-        text: tc('buttons.cancel', { defaultValue: 'Отменить' }),
+        text: tc('buttons.cancel'),
         iconCustomEmojiId: '5260342697075416641',
         onClick: onClose,
         position: 'left',
       }}
     >
       <div className="flex flex-col gap-3">
-        {/* Photo with remove button */}
         {log.photo_url && (
           <div className="relative">
             {includePhoto ? (
@@ -111,7 +111,7 @@ export const CopyMealSheet = ({
                 <img
                   src={log.photo_url}
                   alt={name}
-                  className="aspect-video w-full rounded-2xl object-cover"
+                  className="aspect-square w-full rounded-2xl object-cover"
                 />
                 <button
                   onClick={() => setIncludePhoto(false)}
@@ -120,9 +120,7 @@ export const CopyMealSheet = ({
                     backgroundColor: 'rgba(0,0,0,0.5)',
                     color: '#fff',
                   }}
-                  aria-label={t('remove_photo', {
-                    defaultValue: 'Убрать фото',
-                  })}
+                  aria-label={t('remove_photo')}
                 >
                   <X size={14} />
                 </button>
@@ -138,28 +136,24 @@ export const CopyMealSheet = ({
                   className="text-sm font-medium"
                   style={{ color: theme.hint_color }}
                 >
-                  {t('photo_removed', {
-                    defaultValue: 'Фото убрано — нажмите, чтобы вернуть',
-                  })}
+                  {t('photo_removed')}
                 </span>
               </button>
             )}
           </div>
         )}
 
-        {/* Name input */}
         <div className="flex flex-col gap-1.5">
           <span
             className="px-1 text-xs font-medium"
             style={{ color: theme.hint_color }}
           >
-            {tc('nutrients.name', { defaultValue: 'Название' })}
+            {tc('nutrients.name')}
           </span>
-          <input
-            type="text"
+          <textarea
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl px-3 py-2.5 text-sm font-semibold outline-none"
+            className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full resize-none rounded-xl px-3 py-2 text-sm font-semibold outline-none"
             style={{
               backgroundColor: theme.secondary_bg_color,
               color: theme.text_color,
@@ -167,13 +161,12 @@ export const CopyMealSheet = ({
           />
         </div>
 
-        {/* Portion input */}
         <div className="flex flex-col gap-1.5">
           <span
             className="px-1 text-xs font-medium"
             style={{ color: theme.hint_color }}
           >
-            {tc('nutrients.portion', { defaultValue: 'Порция' })}
+            {tc('nutrients.portion')}
           </span>
           <div className="relative">
             <input
@@ -181,6 +174,7 @@ export const CopyMealSheet = ({
               inputMode="numeric"
               value={portionG}
               min={1}
+              max={9999}
               onChange={(e) =>
                 setPortionG(Math.max(1, Math.round(Number(e.target.value))))
               }
@@ -199,7 +193,6 @@ export const CopyMealSheet = ({
           </div>
         </div>
 
-        {/* Nutrition preview */}
         <NutritionGrid data={totals} />
       </div>
     </BottomSheet>

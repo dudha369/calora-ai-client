@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useBackButton } from '@/shared/hooks/useBackButton';
 import { SectionItem } from '@/shared/ui/Section/SectionItem';
 import { SectionItemIcon } from '@/shared/ui/Section/SectionItemIcon';
-import { Trash2, Sun, Moon, Monitor, ChevronDown } from 'lucide-react';
+import { Monitor, Sun, Moon, Globe, ChevronDown, Trash2 } from 'lucide-react';
 import { Section } from '@/shared/ui/Section/Section';
 import { useState, useRef, useEffect } from 'react';
 import { users } from '@/shared/api/users';
@@ -23,15 +23,15 @@ export const SettingsPage = () => {
   const languageOptions = listLanguageOptions();
   const queryClient = useQueryClient();
 
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [accountDeleteConfirmOpen, setAccountDeleteConfirmOpen] =
+    useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const navigate = useNavigate();
-  useBackButton(() => navigate('/profile'), !confirmOpen);
+  useBackButton(() => navigate('/profile'), !accountDeleteConfirmOpen);
 
-  // Close language dropdown on outside click
   useEffect(() => {
     if (!langDropdownOpen) return;
     const handler = (e: MouseEvent) => {
@@ -58,19 +58,16 @@ export const SettingsPage = () => {
     }
   };
 
-  // ── Theme options ──
   const themeOptions: { key: ThemeMode; label: string; icon: typeof Sun }[] = [
     { key: 'telegram', label: t('theme_auto'), icon: Monitor },
     { key: 'light', label: t('theme_light'), icon: Sun },
     { key: 'dark', label: t('theme_dark'), icon: Moon },
   ];
 
-  // ── Language ──
   const currentLang = languageOptions.find((o) => o.code === language);
 
   return (
     <section className="flex flex-col gap-4">
-      {/* ── Theme picker ── */}
       <Section title={t('theme')}>
         {themeOptions.map((opt) => {
           const Icon = opt.icon;
@@ -102,14 +99,13 @@ export const SettingsPage = () => {
         })}
       </Section>
 
-      {/* ── Language selector ── */}
       <Section>
         <div ref={dropdownRef} className="relative">
           <SectionItem
             icon={
               <SectionItemIcon color={`${theme.button_color}15`}>
-                <span className="text-base leading-none">
-                  {currentLang?.flag ?? '🏳️'}
+                <span>
+                  <Globe size={18} />
                 </span>
               </SectionItemIcon>
             }
@@ -134,7 +130,6 @@ export const SettingsPage = () => {
             }
           />
 
-          {/* Dropdown */}
           <div
             className="overflow-hidden transition-all duration-200 ease-out"
             style={{
@@ -185,20 +180,23 @@ export const SettingsPage = () => {
         </div>
       </Section>
 
-      {/* ── Danger zone ── */}
       <Section>
         <SectionItem
-          icon={<Trash2 size={18} />}
+          icon={
+            <SectionItemIcon color="transparent">
+              <Trash2 size={18} />
+            </SectionItemIcon>
+          }
           label={t('delete_account')}
           color={theme.destructive_text_color}
-          onClick={() => setConfirmOpen(true)}
+          onClick={() => setAccountDeleteConfirmOpen(true)}
         />
       </Section>
 
-      {confirmOpen && (
+      {accountDeleteConfirmOpen && (
         <BottomSheet
           title={t('delete_account_title')}
-          onClose={() => !isDeleting && setConfirmOpen(false)}
+          onClose={() => !isDeleting && setAccountDeleteConfirmOpen(false)}
           actionLabel={t('confirm')}
           iconCustomEmojiId="5258130763148172425"
           onAction={handleDeleteAccount}

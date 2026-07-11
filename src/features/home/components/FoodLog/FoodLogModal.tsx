@@ -210,15 +210,16 @@ export const FoodLogModal = ({
   if (editMode) {
     return (
       <BottomSheet
-        title={t('edit_meal', { defaultValue: 'Редактирование' })}
+        title={t('edit_meal')}
         onClose={exitEditMode}
-        actionLabel={tc('buttons.save', { defaultValue: 'Сохранить' })}
-        iconCustomEmojiId="5274008024585871702"
+        dragToClose={false}
+        actionLabel={tc('buttons.save')}
+        iconCustomEmojiId="5258336354642697821"
         onAction={handleSaveEdit}
         isProcessing={isEditing}
         actionDisabled={editItems.length === 0}
         secondaryAction={{
-          text: tc('buttons.cancel', { defaultValue: 'Отменить' }),
+          text: tc('buttons.cancel'),
           iconCustomEmojiId: '5260342697075416641',
           onClick: exitEditMode,
           position: 'left',
@@ -232,22 +233,19 @@ export const FoodLogModal = ({
               style={{ backgroundColor: theme.section_bg_color }}
             >
               <div className="flex items-center gap-2">
-                <input
-                  type="text"
+                <textarea
                   value={item.food_name}
                   onChange={(e) => updateItemName(i, e.target.value)}
-                  className="min-w-0 flex-1 rounded-xl px-3 py-2 text-sm font-semibold outline-none"
+                  className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full flex-1 resize-none rounded-xl px-3 py-2 text-sm font-semibold outline-none"
                   style={{
-                    backgroundColor: theme.secondary_bg_color,
+                    backgroundColor: theme.bg_color,
                     color: theme.text_color,
                   }}
                 />
                 {editItems.length > 1 && (
                   <button
                     onClick={() => removeItem(i)}
-                    aria-label={tc('buttons.delete', {
-                      defaultValue: 'Удалить',
-                    })}
+                    aria-label={tc('buttons.delete')}
                     className="shrink-0 rounded-lg p-2 transition-opacity active:opacity-60"
                     style={{ color: theme.destructive_text_color }}
                   >
@@ -345,13 +343,13 @@ export const FoodLogModal = ({
                   onClick={enterEditMode}
                   disabled={isProcessing}
                   aria-label={t('edit_meal', { defaultValue: 'Редактировать' })}
-                  className="flex items-center gap-1 rounded-full px-1.25 py-1.5 text-xs font-medium transition-opacity active:opacity-60 disabled:opacity-40"
+                  // className="flex items-center gap-1 rounded-full px-1.5 py-1.5 text-xs font-medium transition-opacity active:opacity-60 disabled:opacity-40"
                   style={{
-                    backgroundColor: `${theme.button_color}20`,
-                    color: theme.button_color,
+                    // backgroundColor: theme.secondary_bg_color,
+                    color: theme.hint_color,
                   }}
                 >
-                  <Pencil size={14} />
+                  <Pencil size={24} />
                 </button>
               </div>
             </div>

@@ -16,21 +16,15 @@ export interface NutritionValues {
 
 interface NutritionEditGridProps {
   values: NutritionValues;
-  /** Snapshot of values when edit started — used as reference for sync */
   baseValues: NutritionValues;
   syncEnabled: boolean;
   onSyncToggle: () => void;
   onChange: (values: NutritionValues) => void;
-  /** Hide portion row (e.g. barcode modal handles portion separately) */
   hidePortion?: boolean;
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-/**
- * Proportionally scale all nutrient values when one changes.
- * ratio = newValue / baseValue → apply to all base values.
- */
 function syncChange(
   key: keyof NutritionValues,
   newValue: number,
@@ -74,7 +68,6 @@ export const NutritionEditGrid = ({
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* Sync toggle */}
       <div className="flex items-center justify-end px-0.5">
         <button
           onClick={onSyncToggle}
@@ -93,7 +86,6 @@ export const NutritionEditGrid = ({
         </button>
       </div>
 
-      {/* Grid: Calories left | 3×2 nutrients right */}
       <div className="grid w-full grid-cols-4 grid-rows-2 gap-1.5">
         {/* Calories — left, spans 2 rows */}
         <div
@@ -170,13 +162,13 @@ export const NutritionEditGrid = ({
       {!hidePortion && (
         <div
           className="flex items-center justify-between rounded-2xl px-4 py-2"
-          style={{ backgroundColor: theme.section_bg_color }}
+          style={{ backgroundColor: theme.bg_color }}
         >
           <span
             className="text-sm font-medium"
             style={{ color: theme.hint_color }}
           >
-            {tc('nutrients.portion', { defaultValue: 'Порция' })}
+            {tc('nutrients.portion')}
           </span>
           <NutritionEditGridCell
             label={tc('units.g')}

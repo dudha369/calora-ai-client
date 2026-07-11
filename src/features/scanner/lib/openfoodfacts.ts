@@ -32,6 +32,8 @@ const OFF_FIELDS = [
   // поля _serving присутствуют только если serving_quantity был вычислен.
   'nutriments',
 
+  'categories_tags',
+
   // Аллергены
   'allergens_tags', // ["en:gluten", "en:milk"]
   'traces_tags', // ["en:nuts"] — "может содержать следы"
@@ -76,6 +78,7 @@ interface OFFProduct {
   serving_size?: string;
   serving_quantity?: number;
   nutriments?: OFFNutriments;
+  categories_tags?: string[];
   allergens_tags?: string[];
   traces_tags?: string[];
   nutrition_grades?: string;
@@ -129,6 +132,34 @@ function extractNutritionPerServingFromAPI(
     sugars: n['sugars_serving'] ?? null,
     fiber: n['fiber_serving'] ?? null,
   };
+}
+
+const WATER_FRACTION_BY_CATEGORY: { pattern: RegExp; fraction: number }[] = [
+  { pattern: /waters?$/, fraction: 0.98 },
+  { pattern: /teas?$/, fraction: 0.98 },
+  { pattern: /coffees?$/, fraction: 0.98 },
+  { pattern: /milks?$/, fraction: 0.87 },
+  { pattern: /(fruit-juices|juices|nectars)$/, fraction: 0.88 },
+  { pattern: /(sodas|carbonated-drinks|colas)$/, fraction: 0.89 },
+  { pattern: /soups?$/, fraction: 0.92 },
+  { pattern: /beers?$/, fraction: 0.92 },
+  { pattern: /wines?$/, fraction: 0.9 },
+  {
+    pattern: /(plant-based-beverages|almond-milks|soy-milks|oat-milks)$/,
+    fraction: 0.9,
+  },
+];
+
+function estimateWaterFraction(categoriesTags: string[] = []): number | null {
+  const isBeverage = categoriesTags.some((t) => t.includes(':beverages'));
+  if (!isBeverage) return null;
+
+  for (const tag of categoriesTags) {
+    const name = tag.replace(/^[a-z]{2}:/, '');
+    const match = WATER_FRACTION_BY_CATEGORY.find((w) => w.pattern.test(name));
+    if (match) return match.fraction;
+  }
+  return 0.85; // это напиток, но конкретный подтип не распознан
 }
 
 /**
@@ -223,6 +254,8 @@ export async function fetchProductByBarcode(
       ? scaleNutrition(per100g, p.product_quantity)
       : null;
 
+  const waterFractionPer100g = estimateWaterFraction(p.categories_tags);
+
   const allergens: AllergenInfo = {
     confirmed: parseAllergenTags(p.allergens_tags),
     traces: parseAllergenTags(p.traces_tags),
@@ -254,6 +287,8 @@ export async function fetchProductByBarcode(
     per100g,
     perServing,
     perPackage,
+
+    waterFractionPer100g,
 
     allergens,
     nutriScore,

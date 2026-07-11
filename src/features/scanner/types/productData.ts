@@ -59,6 +59,8 @@ export interface ProductData {
   /** На всю упаковку — доступно если packageQuantityG задан */
   perPackage: NutritionPer | null;
 
+  waterFractionPer100g: number | null;
+
   allergens: AllergenInfo;
   /** Nutri-Score: от A (лучший) до E (худший) */
   nutriScore: NutriScore | null;

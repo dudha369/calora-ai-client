@@ -3,6 +3,8 @@
   "loading": "Loading…",
   "buttons": {
     "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
     "close": "Close",
     "copy": "Copy",
     "copied": "Copied!",
@@ -37,6 +39,10 @@
       "title": "Under Maintenance",
       "subtitle": "The app is temporarily unavailable. We'll be back shortly!"
     }
+  },
+  "nutrients": {
+    "name": "Name",
+    "portion": "Portion"
   },
   "units": {
     "kcal": "kcal",

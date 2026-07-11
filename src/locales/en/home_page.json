@@ -22,5 +22,9 @@
   "streak_pending": "Streak pending",
   "streak_lost": "Streak lost",
   "cancel": "Cancel",
-  "restore_streak": "Restore streak"
+  "restore_streak": "Restore streak",
+  "edit_meal": "Editing",
+  "copy_meal": "Copying",
+  "remove_photo": "Remove photo",
+  "photo_removed": "Photo removed — click to restore"
 }

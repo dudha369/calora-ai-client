@@ -132,6 +132,10 @@ export const ScannerPage = () => {
   ) => {
     const factor = portionG / 100;
     const p = product.per100g;
+    const waterMl =
+      product.waterFractionPer100g != null
+        ? Math.round(portionG * product.waterFractionPer100g)
+        : 0;
 
     await food.logBarcode({
       log_date: todayApiDate(),
@@ -145,8 +149,10 @@ export const ScannerPage = () => {
           carbs_g: Number(((p.carbs ?? 0) * factor).toFixed(1)),
           fiber_g: Number(((p.fiber ?? 0) * factor).toFixed(1)),
           sugar_g: Number(((p.sugars ?? 0) * factor).toFixed(1)),
+          water_ml: waterMl,
         },
       ],
+      photo_key: product.imageUrl ?? undefined,
     });
 
     invalidateLoggedQueries(false);

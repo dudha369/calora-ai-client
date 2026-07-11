@@ -26,5 +26,9 @@
   "streak_pending": "Серію не продовжено",
   "streak_lost": "Серію втрачено",
   "cancel": "Закрити",
-  "restore_streak": "Відновити серію"
+  "restore_streak": "Відновити серію",
+  "edit_meal": "Редагування",
+  "copy_meal": "Копіювання",
+  "remove_photo": "Видалити фото",
+  "photo_removed": "Фото видалено — натисніть, щоб відновити"
 }
