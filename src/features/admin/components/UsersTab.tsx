@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import {
   useQuery,
   useInfiniteQuery,
@@ -29,6 +30,7 @@ import {
   ChevronDown,
   X,
 } from 'lucide-react';
+import { useTelegram } from '@/shared/hooks/useTelegram.ts';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
@@ -248,16 +250,13 @@ function UserRow({ user, onClick }: { user: AdminUser; onClick: () => void }) {
 
 // ── Photo lightbox ─────────────────────────────────────────────────
 
-function PhotoLightbox({
-  src,
-  onClose,
-}: {
-  src: string;
-  onClose: () => void;
-}) {
-  return (
+function PhotoLightbox({ src, onClose }: { src: string; onClose: () => void }) {
+  const { safeTop } = useTelegram();
+
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+      style={{ top: safeTop }}
       onClick={onClose}
     >
       <button
@@ -272,7 +271,8 @@ function PhotoLightbox({
         className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain"
         onClick={(e) => e.stopPropagation()}
       />
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -304,11 +304,7 @@ function FoodLogCard({ fl }: { fl: AdminFoodLog }) {
             onClick={() => setLightbox(true)}
             className="relative size-14 shrink-0 overflow-hidden rounded-xl"
           >
-            <img
-              src={fl.photo_url}
-              alt=""
-              className="size-full object-cover"
-            />
+            <img src={fl.photo_url} alt="" className="size-full object-cover" />
           </button>
         ) : (
           <div
@@ -353,10 +349,7 @@ function FoodLogCard({ fl }: { fl: AdminFoodLog }) {
       </div>
 
       {lightbox && fl.photo_url && (
-        <PhotoLightbox
-          src={fl.photo_url}
-          onClose={() => setLightbox(false)}
-        />
+        <PhotoLightbox src={fl.photo_url} onClose={() => setLightbox(false)} />
       )}
     </>
   );
@@ -664,7 +657,7 @@ function DetailSection({
   children,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const theme = useTheme();
   return (

@@ -272,6 +272,7 @@ export const BottomSheet = ({
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
     if (!dismissOnBackdrop) return;
     if (suppressBackdropClickRef.current) return;
     if (e.target !== e.currentTarget) return;

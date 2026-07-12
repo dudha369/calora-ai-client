@@ -20,7 +20,7 @@ import { ScrollContainerContext } from '@/shared/context/ScrollContainerContext'
 import { ScannerProvider } from '@/features/scanner/context/ScannerProvider';
 
 export function App() {
-  const { ready, safeTop, safeBottom } = useTelegram();
+  const { ready, safeTop } = useTelegram();
   const theme = useTheme();
 
   // FIX: передаём ready чтобы вызов происходил после viewport.requestFullscreen().
@@ -99,9 +99,7 @@ export function App() {
             </ScrollContainerContext.Provider>
 
             {location.pathname !== '/onboarding' &&
-              !location.pathname.startsWith('/admin') && (
-                <NavigationBar safeBottom={safeBottom} />
-              )}
+              !location.pathname.startsWith('/admin') && <NavigationBar />}
           </ScannerProvider>
         </UserContext.Provider>
       ) : null}

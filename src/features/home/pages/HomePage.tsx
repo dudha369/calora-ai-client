@@ -15,17 +15,17 @@ import { useActiveDates } from '../hooks/useActiveDates';
 import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
 import type { CopyMealResult } from '../components/FoodLog/CopyMealSheet';
 import type { FoodLog } from '@/shared/types/api/food';
-import { StreakPopup } from '@/features/streak/components/StreakPopup';
+import { StreakPopup } from '../../streak/components/StreakPopup';
 
 export const HomePage = () => {
+  const theme = useTheme();
+  const queryClient = useQueryClient();
+
   const { user_data } = useUser();
   const createdAt = user_data?.user.created_at;
   const currentStreak = user_data?.user.current_streak ?? 0;
   const streakActiveToday = user_data?.user.streak_active_today ?? false;
-  const flameColorProps = getFlameColor(currentStreak, streakActiveToday);
-
-  const theme = useTheme();
-  const queryClient = useQueryClient();
+  const flameColorProps = getFlameColor(currentStreak, streakActiveToday, theme.hint_color);
 
   const {
     dates,

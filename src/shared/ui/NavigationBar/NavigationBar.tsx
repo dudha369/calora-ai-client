@@ -15,12 +15,9 @@ import {
   useDeviceOrientationAngle,
   iconCounterRotationDeg,
 } from '../../hooks/useDeviceOrientationAngle';
+import { useTelegram } from '@/shared/hooks/useTelegram.ts';
 
 const ICON_SIZE = 24;
-
-interface NavigationBarProps {
-  safeBottom: number;
-}
 
 /**
  * Навигационная панель — всегда горизонтальная, внизу экрана.
@@ -29,9 +26,11 @@ interface NavigationBarProps {
  * каждая иконка counter-rotate чтобы оставаться "прямой" относительно
  * ориентации телефона. Layout самого navbar'а не меняется.
  */
-export const NavigationBar = ({ safeBottom }: NavigationBarProps) => {
+export const NavigationBar = () => {
   const theme = useTheme();
   const { t } = useTranslation('common');
+
+  const { safeBottom } = useTelegram();
 
   const { isLiveCamera } = useScanner();
   const deviceAngle = useDeviceOrientationAngle(isLiveCamera);

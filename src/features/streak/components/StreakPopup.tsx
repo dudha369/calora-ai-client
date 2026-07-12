@@ -1,124 +1,42 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Flame, Trophy, Shield } from 'lucide-react';
-import { Skeleton } from '@/shared/ui/Skeleton';
+import { Flame, Check, Target } from 'lucide-react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { users } from '@/shared/api/users';
-import type { StreakInfo, TodayProgress } from '@/shared/types/api/streak';
+import type { StreakInfo } from '@/shared/types/api/streak';
+import { useTranslation } from 'react-i18next';
+import { capitalizeFirst, getIntlLocale } from '@/shared/lib/locale';
+import { Section } from './Section';
+import { ProgressBar } from './ProgressBar';
+import { Skeleton } from '@/shared/ui/Skeleton.tsx';
+import { getFlameColor } from '@/features/home/lib/getFlameColor.ts';
 
 interface StreakPopupProps {
   currentStreak: number;
   onClose: () => void;
 }
 
-const MAX_RESTORES_PER_MONTH = 3;
-
-const CaloriesBar = ({ p }: { p: TodayProgress }) => {
-  const theme = useTheme();
-  const scale = p.calories_max * 1.2;
-  const pct = (v: number) =>
-    `${Math.min(Math.max((v / scale) * 100, 0), 100).toFixed(1)}%`;
-
-  const barColor =
-    p.status === 'met'
-      ? '#34c759'
-      : p.status === 'over'
-        ? theme.destructive_text_color
-        : theme.button_color;
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div
-        className="relative h-2.5 w-full overflow-hidden rounded-full"
-        style={{ backgroundColor: theme.section_separator_color }}
-      >
-        <div
-          className="absolute top-0 h-full rounded-full opacity-20"
-          style={{
-            left: pct(p.calories_min),
-            width: `${((p.calories_max - p.calories_min) / scale) * 100}%`,
-            backgroundColor: '#34c759',
-          }}
-        />
-        <div
-          className="absolute top-0 h-full rounded-full transition-[width] duration-500"
-          style={{ width: pct(p.calories), backgroundColor: barColor }}
-        />
-        <div
-          className="absolute top-0 h-full w-px opacity-40"
-          style={{
-            left: pct(p.calories_goal),
-            backgroundColor: theme.text_color,
-          }}
-        />
-      </div>
-      <div
-        className="flex justify-between text-xs"
-        style={{ color: theme.hint_color }}
-      >
-        <span>0</span>
-        <span>{p.calories_goal} ккал</span>
-      </div>
-    </div>
-  );
-};
-
-const StatusLine = ({ p }: { p: TodayProgress }) => {
-  const theme = useTheme();
-
-  if (p.status === 'met') {
-    return (
-      <p className="text-sm font-medium" style={{ color: '#34c759' }}>
-        ✅ Норма выполнена — серия продлена!
-      </p>
-    );
-  }
-  if (p.status === 'over') {
-    return (
-      <p className="text-sm" style={{ color: theme.hint_color }}>
-        Превышение нормы. Серия была продлена ранее.
-      </p>
-    );
-  }
-  return (
-    <p className="text-sm" style={{ color: theme.hint_color }}>
-      Ещё{' '}
-      <span className="font-semibold" style={{ color: theme.text_color }}>
-        {p.calories_remaining} ккал
-      </span>{' '}
-      до допуска
-    </p>
-  );
-};
-
-const RestoreCharges = ({ available }: { available: number }) => {
-  const theme = useTheme();
-  return (
-    <div className="flex items-center gap-1">
-      {Array.from({ length: MAX_RESTORES_PER_MONTH }, (_, i) => (
-        <Shield
-          key={i}
-          size={15}
-          style={{
-            color:
-              i < available
-                ? theme.button_text_color
-                : theme.section_separator_color,
-            fill: i < available ? theme.button_text_color : 'transparent',
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ─── Main component ───────────────────────────────────────────────────────────
-
 export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
+  const { t: tc, i18n } = useTranslation('common');
+  const locale = getIntlLocale(i18n.language);
   const queryClient = useQueryClient();
   const [restoreError, setRestoreError] = useState<string | null>(null);
+  if (restoreError) console.log(restoreError);
+
+  const dayHeaders = useMemo(
+    () =>
+      Array.from({ length: 7 }, (_, i) =>
+        capitalizeFirst(
+          new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(
+            new Date(2024, 0, 1 + i),
+          ),
+        ),
+      ),
+    [locale],
+  );
 
   const { data, isLoading } = useQuery<StreakInfo>({
     queryKey: ['streak'],
@@ -126,10 +44,23 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
     staleTime: 10_000,
   });
 
+  const streak = data?.current_streak ?? currentStreak;
+  const streakExtended = data?.today_progress?.status === 'met';
+  const daily_goalProgress = data?.today_progress?.calories_goal
+    ? Math.round(
+        (data.today_progress.calories * 100) /
+          data.today_progress.calories_goal,
+      )
+    : 0;
+  const flameColorProps = getFlameColor(
+    streak,
+    streakExtended,
+    theme.hint_color,
+  );
+
   const { mutate: doRestore, isPending: isRestoring } = useMutation({
     mutationFn: () => users.restoreStreak(),
     onSuccess: ({ data: res }) => {
-      // Обновляем кэш немедленно — эндпоинт уже вернул новые значения.
       queryClient.setQueryData<StreakInfo>(['streak'], (old) =>
         old
           ? {
@@ -137,12 +68,9 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
               current_streak: res.restored_to,
               can_restore: false,
               streak_restores_available: res.restores_remaining,
-              // streak_active_today остаётся false — restore не засчитывает
-              // сегодня автоматически, нужно залогировать еду.
             }
           : old,
       );
-      // Фоновый рефетч /me — обновит счётчик огонька в хедере.
       queryClient.invalidateQueries({ queryKey: ['user'] });
       setRestoreError(null);
     },
@@ -151,108 +79,119 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
     },
   });
 
-  // currentStreak из пропов — число видно мгновенно при открытии.
-  // data?.current_streak подхватывается когда запрос завершится (~100ms).
-  const streak = data?.current_streak ?? currentStreak;
-
-  // cancelLabel всегда передаём строкой — иначе useSecondaryButton внутри
-  // BottomSheet вызывался бы условно (нарушение rules of hooks).
-  // Когда onAction === undefined → isTgButtonsVisible = false →
-  // оба Telegram-button скрыты (встроено в BottomSheet).
   return (
     <BottomSheet
-      title="Серия"
+      title={t(streakExtended ? 'streak_extended' : 'streak_pending')}
       onClose={onClose}
       secondaryAction={{
-        text: 'Закрыть',
+        text: data?.can_restore ? t('cancel') : undefined,
       }}
-      actionLabel={data?.can_restore ? 'Восстановить серию' : undefined}
-      onAction={data?.can_restore ? () => doRestore() : undefined}
+      actionLabel={data?.can_restore ? t('restore_streak') : t('keep_it_up')}
+      onAction={data?.can_restore ? () => doRestore() : () => onClose()}
       isProcessing={isRestoring}
     >
-      <div className="flex flex-col gap-4">
-        {/* Счётчики */}
-        <div className="flex gap-3">
-          <div
-            className="flex flex-1 flex-col items-center gap-1 rounded-2xl py-3"
-            style={{ backgroundColor: theme.section_bg_color }}
-          >
-            <div className="flex items-center gap-1.5">
-              <Flame size={18} className="text-orange-400" />
+      <div className="flex flex-col gap-2.5">
+        <Section>
+          <div className="flex items-center gap-2">
+            <Flame size={38} {...flameColorProps} />
+
+            <div className="flex flex-col gap-1">
               <span
-                className="text-3xl font-bold tabular-nums"
-                style={{ color: theme.text_color }}
+                className="text-sm leading-none"
+                style={{ color: theme.hint_color }}
               >
-                {streak}
+                {t('current_streak')}
+              </span>
+
+              <span
+                className="text-lg leading-none font-medium"
+                style={{ color: theme.button_text_color }}
+              >
+                {streak} {t('days', { count: streak })}
               </span>
             </div>
-            <span className="text-xs" style={{ color: theme.hint_color }}>
-              текущая
-            </span>
           </div>
 
           <div
-            className="flex flex-1 flex-col items-center gap-1 rounded-2xl py-3"
-            style={{ backgroundColor: theme.section_bg_color }}
-          >
-            <div className="flex items-center gap-1.5">
-              <Trophy size={16} className="text-yellow-400" />
-              <span
-                className="text-3xl font-bold tabular-nums"
-                style={{ color: theme.text_color }}
-              >
-                {data?.max_streak ?? '—'}
-              </span>
-            </div>
-            <span className="text-xs" style={{ color: theme.hint_color }}>
-              рекорд
-            </span>
-          </div>
-        </div>
+            className="my-3.5 h-0.5 w-full rounded-full"
+            style={{ backgroundColor: theme.section_separator_color }}
+          />
 
-        {/* Прогресс за сегодня */}
+          <div>
+            <div className="mb-1 grid grid-cols-7 gap-6">
+              {dayHeaders.map((h) => (
+                <span
+                  key={h}
+                  className="flex aspect-square items-center justify-center rounded-full"
+                  style={{
+                    color: theme.button_text_color,
+                    backgroundColor: theme.button_color,
+                  }}
+                >
+                  <Check strokeWidth={2} size={14} />
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-6">
+              {dayHeaders.map((h) => (
+                <div
+                  key={h}
+                  className="text-center text-xs font-medium"
+                  style={{ color: theme.hint_color }}
+                >
+                  {h}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+
         {isLoading ? (
           <Skeleton className="h-12 w-full" />
         ) : data?.today_progress ? (
-          <div className="flex flex-col gap-2">
-            <CaloriesBar p={data.today_progress} />
-            <StatusLine p={data.today_progress} />
-          </div>
-        ) : null}
-
-        {/* Щиты */}
-        {isLoading ? (
-          <Skeleton className="h-5 w-24" />
-        ) : data ? (
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm" style={{ color: theme.hint_color }}>
-                Щиты серии
-              </span>
-              <RestoreCharges available={data.streak_restores_available} />
-            </div>
-            {restoreError && (
-              <p
-                className="text-xs"
-                style={{ color: theme.destructive_text_color }}
+          <Section className="gap-1.5">
+            <div className="flex">
+              <span
+                className="flex w-1/3 items-center justify-center text-3xl font-medium"
+                style={{ color: theme.text_color }}
               >
-                {restoreError}
-              </p>
-            )}
-          </div>
+                {daily_goalProgress}%
+              </span>
+
+              <div className="flex w-2/3 flex-col gap-px">
+                <span className="text-sm" style={{ color: theme.text_color }}>
+                  {streakExtended
+                    ? t('daily_goal_completed')
+                    : t('daily_goal_not_completed')}
+                </span>
+                <span className="text-xs" style={{ color: theme.hint_color }}>
+                  {data.today_progress.calories} {t('out_of')}{' '}
+                  {data.today_progress.calories_max} {tc('units.kcal')}
+                </span>
+              </div>
+            </div>
+
+            <ProgressBar p={data.today_progress} />
+          </Section>
         ) : null}
 
-        {/* Правило */}
-        <p
-          className="text-xs leading-relaxed"
-          style={{ color: theme.hint_color }}
-        >
-          Серия продлевается при соблюдении нормы калорий
-          {data?.today_progress
-            ? ` (допуск от ${data.today_progress.calories_min} ккал).`
-            : '.'}{' '}
-          Щиты обновляются с каждой новой серией и в начале месяца.
-        </p>
+        <Section>
+          <div className="flex items-center gap-3">
+            <Target size={48} style={{ color: theme.hint_color }} />
+
+            <div className="flex flex-col gap-px">
+              <span
+                className="text-sm font-medium"
+                style={{ color: theme.text_color }}
+              >
+                {t('daily_goal')} набор массы
+              </span>
+              <span className="text-xs" style={{ color: theme.hint_color }}>
+                Для продления серии набирайте от 90% дневной нормы калорий.
+              </span>
+            </div>
+          </div>
+        </Section>
       </div>
     </BottomSheet>
   );

@@ -55,7 +55,7 @@ export const NutritionGrid = ({ data }: NutritionGridProps) => {
               className="text-[10px] leading-none"
               style={{ color: theme.hint_color }}
             >
-              {t('from_target')}
+              {t('from_daily_goal')}
             </span>
           </div>
         )}

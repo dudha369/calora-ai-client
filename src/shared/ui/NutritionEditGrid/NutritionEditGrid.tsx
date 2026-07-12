@@ -20,7 +20,6 @@ interface NutritionEditGridProps {
   syncEnabled: boolean;
   onSyncToggle: () => void;
   onChange: (values: NutritionValues) => void;
-  hidePortion?: boolean;
 }
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -52,7 +51,6 @@ export const NutritionEditGrid = ({
   syncEnabled,
   onSyncToggle,
   onChange,
-  hidePortion = false,
 }: NutritionEditGridProps) => {
   const theme = useTheme();
   const { t } = useTranslation('home_page');
@@ -104,7 +102,7 @@ export const NutritionEditGrid = ({
         {/* Right 3×2 grid */}
         <div
           className="col-span-3 row-span-2 flex flex-col rounded-2xl"
-          style={{ backgroundColor: theme.secondary_bg_color }}
+          style={{ backgroundColor: theme.section_bg_color }}
         >
           <div className="flex flex-1">
             <NutritionEditGridCell
@@ -158,26 +156,27 @@ export const NutritionEditGrid = ({
         </div>
       </div>
 
-      {/* Portion row */}
-      {!hidePortion && (
-        <div
-          className="flex items-center justify-between rounded-2xl px-4 py-2"
-          style={{ backgroundColor: theme.bg_color }}
+      <div className="relative">
+        <input
+          type="number"
+          inputMode="numeric"
+          value={values.portion_g}
+          min={1}
+          max={9999}
+          onChange={(e) => handleChange('portion_g', parseInt(e.target.value))}
+          className="w-full rounded-xl py-2.5 pr-8 pl-3 text-sm font-medium outline-none"
+          style={{
+            backgroundColor: theme.secondary_bg_color,
+            color: theme.text_color,
+          }}
+        />
+        <span
+          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs"
+          style={{ color: theme.hint_color }}
         >
-          <span
-            className="text-sm font-medium"
-            style={{ color: theme.hint_color }}
-          >
-            {tc('nutrients.portion')}
-          </span>
-          <NutritionEditGridCell
-            label={tc('units.g')}
-            value={values.portion_g}
-            unit={tc('units.g')}
-            onChange={(v) => handleChange('portion_g', v)}
-          />
-        </div>
-      )}
+          {tc('units.g')}
+        </span>
+      </div>
     </div>
   );
 };

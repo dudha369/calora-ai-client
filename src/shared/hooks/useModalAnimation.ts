@@ -1,30 +1,26 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export const useModalAnimation = (onClose: () => void, duration = 300) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Запускаем анимацию появления
     const timer = setTimeout(() => setIsMounted(true), 10);
-
-    // Блокируем скролл на body
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
     return () => {
       clearTimeout(timer);
-      // Возвращаем скролл при размонтировании
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
       document.body.style.overflow = originalOverflow;
     };
   }, []);
 
   const handleClose = useCallback(() => {
-    if (isClosing) return; // Защита от повторных кликов
-
-    setIsClosing(true); // Запускаем анимацию исчезновения
-
-    setTimeout(() => {
+    if (isClosing) return;
+    setIsClosing(true);
+    closeTimerRef.current = setTimeout(() => {
       onClose();
     }, duration);
   }, [onClose, isClosing, duration]);

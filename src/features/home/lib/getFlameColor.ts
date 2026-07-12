@@ -1,11 +1,12 @@
 export function getFlameColor(
   currentStreak: number,
   streakActiveToday: boolean,
+  inactive_color: string,
 ) {
   if (currentStreak === 0) return { stroke: 'gray', fill: 'lightgray' };
 
   if (!streakActiveToday) {
-    return { stroke: 'gray', fill: 'transparent' };
+    return { stroke: inactive_color, fill: 'transparent' };
   }
 
   if (currentStreak <= 10) return { stroke: 'orange', fill: 'yellow' };
