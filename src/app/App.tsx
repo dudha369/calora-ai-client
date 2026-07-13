@@ -99,7 +99,9 @@ export function App() {
             </ScrollContainerContext.Provider>
 
             {location.pathname !== '/onboarding' &&
-              !location.pathname.startsWith('/admin') && <NavigationBar />}
+              !location.pathname.startsWith('/profile/admin') && (
+                <NavigationBar />
+              )}
           </ScannerProvider>
         </UserContext.Provider>
       ) : null}

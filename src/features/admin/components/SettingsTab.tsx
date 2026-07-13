@@ -157,7 +157,7 @@ export const SettingsTab = () => {
             }
             placeholder="e.g. We're updating the app. Back in 30 minutes!"
             rows={3}
-            className="w-full resize-none rounded-xl bg-transparent p-3 text-sm outline-none"
+            className="w-full rounded-xl bg-transparent p-3 text-sm"
             style={{
               color: theme.text_color,
               backgroundColor: `${theme.hint_color}10`,
@@ -258,7 +258,7 @@ function WhitelistSection() {
           value={newId}
           onChange={(e) => setNewId(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && addId()}
-          className="flex-1 rounded-xl bg-transparent px-3 py-2 text-sm outline-none"
+          className="flex-1 rounded-xl bg-transparent px-3 py-2 text-sm"
           style={{
             color: theme.text_color,
             backgroundColor: `${theme.hint_color}15`,

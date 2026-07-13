@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Flame, Check, Target } from 'lucide-react';
+import { Flame, Check, Shield, Target } from 'lucide-react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { users } from '@/shared/api/users';
-import type { StreakInfo } from '@/shared/types/api/streak';
+import type { StreakInfo, GoalType } from '@/shared/types/api/streak';
 import { useTranslation } from 'react-i18next';
 import { capitalizeFirst, getIntlLocale } from '@/shared/lib/locale';
+import { toApiDate } from '@/shared/lib/date';
 import { Section } from './Section';
 import { ProgressBar } from './ProgressBar';
 import { Skeleton } from '@/shared/ui/Skeleton.tsx';
@@ -15,6 +16,14 @@ import { getFlameColor } from '@/features/home/lib/getFlameColor.ts';
 interface StreakPopupProps {
   currentStreak: number;
   onClose: () => void;
+}
+
+const RESTORED_DAY_COLOR = '#f59e0b';
+
+const GOAL_TYPES: GoalType[] = ['lose', 'maintain', 'gain'];
+
+function isGoalType(value: string | null | undefined): value is GoalType {
+  return !!value && (GOAL_TYPES as string[]).includes(value);
 }
 
 export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
@@ -26,18 +35,6 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
   const [restoreError, setRestoreError] = useState<string | null>(null);
   if (restoreError) console.log(restoreError);
 
-  const dayHeaders = useMemo(
-    () =>
-      Array.from({ length: 7 }, (_, i) =>
-        capitalizeFirst(
-          new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(
-            new Date(2024, 0, 1 + i),
-          ),
-        ),
-      ),
-    [locale],
-  );
-
   const { data, isLoading } = useQuery<StreakInfo>({
     queryKey: ['streak'],
     queryFn: async () => (await users.getStreak()).data,
@@ -46,6 +43,10 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
 
   const streak = data?.current_streak ?? currentStreak;
   const streakExtended = data?.today_progress?.status === 'met';
+
+  const rawGoalType = data?.goal_type ?? null;
+  const goalType: GoalType = isGoalType(rawGoalType) ? rawGoalType : 'maintain';
+
   const daily_goalProgress = data?.today_progress?.calories_goal
     ? Math.round(
         (data.today_progress.calories * 100) /
@@ -57,6 +58,9 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
     streakExtended,
     theme.hint_color,
   );
+
+  const todayStr = useMemo(() => toApiDate(new Date()), []);
+  const weekHistory = data?.week_history ?? [];
 
   const { mutate: doRestore, isPending: isRestoring } = useMutation({
     mutationFn: () => users.restoreStreak(),
@@ -72,6 +76,8 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
           : old,
       );
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      // Обновляем недельную историю — restore задним числом помечает часть дней 'restored'
+      queryClient.invalidateQueries({ queryKey: ['streak'] });
       setRestoreError(null);
     },
     onError: () => {
@@ -86,7 +92,13 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
       secondaryAction={{
         text: data?.can_restore ? t('cancel') : undefined,
       }}
-      actionLabel={data?.can_restore ? t('restore_streak') : t('keep_it_up')}
+      actionLabel={
+        data?.can_restore
+          ? t('restore_streak')
+          : streakExtended
+            ? t('keep_it_up')
+            : t('understood')
+      }
       onAction={data?.can_restore ? () => doRestore() : () => onClose()}
       isProcessing={isRestoring}
     >
@@ -113,37 +125,94 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
           </div>
 
           <div
-            className="my-3.5 h-0.5 w-full rounded-full"
+            className="my-4 h-0.5 w-full rounded-full"
             style={{ backgroundColor: theme.section_separator_color }}
           />
 
-          <div>
-            <div className="mb-1 grid grid-cols-7 gap-6">
-              {dayHeaders.map((h) => (
-                <span
-                  key={h}
-                  className="flex aspect-square items-center justify-center rounded-full"
-                  style={{
-                    color: theme.button_text_color,
-                    backgroundColor: theme.button_color,
-                  }}
-                >
-                  <Check strokeWidth={2} size={14} />
-                </span>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-6">
-              {dayHeaders.map((h) => (
-                <div
-                  key={h}
-                  className="text-center text-xs font-medium"
-                  style={{ color: theme.hint_color }}
-                >
-                  {h}
+          {isLoading ? (
+            <div className="grid grid-cols-7 gap-2">
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} className="flex flex-col items-center gap-1.5">
+                  <Skeleton className="h-3.5 w-6" />
+                  <Skeleton className="size-8 rounded-full" />
                 </div>
               ))}
             </div>
-          </div>
+          ) : (
+            <div className="grid grid-cols-7 gap-2">
+              {weekHistory.map((day) => {
+                const isToday = day.date === todayStr;
+                const effectiveStatus = isToday
+                  ? streakExtended
+                    ? 'met'
+                    : 'pending'
+                  : day.status;
+
+                const isFilled =
+                  effectiveStatus === 'met' || effectiveStatus === 'restored';
+                const isRestored = effectiveStatus === 'restored';
+                const isPending = effectiveStatus === 'pending';
+
+                const label = capitalizeFirst(
+                  new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(
+                    new Date(`${day.date}T12:00:00`),
+                  ),
+                );
+
+                const tooltip = isRestored
+                  ? t('streak.day_status.restored')
+                  : effectiveStatus === 'met'
+                    ? t('streak.day_status.met')
+                    : undefined;
+
+                return (
+                  <div
+                    key={day.date}
+                    className="flex flex-col items-center gap-1.5"
+                  >
+                    <span
+                      className="text-xs leading-none font-medium"
+                      style={{
+                        color: isToday ? theme.text_color : theme.hint_color,
+                      }}
+                    >
+                      {label}
+                    </span>
+
+                    <div
+                      title={tooltip}
+                      className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                      style={{
+                        backgroundColor: isFilled
+                          ? isRestored
+                            ? RESTORED_DAY_COLOR
+                            : theme.button_color
+                          : 'transparent',
+                        border: isFilled
+                          ? 'none'
+                          : `2px ${isPending ? 'dashed' : 'solid'} ${theme.text_color}`,
+                      }}
+                    >
+                      {isFilled &&
+                        (isRestored ? (
+                          <Shield
+                            strokeWidth={2}
+                            size={14}
+                            style={{ color: theme.button_text_color }}
+                          />
+                        ) : (
+                          <Check
+                            strokeWidth={2}
+                            size={14}
+                            style={{ color: theme.button_text_color }}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </Section>
 
         {isLoading ? (
@@ -171,7 +240,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
               </div>
             </div>
 
-            <ProgressBar p={data.today_progress} />
+            <ProgressBar p={data.today_progress} goalType={goalType} />
           </Section>
         ) : null}
 
@@ -184,10 +253,10 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                 className="text-sm font-medium"
                 style={{ color: theme.text_color }}
               >
-                {t('daily_goal')} набор массы
+                {t('daily_goal')} {t(`streak.goal_types.${goalType}`)}
               </span>
               <span className="text-xs" style={{ color: theme.hint_color }}>
-                Для продления серии набирайте от 90% дневной нормы калорий.
+                {t(`streak.goal_rules.${goalType}`)}
               </span>
             </div>
           </div>

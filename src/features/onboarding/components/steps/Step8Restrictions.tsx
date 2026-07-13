@@ -105,7 +105,7 @@ export const Step8Restrictions = ({
               emit(selected, e.target.value);
             }}
             placeholder={t('step8.allergy_placeholder')}
-            className="w-full rounded-2xl p-4 text-sm outline-none"
+            className="w-full rounded-2xl p-4 text-sm"
             style={{
               backgroundColor: theme.section_bg_color,
               color: theme.text_color,

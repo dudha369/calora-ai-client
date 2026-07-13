@@ -44,7 +44,6 @@ export const BarcodeResultModal = ({
   const theme = useTheme();
   const startPortion = product.servingSizeG ?? DEFAULT_PORTION_G;
   const [isConfirming, setIsConfirming] = useState(false);
-  const [syncEnabled, setSyncEnabled] = useState(true);
 
   const [values, setValues] = useState<NutritionValues>(() =>
     buildNutritionValues(
@@ -88,11 +87,13 @@ export const BarcodeResultModal = ({
     >
       <div className="flex flex-col gap-3">
         {product.imageUrl && (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="mx-auto h-24 w-24 rounded-xl object-contain"
-          />
+          <div className="@container w-full">
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
+            />
+          </div>
         )}
         {/* Product name / brand */}
         <div className="flex flex-col items-center gap-0.5 px-2 pt-1">
@@ -141,8 +142,6 @@ export const BarcodeResultModal = ({
         <NutritionEditGrid
           values={values}
           baseValues={baseValues}
-          syncEnabled={syncEnabled}
-          onSyncToggle={() => setSyncEnabled((s) => !s)}
           onChange={handleChange}
         />
       </div>

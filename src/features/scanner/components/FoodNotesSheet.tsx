@@ -73,7 +73,7 @@ export const FoodNotesSheet = ({
             maxLength={MAX_NOTES_LENGTH}
             ref={textAreaRef}
             onFocus={handleFocus}
-            className="h-12 w-full resize-none rounded-t-2xl p-2 pb-0 text-sm outline-none"
+            className="h-12 w-full rounded-t-2xl p-2 pb-0 text-sm"
             style={{
               backgroundColor: theme.section_bg_color,
               color: theme.text_color,

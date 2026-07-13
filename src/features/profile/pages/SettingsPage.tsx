@@ -77,7 +77,7 @@ export const SettingsPage = () => {
               key={opt.key}
               icon={
                 <SectionItemIcon
-                  color={
+                  backgroundColor={
                     isActive ? theme.button_color : `${theme.hint_color}25`
                   }
                 >
@@ -103,7 +103,7 @@ export const SettingsPage = () => {
         <div ref={dropdownRef} className="relative">
           <SectionItem
             icon={
-              <SectionItemIcon color={`${theme.button_color}15`}>
+              <SectionItemIcon backgroundColor="#007AFF">
                 <span>
                   <Globe size={18} />
                 </span>
@@ -183,7 +183,7 @@ export const SettingsPage = () => {
       <Section>
         <SectionItem
           icon={
-            <SectionItemIcon color="transparent">
+            <SectionItemIcon color={theme.destructive_text_color}>
               <Trash2 size={18} />
             </SectionItemIcon>
           }

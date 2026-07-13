@@ -21,7 +21,24 @@
   "streak_extended": "Streak extended!",
   "streak_pending": "Streak pending",
   "streak_lost": "Streak lost",
+  "streak": {
+    "goal_types": {
+      "lose": "Weight loss",
+      "maintain": "Weight maintenance",
+      "gain": "Muscle gain"
+    },
+    "goal_rules": {
+      "lose": "To keep your streak, stay within ±10% of your calorie goal (no lower than −30%).",
+      "maintain": "To keep your streak, stay within ±10% of your daily calorie goal.",
+      "gain": "To keep your streak, hit your calorie goal or go over — overeating isn't penalized."
+    },
+    "day_status": {
+      "met": "Goal met",
+      "restored": "Restored with a shield"
+    }
+  },
   "keep_it_up": "Keep it up!",
+  "understood": "Understood",
   "current_streak": "Current streak",
   "days_one": "day",
   "days_other": "days",

@@ -92,7 +92,7 @@ export const BroadcastTab = () => {
           onChange={(e) => setText(e.target.value)}
           placeholder="Write your broadcast message..."
           rows={5}
-          className="w-full resize-none rounded-xl bg-transparent p-3 text-sm outline-none"
+          className="w-full rounded-xl bg-transparent p-3 text-sm"
           style={{
             color: theme.text_color,
             backgroundColor: `${theme.hint_color}10`,
@@ -149,7 +149,7 @@ export const BroadcastTab = () => {
             placeholder="Button text"
             value={buttonText}
             onChange={(e) => setButtonText(e.target.value)}
-            className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2 text-sm outline-none"
+            className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2 text-sm"
             style={{
               color: theme.text_color,
               backgroundColor: `${theme.hint_color}10`,
@@ -160,7 +160,7 @@ export const BroadcastTab = () => {
             placeholder="URL"
             value={buttonUrl}
             onChange={(e) => setButtonUrl(e.target.value)}
-            className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2 text-sm outline-none"
+            className="min-w-0 flex-1 rounded-xl bg-transparent px-3 py-2 text-sm"
             style={{
               color: theme.text_color,
               backgroundColor: `${theme.hint_color}10`,

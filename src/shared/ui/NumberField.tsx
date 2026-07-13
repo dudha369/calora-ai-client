@@ -32,7 +32,7 @@ export const NumberField = ({
           step={step}
           min={min}
           onChange={(e) => onChange(Math.max(min, Number(e.target.value) || 0))}
-          className="w-full rounded-xl py-2 pr-9 pl-3 text-sm font-medium outline-none"
+          className="w-full rounded-xl py-2 pr-9 pl-3 text-sm font-medium"
           style={{
             backgroundColor: theme.secondary_bg_color,
             color: theme.text_color,

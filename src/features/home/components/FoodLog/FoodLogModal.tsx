@@ -113,11 +113,13 @@ export const FoodLogModal = ({
             )}
           >
             {log.photo_url ? (
-              <img
-                src={log.photo_url}
-                alt={displayName}
-                className="aspect-square w-full rounded-2xl object-cover"
-              />
+              <div className="@container w-full">
+                <img
+                  src={log.photo_url}
+                  alt={displayName}
+                  className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
+                />
+              </div>
             ) : (
               <div
                 className="flex aspect-2/1 w-full items-center justify-center rounded-2xl"
@@ -161,7 +163,7 @@ export const FoodLogModal = ({
                   onClick={() => setEditMode(true)}
                   disabled={isProcessing}
                   aria-label={t('edit_meal')}
-                  className="p-1 transition-opacity active:opacity-60 disabled:opacity-40"
+                  className="rounded-full p-1 transition-opacity hover:opacity-80 active:opacity-60 disabled:opacity-40"
                   style={{
                     color: theme.hint_color,
                   }}

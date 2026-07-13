@@ -1,11 +1,25 @@
 import { useTheme } from '@/shared/context/ThemeContext.ts';
-import { Check } from 'lucide-react';
-import type { TodayProgress } from '@/shared/types/api/streak.ts';
+import { Check, AlertTriangle } from 'lucide-react';
+import type { TodayProgress, GoalType } from '@/shared/types/api/streak.ts';
 
-export const ProgressBar = ({ p }: { p: TodayProgress }) => {
+interface ProgressBarProps {
+  p: TodayProgress;
+  goalType: GoalType;
+}
+
+export const ProgressBar = ({ p, goalType }: ProgressBarProps) => {
   const theme = useTheme();
   const toFixed = (value: number) => (value >= 100 ? 100 : value);
-  const barWidth = toFixed(Math.round((p.calories * 100) / p.calories_min));
+  const barWidth = toFixed(
+    Math.round((p.calories * 100) / Math.max(p.calories_min, 1)),
+  );
+
+  const isMet = p.status === 'met';
+  const isOverPenalized = p.status === 'over' && goalType !== 'gain';
+
+  const barColor = isOverPenalized
+    ? theme.destructive_text_color
+    : theme.button_color;
 
   return (
     <div
@@ -13,23 +27,27 @@ export const ProgressBar = ({ p }: { p: TodayProgress }) => {
       style={{ backgroundColor: theme.section_separator_color }}
     >
       <div
-        className="absolute top-0 left-0 h-full rounded-full"
+        className="absolute top-0 left-0 h-full rounded-full transition-[width,background-color] duration-300"
         style={{
           width: `${barWidth}%`,
-          backgroundColor: theme.button_color,
+          backgroundColor: barColor,
         }}
       />
 
-      {p.status === 'met' && (
+      {(isMet || isOverPenalized) && (
         <div
-          className="absolute right-0 flex aspect-square items-center rounded-full p-px"
+          className="absolute right-0 flex aspect-square items-center justify-center rounded-full p-px"
           style={{
-            backgroundColor: theme.button_color,
+            backgroundColor: barColor,
             color: theme.secondary_bg_color,
             outline: `${theme.secondary_bg_color} solid 4px`,
           }}
         >
-          <Check strokeWidth={2} size={12} />
+          {isOverPenalized ? (
+            <AlertTriangle strokeWidth={2} size={12} />
+          ) : (
+            <Check strokeWidth={2} size={12} />
+          )}
         </div>
       )}
     </div>

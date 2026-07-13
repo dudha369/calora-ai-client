@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
 import { useTheme } from '@/shared/context/ThemeContext';
 
 export interface NutritionEditGridCellProps {
@@ -7,7 +7,6 @@ export interface NutritionEditGridCellProps {
   unit: string;
   step?: number;
   onChange: (value: number) => void;
-  large?: boolean;
 }
 
 const fmt = (n: number, step: number) =>
@@ -19,7 +18,6 @@ export const NutritionEditGridCell = ({
   unit,
   step = 1,
   onChange,
-  large = false,
 }: NutritionEditGridCellProps) => {
   const theme = useTheme();
   const [editing, setEditing] = useState(false);
@@ -46,7 +44,7 @@ export const NutritionEditGridCell = ({
     setEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') inputRef.current?.blur();
   };
 
@@ -54,7 +52,7 @@ export const NutritionEditGridCell = ({
 
   return (
     <div
-      className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center gap-1 py-2.5 transition-opacity active:opacity-60"
+      className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center gap-1 py-2.5 transition-opacity hover:opacity-80 active:opacity-60"
       onClick={!editing ? handleTap : undefined}
     >
       {editing ? (
@@ -68,33 +66,27 @@ export const NutritionEditGridCell = ({
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className={`w-16 rounded-lg bg-transparent text-center leading-none font-medium outline-none ${large ? 'text-2xl' : 'text-lg'}`}
+          className="w-16 rounded-lg bg-transparent text-center text-lg leading-none font-medium"
           style={{
             color: theme.button_color,
             caretColor: theme.button_color,
           }}
         />
       ) : (
-        <span
-          className={`leading-none font-medium ${large ? 'text-2xl' : 'text-lg'}`}
-        >
-          {displayValue}
-        </span>
+        <span className="text-lg leading-none font-medium">{displayValue}</span>
       )}
 
       <span
-        className={`leading-none ${large ? 'text-sm' : 'text-xs'}`}
+        className="text-xs leading-none"
         style={{ color: theme.hint_color }}
       >
         {label || unit}
       </span>
 
-      {!large && (
-        <div
-          className="absolute top-1/2 -right-px h-3/5 w-px -translate-y-1/2 group-last:hidden"
-          style={{ backgroundColor: theme.section_separator_color }}
-        />
-      )}
+      <div
+        className="absolute top-1/2 -right-px h-3/5 w-0.5 -translate-y-1/2 rounded-full group-last:hidden"
+        style={{ backgroundColor: theme.section_separator_color }}
+      />
     </div>
   );
 };

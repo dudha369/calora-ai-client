@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
@@ -87,7 +86,8 @@ export const EditMealSheet = ({
   const [baseItems] = useState<NutritionValues[]>(() =>
     log.items.map(toEditable).map(itemToNutrition),
   );
-  const [syncEnabled, setSyncEnabled] = useState(false);
+
+  const manyItems = editItems.length > 1;
 
   const updateItemName = (index: number, name: string) =>
     setEditItems((prev) =>
@@ -134,11 +134,6 @@ export const EditMealSheet = ({
     [editItems],
   );
 
-  const handleSave = () => {
-    if (editItems.length === 0) return;
-    onConfirm(editItems);
-  };
-
   return (
     <BottomSheet
       title={t('edit_meal')}
@@ -146,9 +141,8 @@ export const EditMealSheet = ({
       dragToClose={false}
       actionLabel={tc('buttons.save')}
       iconCustomEmojiId="5258336354642697821"
-      onAction={handleSave}
+      onAction={() => onConfirm(editItems)}
       isProcessing={isProcessing}
-      actionDisabled={editItems.length === 0}
       secondaryAction={{
         text: tc('buttons.cancel'),
         iconCustomEmojiId: '5260342697075416641',
@@ -164,38 +158,45 @@ export const EditMealSheet = ({
             style={{ border: `2px solid ${theme.section_bg_color}` }}
           >
             <div className="flex items-center gap-2">
+              {manyItems && (
+                <span
+                  className="inline-flex size-7.5 shrink-0 items-center justify-center rounded-full text-base font-medium"
+                  style={{
+                    border: `${theme.hint_color} 2px dashed`,
+                    color: theme.text_color,
+                  }}
+                >
+                  {i + 1}
+                </span>
+              )}
+
               <textarea
                 value={item.food_name}
                 onChange={(e) => updateItemName(i, e.target.value)}
-                className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full flex-1 resize-none rounded-xl px-3 py-2 text-sm font-semibold outline-none"
+                className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full flex-1 rounded-xl px-3 py-2 text-sm font-semibold"
                 style={{
                   backgroundColor: theme.section_bg_color,
                   color: theme.text_color,
                 }}
               />
-              {editItems.length > 1 && (
-                <button
-                  onClick={() => removeItem(i)}
-                  aria-label={tc('buttons.delete')}
-                  className="shrink-0 rounded-lg p-2 transition-opacity active:opacity-60"
-                  style={{ color: theme.destructive_text_color }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
             </div>
 
             <NutritionEditGrid
               values={itemToNutrition(item)}
               baseValues={baseItems[i] ?? itemToNutrition(item)}
-              syncEnabled={syncEnabled}
-              onSyncToggle={() => setSyncEnabled((prev) => !prev)}
+              onRemoveItem={manyItems ? () => removeItem(i) : undefined}
               onChange={(v) => updateItemNutrition(i, v)}
             />
           </div>
         ))}
 
-        <NutritionGrid data={editTotals} />
+        <div className="flex flex-col gap-px">
+          <span
+            className="text-base font-medium"
+            style={{ color: theme.text_color }}
+          ></span>
+          <NutritionGrid data={editTotals} />
+        </div>
       </div>
     </BottomSheet>
   );

@@ -272,7 +272,7 @@ const CustomAmountModal = ({
             onChange={(e) => setRaw(e.target.value)}
             placeholder="Например, 350"
             autoFocus
-            className="w-full rounded-2xl p-4 pr-16 text-lg font-medium outline-none"
+            className="w-full rounded-2xl p-4 pr-16 text-lg font-medium"
             style={{
               backgroundColor: theme.section_bg_color,
               color: theme.text_color,

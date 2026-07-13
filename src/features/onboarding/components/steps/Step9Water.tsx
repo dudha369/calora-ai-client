@@ -3,10 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { StepShell } from '../StepShell';
 import { OptionCard } from '../OptionCard';
 import { useTheme } from '@/shared/context/ThemeContext';
-import type {
-  OnboardingData,
-  WaterTrack,
-} from '@/shared/types/Onboarding';
+import type { OnboardingData, WaterTrack } from '@/shared/types/Onboarding';
 
 const calcAuto = (weight?: number) => (weight ? Math.round(weight * 33) : 2000);
 
@@ -85,7 +82,7 @@ export const Step9Water = ({ data, onChange }: Step9WaterProps) => {
               value={rawGoal}
               onChange={(e) => handleGoalInput(e.target.value)}
               placeholder={t('step9.placeholder')}
-              className="w-full rounded-2xl p-4 pr-24 text-lg font-medium outline-none"
+              className="w-full rounded-2xl p-4 pr-24 text-lg font-medium"
               style={{
                 backgroundColor: theme.section_bg_color,
                 color: theme.text_color,

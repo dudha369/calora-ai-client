@@ -30,7 +30,7 @@ export const NutritionGridCardCell = ({
       </span>
 
       <div
-        className="absolute top-1/2 -right-px h-3/4 w-0.5 -translate-y-1/2 group-last:hidden"
+        className="absolute top-1/2 -right-px h-3/5 w-0.5 -translate-y-1/2 rounded-full group-last:hidden"
         style={{
           backgroundColor: theme.section_separator_color,
         }}

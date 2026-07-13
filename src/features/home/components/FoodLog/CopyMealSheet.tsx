@@ -153,7 +153,7 @@ export const CopyMealSheet = ({
           <textarea
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full resize-none rounded-xl px-3 py-2 text-sm font-semibold outline-none"
+            className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full rounded-xl px-3 py-2 text-sm font-semibold"
             style={{
               backgroundColor: theme.secondary_bg_color,
               color: theme.text_color,
@@ -178,7 +178,7 @@ export const CopyMealSheet = ({
               onChange={(e) =>
                 setPortionG(Math.max(1, Math.round(Number(e.target.value))))
               }
-              className="w-full rounded-xl py-2.5 pr-8 pl-3 text-sm font-medium outline-none"
+              className="w-full rounded-xl py-2.5 pr-8 pl-3 text-sm font-medium"
               style={{
                 backgroundColor: theme.secondary_bg_color,
                 color: theme.text_color,

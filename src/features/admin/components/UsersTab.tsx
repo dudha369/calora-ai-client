@@ -86,7 +86,7 @@ export const UsersTab = ({ selectedUserId, onSelectUser }: UsersTabProps) => {
             setSearch(e.target.value);
             setPage(1);
           }}
-          className="flex-1 bg-transparent text-sm outline-none"
+          className="flex-1 bg-transparent text-sm"
           style={{ color: theme.text_color }}
         />
       </div>

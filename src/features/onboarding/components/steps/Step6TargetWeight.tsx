@@ -54,7 +54,7 @@ export const Step6TargetWeight = ({
             placeholder={
               isLose ? t('step6.placeholder_lose') : t('step6.placeholder_gain')
             }
-            className="w-full rounded-2xl p-4 pr-20 text-lg font-medium outline-none"
+            className="w-full rounded-2xl p-4 pr-20 text-lg font-medium"
             style={{
               backgroundColor: theme.section_bg_color,
               color: theme.text_color,

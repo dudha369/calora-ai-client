@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Link2, Unlink } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { NutritionEditGridCell } from './NutritionEditGridCell';
+import { useState } from 'react';
 
 export interface NutritionValues {
   portion_g: number;
@@ -17,8 +18,7 @@ export interface NutritionValues {
 interface NutritionEditGridProps {
   values: NutritionValues;
   baseValues: NutritionValues;
-  syncEnabled: boolean;
-  onSyncToggle: () => void;
+  onRemoveItem?: () => void;
   onChange: (values: NutritionValues) => void;
 }
 
@@ -48,13 +48,13 @@ function syncChange(
 export const NutritionEditGrid = ({
   values,
   baseValues,
-  syncEnabled,
-  onSyncToggle,
+  onRemoveItem,
   onChange,
 }: NutritionEditGridProps) => {
   const theme = useTheme();
   const { t } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
+  const [syncEnabled, setSyncEnabled] = useState(false);
 
   const handleChange = (key: keyof NutritionValues, newValue: number) => {
     onChange(
@@ -66,26 +66,7 @@ export const NutritionEditGrid = ({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-end px-0.5">
-        <button
-          onClick={onSyncToggle}
-          className="flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-medium transition-opacity active:opacity-60"
-          style={{
-            backgroundColor: syncEnabled
-              ? `${theme.button_color}20`
-              : theme.secondary_bg_color,
-            color: syncEnabled ? theme.button_color : theme.hint_color,
-          }}
-        >
-          {syncEnabled ? <Link2 size={12} /> : <Unlink size={12} />}
-          {syncEnabled
-            ? tc('sync.linked', { defaultValue: 'Связано' })
-            : tc('sync.independent', { defaultValue: 'Раздельно' })}
-        </button>
-      </div>
-
-      <div className="grid w-full grid-cols-4 grid-rows-2 gap-1.5">
-        {/* Calories — left, spans 2 rows */}
+      <div className="grid w-full grid-cols-4 grid-rows-2 gap-2">
         <div
           className="col-span-1 row-span-2 flex flex-col items-center justify-center rounded-2xl"
           style={{ backgroundColor: theme.section_bg_color }}
@@ -94,12 +75,10 @@ export const NutritionEditGrid = ({
             label={tc('units.kcal')}
             value={values.calories}
             unit={tc('units.kcal')}
-            large
             onChange={(v) => handleChange('calories', v)}
           />
         </div>
 
-        {/* Right 3×2 grid */}
         <div
           className="col-span-3 row-span-2 flex flex-col rounded-2xl"
           style={{ backgroundColor: theme.section_bg_color }}
@@ -127,10 +106,12 @@ export const NutritionEditGrid = ({
               onChange={(v) => handleChange('carbs_g', v)}
             />
           </div>
+
           <div
-            className="mx-auto h-px w-[90%]"
+            className="mx-auto h-0.5 w-[90%] rounded-full"
             style={{ backgroundColor: theme.section_separator_color }}
           />
+
           <div className="flex flex-1">
             <NutritionEditGridCell
               label={t('sugars')}
@@ -156,26 +137,78 @@ export const NutritionEditGrid = ({
         </div>
       </div>
 
-      <div className="relative">
-        <input
-          type="number"
-          inputMode="numeric"
-          value={values.portion_g}
-          min={1}
-          max={9999}
-          onChange={(e) => handleChange('portion_g', parseInt(e.target.value))}
-          className="w-full rounded-xl py-2.5 pr-8 pl-3 text-sm font-medium outline-none"
+      <div className="flex w-full items-center gap-2">
+        <div
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl px-3 text-sm"
           style={{
             backgroundColor: theme.secondary_bg_color,
-            color: theme.text_color,
           }}
-        />
-        <span
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs"
-          style={{ color: theme.hint_color }}
         >
-          {tc('units.g')}
-        </span>
+          <span style={{ color: theme.hint_color }}>
+            {tc('nutrients.portion')}
+          </span>
+
+          <input
+            type="number"
+            inputMode="numeric"
+            value={values.portion_g}
+            min={1}
+            max={9999}
+            onChange={(e) => {
+              const value = parseInt(e.target.value, 10);
+              handleChange('portion_g', Number.isNaN(value) ? 1 : value);
+            }}
+            className="h-[calc(1lh+1rem)] min-w-0 flex-1 text-center font-medium"
+            style={{
+              color: theme.text_color,
+              backgroundColor: 'transparent',
+            }}
+          />
+
+          <span style={{ color: theme.hint_color }}>{tc('units.g')}</span>
+        </div>
+
+        <div
+          className="inline-flex gap-px rounded-xl p-1"
+          style={{
+            backgroundColor: theme.secondary_bg_color,
+          }}
+        >
+          <button
+            onClick={() => setSyncEnabled(true)}
+            className="rounded-lg px-2 py-1 text-sm transition-all duration-200"
+            style={{
+              backgroundColor: syncEnabled ? theme.button_color : 'transparent',
+              color: syncEnabled ? theme.button_text_color : theme.hint_color,
+            }}
+          >
+            Авто
+          </button>
+
+          <button
+            onClick={() => setSyncEnabled(false)}
+            className="rounded-lg px-2 py-1 text-sm transition-all duration-200"
+            style={{
+              backgroundColor: !syncEnabled
+                ? theme.button_color
+                : 'transparent',
+              color: !syncEnabled ? theme.button_text_color : theme.hint_color,
+            }}
+          >
+            Вручную
+          </button>
+        </div>
+
+        {onRemoveItem && (
+          <button
+            onClick={() => onRemoveItem()}
+            aria-label={tc('buttons.delete')}
+            className="flex items-center rounded-full px-1 transition-opacity hover:opacity-80 active:opacity-60"
+            style={{ color: theme.destructive_text_color }}
+          >
+            <Trash2 size={16} />
+          </button>
+        )}
       </div>
     </div>
   );

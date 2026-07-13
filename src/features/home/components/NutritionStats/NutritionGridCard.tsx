@@ -32,7 +32,7 @@ export const NutritionGridCard = ({ row1, row2 }: NutritionGridCardProps) => {
       {row2 && (
         <>
           <div
-            className="mx-auto h-0.5 w-[90%]"
+            className="mx-auto h-0.5 w-[90%] rounded-full"
             style={{ backgroundColor: theme.section_separator_color }}
           />
           <div className="flex flex-1">

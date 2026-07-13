@@ -63,7 +63,7 @@ export const ProfilePage = () => {
           <Section title="Admin Panel">
             <SectionItem
               icon={
-                <SectionItemIcon color="#5856D6">
+                <SectionItemIcon backgroundColor="#5856D6">
                   <Shield />
                 </SectionItemIcon>
               }
@@ -76,7 +76,7 @@ export const ProfilePage = () => {
         <Section title={t('body_section.title')}>
           <SectionItem
             icon={
-              <SectionItemIcon color="#FF2D55">
+              <SectionItemIcon backgroundColor="#FF2D55">
                 <Target />
               </SectionItemIcon>
             }
@@ -85,7 +85,7 @@ export const ProfilePage = () => {
           />
           <SectionItem
             icon={
-              <SectionItemIcon color="#34C759">
+              <SectionItemIcon backgroundColor="#34C759">
                 <Sprout />
               </SectionItemIcon>
             }
@@ -97,7 +97,7 @@ export const ProfilePage = () => {
         <Section title={t('progress_section.title')}>
           <SectionItem
             icon={
-              <SectionItemIcon color="#007AFF">
+              <SectionItemIcon backgroundColor="#007AFF">
                 <ChartNoAxesCombinedIcon />
               </SectionItemIcon>
             }
@@ -106,7 +106,7 @@ export const ProfilePage = () => {
           />
           <SectionItem
             icon={
-              <SectionItemIcon color="#FF9500">
+              <SectionItemIcon backgroundColor="#FF9500">
                 <Trophy />
               </SectionItemIcon>
             }
@@ -118,7 +118,7 @@ export const ProfilePage = () => {
         <Section title={t('settings_section.title')}>
           <SectionItem
             icon={
-              <SectionItemIcon color="#8E8E93">
+              <SectionItemIcon backgroundColor="#8E8E93">
                 <Settings />
               </SectionItemIcon>
             }

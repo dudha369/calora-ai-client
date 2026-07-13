@@ -60,7 +60,6 @@ export const FoodResultModal = ({
   const [dishes, setDishes] = useState<AnalyzedDish[]>(result.dishes);
   const [mealName, setMealName] = useState(result.meal_name ?? '');
   const [isConfirming, setIsConfirming] = useState(false);
-  const [syncEnabled, setSyncEnabled] = useState(false);
   const isMultiDish = dishes.length > 1;
 
   // Snapshot of original values per dish for proportional sync
@@ -94,9 +93,7 @@ export const FoodResultModal = ({
   );
 
   const updateDishName = (index: number, name: string) =>
-    setDishes((prev) =>
-      prev.map((d, i) => (i === index ? { ...d, name } : d)),
-    );
+    setDishes((prev) => prev.map((d, i) => (i === index ? { ...d, name } : d)));
 
   const updateDishNutrition = useCallback(
     (index: number, values: NutritionValues) =>
@@ -114,8 +111,7 @@ export const FoodResultModal = ({
   const handleConfirm = async () => {
     setIsConfirming(true);
     try {
-      const finalName =
-        mealName.trim() || dishes[0]?.name || '';
+      const finalName = mealName.trim() || dishes[0]?.name || '';
       await onConfirm(dishes, finalName);
     } finally {
       setIsConfirming(false);
@@ -145,7 +141,7 @@ export const FoodResultModal = ({
             value={mealName}
             onChange={(e) => setMealName(e.target.value)}
             placeholder="Название приёма пищи"
-            className="w-full rounded-xl px-3 py-2.5 text-base font-bold outline-none"
+            className="w-full rounded-xl px-3 py-2.5 text-base font-bold"
             style={{
               backgroundColor: theme.secondary_bg_color,
               color: theme.text_color,
@@ -165,7 +161,7 @@ export const FoodResultModal = ({
                 type="text"
                 value={dish.name}
                 onChange={(e) => updateDishName(i, e.target.value)}
-                className="min-w-0 flex-1 rounded-xl px-3 py-2 text-sm font-semibold outline-none"
+                className="min-w-0 flex-1 rounded-xl px-3 py-2 text-sm font-semibold"
                 style={{
                   backgroundColor: theme.secondary_bg_color,
                   color: theme.text_color,
@@ -187,8 +183,6 @@ export const FoodResultModal = ({
             <NutritionEditGrid
               values={dishToNutrition(dish)}
               baseValues={baseValues[i] ?? dishToNutrition(dish)}
-              syncEnabled={syncEnabled}
-              onSyncToggle={() => setSyncEnabled((s) => !s)}
               onChange={(v) => updateDishNutrition(i, v)}
             />
           </div>

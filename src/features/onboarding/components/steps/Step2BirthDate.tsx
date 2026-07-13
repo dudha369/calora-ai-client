@@ -66,7 +66,7 @@ export const Step2BirthDate = ({ data, onChange }: Step2BirthDateProps) => {
           min={minDate}
           max={maxDate}
           onChange={(e) => handleChange(e.target.value)}
-          className="w-full rounded-2xl p-4 text-lg font-medium outline-none"
+          className="w-full rounded-2xl p-4 text-lg font-medium"
           style={{
             backgroundColor: theme.section_bg_color,
             color: theme.text_color,

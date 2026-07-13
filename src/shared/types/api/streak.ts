@@ -9,6 +9,15 @@ export interface TodayProgress {
   status: StreakDayStatus;
 }
 
+export type GoalType = 'lose' | 'maintain' | 'gain';
+
+export type WeekDayStatus = 'met' | 'missed' | 'restored' | 'none';
+
+export interface WeekHistoryDay {
+  date: string;
+  status: WeekDayStatus;
+}
+
 export interface StreakInfo {
   current_streak: number;
   max_streak: number;
@@ -16,6 +25,8 @@ export interface StreakInfo {
   streak_restores_available: number;
   can_restore: boolean;
   today_progress: TodayProgress | null;
+  goal_type: GoalType | null;
+  week_history: WeekHistoryDay[];
 }
 
 export interface RestoreStreakResponse {
