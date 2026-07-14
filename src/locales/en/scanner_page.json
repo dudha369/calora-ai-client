@@ -10,5 +10,38 @@
   "optional": "*optional",
   "ready_to_analyze?": "Ready to analyze your dish?",
   "press_to_analyze": "Press camera button below to take photo of your dish or scan product barcode",
-  "captured_photo": "Captured photo"
+  "captured_photo": "Captured photo",
+  "allergens": {
+    "gluten": "Gluten",
+    "milk": "Milk",
+    "dairy": "Dairy",
+    "eggs": "Eggs",
+    "fish": "Fish",
+    "peanuts": "Peanuts",
+    "nuts": "Nuts",
+    "tree-nuts": "Tree Nuts",
+    "soybeans": "Soybeans",
+    "celery": "Celery",
+    "mustard": "Mustard",
+    "sesame-seeds": "Sesame Seeds",
+    "sesame": "Sesame",
+    "lupin": "Lupin",
+    "molluscs": "Molluscs",
+    "crustaceans": "Crustaceans",
+    "sulphur-dioxide": "Sulphur Dioxide / Sulphites",
+    "sulphites": "Sulphites",
+    "sulfur-dioxide": "Sulfur Dioxide",
+    "sulfites": "Sulfites"
+  },
+  "nova_groups": {
+    "1": "Unprocessed product",
+    "2": "Culinary ingredient",
+    "3": "Processed product",
+    "4": "Ultra-processed product"
+  },
+  "allergy_warning": {
+    "confirmed": "Contains allergen",
+    "possible": "May contain traces",
+    "check_manually": "You have a noted allergy ({{note}}) — please check the ingredients manually"
+  }
 }

@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { BottomSheet } from '@/shared/ui/BottomSheet';
+import { X, ImageOff } from 'lucide-react';
 import { NutritionGrid } from '../NutritionStats/NutritionGrid';
 import {
   NutritionEditGrid,
@@ -8,7 +8,7 @@ import {
 } from '@/shared/ui/NutritionEditGrid';
 import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog, FoodItem } from '@/shared/types/api/food';
-import { round1 } from '@/features/home/lib/nutrition';
+import { sumNutrition } from '@/features/home/lib/nutrition';
 
 export interface EditableItem {
   food_name: string;
@@ -63,22 +63,17 @@ function nutritionToItem(name: string, v: NutritionValues): EditableItem {
   };
 }
 
-interface EditMealSheetProps {
+interface EditMealSheetContentProps {
   log: FoodLog;
-  isProcessing: boolean;
-  onConfirm: (items: EditableItem[]) => void;
-  onClose: () => void;
+  onDataChange: (items: EditableItem[], removePhoto: boolean) => void;
 }
 
-export const EditMealSheet = ({
+export const EditMealSheetContent = ({
   log,
-  isProcessing,
-  onConfirm,
-  onClose,
-}: EditMealSheetProps) => {
+  onDataChange,
+}: EditMealSheetContentProps) => {
   const theme = useTheme();
   const { t } = useTranslation('home_page');
-  const { t: tc } = useTranslation('common');
 
   const [editItems, setEditItems] = useState<EditableItem[]>(() =>
     log.items.map(toEditable),
@@ -86,6 +81,7 @@ export const EditMealSheet = ({
   const [baseItems] = useState<NutritionValues[]>(() =>
     log.items.map(toEditable).map(itemToNutrition),
   );
+  const [photoRemoved, setPhotoRemoved] = useState(false);
 
   const manyItems = editItems.length > 1;
 
@@ -109,95 +105,101 @@ export const EditMealSheet = ({
   const removeItem = (index: number) =>
     setEditItems((prev) => prev.filter((_, i) => i !== index));
 
-  const editTotals = useMemo(
-    () =>
-      editItems.reduce(
-        (acc, d) => ({
-          total_calories: acc.total_calories + d.calories,
-          total_protein_g: round1(acc.total_protein_g + d.protein_g),
-          total_fat_g: round1(acc.total_fat_g + d.fat_g),
-          total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
-          total_fiber_g: round1(acc.total_fiber_g + d.fiber_g),
-          total_sugar_g: round1(acc.total_sugar_g + d.sugar_g),
-          total_water_ml: acc.total_water_ml + d.water_ml,
-        }),
-        {
-          total_calories: 0,
-          total_protein_g: 0,
-          total_fat_g: 0,
-          total_carbs_g: 0,
-          total_fiber_g: 0,
-          total_sugar_g: 0,
-          total_water_ml: 0,
-        },
-      ),
-    [editItems],
-  );
+  const editTotals = useMemo(() => sumNutrition(editItems), [editItems]);
+
+  useEffect(() => {
+    onDataChange(editItems, photoRemoved);
+  }, [editItems, photoRemoved, onDataChange]);
 
   return (
-    <BottomSheet
-      title={t('edit_meal')}
-      onClose={onClose}
-      dragToClose={false}
-      actionLabel={tc('buttons.save')}
-      iconCustomEmojiId="5258336354642697821"
-      onAction={() => onConfirm(editItems)}
-      isProcessing={isProcessing}
-      secondaryAction={{
-        text: tc('buttons.cancel'),
-        iconCustomEmojiId: '5260342697075416641',
-        onClick: onClose,
-        position: 'left',
-      }}
-    >
-      <div className="flex flex-col gap-2.5">
-        {editItems.map((item, i) => (
-          <div
-            key={i}
-            className="flex flex-col gap-2.5 rounded-2xl p-3"
-            style={{ border: `2px solid ${theme.section_bg_color}` }}
-          >
-            <div className="flex items-center gap-2">
-              {manyItems && (
-                <span
-                  className="inline-flex size-7.5 shrink-0 items-center justify-center rounded-full text-base font-medium"
+    <div className="flex flex-col gap-2.5">
+      {log.photo_url && (
+        <div className="relative">
+          {!photoRemoved ? (
+            <>
+              <div className="@container w-full">
+                <img
+                  src={log.photo_url}
+                  alt={log.meal_name ?? editItems[0]?.food_name ?? ''}
+                  className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
+                />
+                <button
+                  onClick={() => setPhotoRemoved(true)}
+                  className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full backdrop-blur-sm transition-opacity active:opacity-60"
                   style={{
-                    border: `${theme.hint_color} 2px dashed`,
-                    color: theme.text_color,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    color: '#fff',
                   }}
+                  aria-label={t('remove_photo')}
                 >
-                  {i + 1}
-                </span>
-              )}
+                  <X size={14} />
+                </button>
+              </div>
+            </>
+          ) : (
+            <button
+              onClick={() => setPhotoRemoved(false)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 transition-opacity active:opacity-60"
+              style={{ backgroundColor: theme.secondary_bg_color }}
+            >
+              <ImageOff size={18} style={{ color: theme.hint_color }} />
+              <span
+                className="text-sm font-medium"
+                style={{ color: theme.hint_color }}
+              >
+                {t('photo_removed')}
+              </span>
+            </button>
+          )}
+        </div>
+      )}
 
-              <textarea
-                value={item.food_name}
-                onChange={(e) => updateItemName(i, e.target.value)}
-                className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full flex-1 rounded-xl px-3 py-2 text-sm font-semibold"
+      {editItems.map((item, i) => (
+        <div
+          key={i}
+          className="flex flex-col gap-2.5 rounded-2xl p-3"
+          style={{ border: `2px solid ${theme.section_bg_color}` }}
+        >
+          <div className="flex items-center gap-2">
+            {manyItems && (
+              <span
+                className="inline-flex size-7.5 shrink-0 items-center justify-center rounded-full text-base font-medium"
                 style={{
-                  backgroundColor: theme.section_bg_color,
+                  border: `${theme.hint_color} 2px dashed`,
                   color: theme.text_color,
                 }}
-              />
-            </div>
+              >
+                {i + 1}
+              </span>
+            )}
 
-            <NutritionEditGrid
-              values={itemToNutrition(item)}
-              baseValues={baseItems[i] ?? itemToNutrition(item)}
-              onRemoveItem={manyItems ? () => removeItem(i) : undefined}
-              onChange={(v) => updateItemNutrition(i, v)}
+            <textarea
+              value={item.food_name}
+              onChange={(e) => updateItemName(i, e.target.value)}
+              className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full flex-1 rounded-xl px-3 py-2 text-sm font-semibold"
+              style={{
+                backgroundColor: theme.section_bg_color,
+                color: theme.text_color,
+              }}
             />
           </div>
-        ))}
 
-        <div className="flex flex-col gap-px">
-          <span
-            className="text-base font-medium"
-            style={{ color: theme.text_color }}
-          ></span>
-          <NutritionGrid data={editTotals} />
+          <NutritionEditGrid
+            values={itemToNutrition(item)}
+            baseValues={baseItems[i] ?? itemToNutrition(item)}
+            onRemoveItem={manyItems ? () => removeItem(i) : undefined}
+            onChange={(v) => updateItemNutrition(i, v)}
+          />
         </div>
+      ))}
+
+      <div className="flex flex-col gap-px">
+        <span
+          className="text-base font-medium"
+          style={{ color: theme.text_color }}
+        ></span>
+        <NutritionGrid data={editTotals} />
       </div>
-    </BottomSheet>
+    </div>
   );
 };

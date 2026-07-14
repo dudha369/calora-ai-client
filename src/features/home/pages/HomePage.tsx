@@ -25,7 +25,11 @@ export const HomePage = () => {
   const createdAt = user_data?.user.created_at;
   const currentStreak = user_data?.user.current_streak ?? 0;
   const streakActiveToday = user_data?.user.streak_active_today ?? false;
-  const flameColorProps = getFlameColor(currentStreak, streakActiveToday, theme.hint_color);
+  const flameColorProps = getFlameColor(
+    currentStreak,
+    streakActiveToday,
+    theme.hint_color,
+  );
 
   const {
     dates,
@@ -105,6 +109,7 @@ export const HomePage = () => {
     mutationFn: ({
       logId,
       items,
+      removePhoto,
     }: {
       logId: number;
       items: {
@@ -118,7 +123,8 @@ export const HomePage = () => {
         sugar_g: number;
         water_ml: number;
       }[];
-    }) => food.update(logId, items),
+      removePhoto: boolean;
+    }) => food.update(logId, items, removePhoto),
     onMutate: () => setFoodLogEditing(true),
     onSettled: () => setFoodLogEditing(false),
     onSuccess: () => {
@@ -228,7 +234,9 @@ export const HomePage = () => {
           }
           onDelete={deleteLog}
           onCopy={copyLog}
-          onEdit={(logId, items) => editLog({ logId, items })}
+          onEdit={(logId, items, removePhoto) =>
+            editLog({ logId, items, removePhoto })
+          }
         />
       )}
     </div>

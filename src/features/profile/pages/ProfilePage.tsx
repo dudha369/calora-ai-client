@@ -37,7 +37,7 @@ export const ProfilePage = () => {
       <section className="flex flex-col items-center gap-2 pt-1">
         <div
           className="flex size-24 items-center justify-center rounded-full"
-          style={{ backgroundColor: `${theme.button_color}20` }}
+          style={{ backgroundColor: theme.secondary_bg_color }}
         >
           {photo_url ? (
             <img

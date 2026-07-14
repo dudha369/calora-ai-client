@@ -129,6 +129,7 @@ export const ScannerPage = () => {
   const handleBarcodeConfirm = async (
     product: ProductData,
     portionG: number,
+    includePhoto: boolean,
   ) => {
     const factor = portionG / 100;
     const p = product.per100g;
@@ -152,7 +153,7 @@ export const ScannerPage = () => {
           water_ml: waterMl,
         },
       ],
-      photo_key: product.imageUrl ?? undefined,
+      photo_key: includePhoto ? (product.imageUrl ?? undefined) : undefined,
     });
 
     invalidateLoggedQueries(false);
@@ -163,9 +164,16 @@ export const ScannerPage = () => {
   const handleFoodConfirm = async (
     dishes: AnalyzedDish[],
     mealName: string,
+    includePhoto: boolean,
   ) => {
     if (status.kind !== 'food') return;
     pendingPhotoKeyRef.current = null;
+
+    // Пользователь открепил фото — чистим уже загруженный в B2 orphan-файл,
+    // раз он не будет привязан ни к одному FoodLog.
+    if (!includePhoto && status.result.photo_key) {
+      food.deleteOrphanPhoto(status.result.photo_key).catch(() => {});
+    }
 
     const totalWaterMl = dishes.reduce((sum, d) => sum + d.water_ml, 0);
 
@@ -182,7 +190,7 @@ export const ScannerPage = () => {
         sugar_g: dish.sugar_g,
         water_ml: dish.water_ml,
       })),
-      photo_key: status.result.photo_key,
+      photo_key: includePhoto ? status.result.photo_key : undefined,
       meal_name: mealName || undefined,
       water_ml: totalWaterMl > 0 ? totalWaterMl : undefined,
     });
@@ -238,6 +246,7 @@ export const ScannerPage = () => {
       {status.kind === 'food' && (
         <FoodResultModal
           result={status.result}
+          photo={photo}
           onConfirm={handleFoodConfirm}
           onClose={() => deleteOrphanAndClose(status.result.photo_key)}
         />

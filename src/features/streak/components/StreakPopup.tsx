@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Flame, Check, Shield, Target } from 'lucide-react';
+import { Flame, Check, Shield, X, Target } from 'lucide-react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { users } from '@/shared/api/users';
@@ -17,8 +17,6 @@ interface StreakPopupProps {
   currentStreak: number;
   onClose: () => void;
 }
-
-const RESTORED_DAY_COLOR = '#f59e0b';
 
 const GOAL_TYPES: GoalType[] = ['lose', 'maintain', 'gain'];
 
@@ -47,10 +45,9 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
   const rawGoalType = data?.goal_type ?? null;
   const goalType: GoalType = isGoalType(rawGoalType) ? rawGoalType : 'maintain';
 
-  const daily_goalProgress = data?.today_progress?.calories_goal
+  const streakGoalProgress = data?.today_progress?.calories_min
     ? Math.round(
-        (data.today_progress.calories * 100) /
-          data.today_progress.calories_goal,
+        (data.today_progress.calories * 100) / data.today_progress.calories_min,
       )
     : 0;
   const flameColorProps = getFlameColor(
@@ -142,16 +139,43 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
             <div className="grid grid-cols-7 gap-2">
               {weekHistory.map((day) => {
                 const isToday = day.date === todayStr;
-                const effectiveStatus = isToday
-                  ? streakExtended
-                    ? 'met'
-                    : 'pending'
-                  : day.status;
+                const isEffectiveStatus = day.status !== 'none';
+                const isRestored = day.status === 'restored';
 
-                const isFilled =
-                  effectiveStatus === 'met' || effectiveStatus === 'restored';
-                const isRestored = effectiveStatus === 'restored';
-                const isPending = effectiveStatus === 'pending';
+                console.log(day.date, day.status, isEffectiveStatus);
+
+                let backgroundColor;
+                let icon;
+                if (day.status === 'met') {
+                  backgroundColor = theme.button_color;
+                  icon = (
+                    <Check
+                      strokeWidth={2.5}
+                      size={18}
+                      style={{ color: theme.button_text_color }}
+                    />
+                  );
+                } else if (day.status === 'restored') {
+                  backgroundColor = theme.link_color;
+                  icon = (
+                    <Shield
+                      strokeWidth={2.5}
+                      size={18}
+                      style={{ color: theme.button_text_color }}
+                    />
+                  );
+                } else if (day.status === 'missed') {
+                  backgroundColor = theme.destructive_text_color;
+                  icon = (
+                    <X
+                      strokeWidth={3}
+                      size={18}
+                      style={{ color: theme.button_text_color }}
+                    />
+                  );
+                } else {
+                  backgroundColor = 'transparent';
+                }
 
                 const label = capitalizeFirst(
                   new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(
@@ -161,7 +185,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
 
                 const tooltip = isRestored
                   ? t('streak.day_status.restored')
-                  : effectiveStatus === 'met'
+                  : day.status === 'met'
                     ? t('streak.day_status.met')
                     : undefined;
 
@@ -183,30 +207,15 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                       title={tooltip}
                       className="flex size-8 shrink-0 items-center justify-center rounded-full"
                       style={{
-                        backgroundColor: isFilled
-                          ? isRestored
-                            ? RESTORED_DAY_COLOR
-                            : theme.button_color
-                          : 'transparent',
-                        border: isFilled
-                          ? 'none'
-                          : `2px ${isPending ? 'dashed' : 'solid'} ${theme.text_color}`,
+                        backgroundColor,
+                        border: `2px ${isToday ? 'dashed' : 'solid'} ${
+                          isEffectiveStatus
+                            ? theme.text_color
+                            : theme.hint_color
+                        }`,
                       }}
                     >
-                      {isFilled &&
-                        (isRestored ? (
-                          <Shield
-                            strokeWidth={2}
-                            size={14}
-                            style={{ color: theme.button_text_color }}
-                          />
-                        ) : (
-                          <Check
-                            strokeWidth={2}
-                            size={14}
-                            style={{ color: theme.button_text_color }}
-                          />
-                        ))}
+                      {isEffectiveStatus && icon}
                     </div>
                   </div>
                 );
@@ -224,7 +233,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                 className="flex w-1/3 items-center justify-center text-3xl font-medium"
                 style={{ color: theme.text_color }}
               >
-                {daily_goalProgress}%
+                {streakGoalProgress}%
               </span>
 
               <div className="flex w-2/3 flex-col gap-px">
@@ -235,7 +244,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                 </span>
                 <span className="text-xs" style={{ color: theme.hint_color }}>
                   {data.today_progress.calories} {t('out_of')}{' '}
-                  {data.today_progress.calories_max} {tc('units.kcal')}
+                  {data.today_progress.calories_min} {tc('units.kcal')}
                 </span>
               </div>
             </div>
@@ -246,7 +255,11 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
 
         <Section>
           <div className="flex items-center gap-3">
-            <Target size={48} style={{ color: theme.hint_color }} />
+            <Target
+              size={36}
+              className="shrink-0"
+              style={{ color: theme.hint_color }}
+            />
 
             <div className="flex flex-col gap-px">
               <span

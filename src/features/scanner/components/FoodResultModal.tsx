@@ -1,12 +1,13 @@
 import { useMemo, useState, useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, X, ImageOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import {
   NutritionEditGrid,
   type NutritionValues,
 } from '@/shared/ui/NutritionEditGrid';
 import { NutritionGrid } from '@/features/home/components/NutritionStats/NutritionGrid';
-import { round1 } from '@/features/home/lib/nutrition';
+import { sumNutrition } from '@/features/home/lib/nutrition';
 import type {
   AnalyzedDish,
   FoodAnalyzeResponse,
@@ -15,7 +16,13 @@ import { useTheme } from '@/shared/context/ThemeContext';
 
 interface FoodResultModalProps {
   result: FoodAnalyzeResponse;
-  onConfirm: (dishes: AnalyzedDish[], mealName: string) => Promise<void>;
+  /** Превью снятого фото (data URL) — для показа и возможности открепить */
+  photo: string | null;
+  onConfirm: (
+    dishes: AnalyzedDish[],
+    mealName: string,
+    includePhoto: boolean,
+  ) => Promise<void>;
   onClose: () => void;
 }
 
@@ -53,13 +60,16 @@ function nutritionToDish(
 
 export const FoodResultModal = ({
   result,
+  photo,
   onConfirm,
   onClose,
 }: FoodResultModalProps) => {
   const theme = useTheme();
+  const { t } = useTranslation('home_page');
   const [dishes, setDishes] = useState<AnalyzedDish[]>(result.dishes);
   const [mealName, setMealName] = useState(result.meal_name ?? '');
   const [isConfirming, setIsConfirming] = useState(false);
+  const [includePhoto, setIncludePhoto] = useState(!!photo);
   const isMultiDish = dishes.length > 1;
 
   // Snapshot of original values per dish for proportional sync
@@ -67,30 +77,7 @@ export const FoodResultModal = ({
     result.dishes.map(dishToNutrition),
   );
 
-  const totals = useMemo(
-    () =>
-      dishes.reduce(
-        (acc, d) => ({
-          total_calories: acc.total_calories + d.calories,
-          total_protein_g: round1(acc.total_protein_g + d.protein_g),
-          total_fat_g: round1(acc.total_fat_g + d.fat_g),
-          total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
-          total_fiber_g: round1(acc.total_fiber_g + d.fiber_g),
-          total_sugar_g: round1(acc.total_sugar_g + d.sugar_g),
-          total_water_ml: acc.total_water_ml + d.water_ml,
-        }),
-        {
-          total_calories: 0,
-          total_protein_g: 0,
-          total_fat_g: 0,
-          total_carbs_g: 0,
-          total_fiber_g: 0,
-          total_sugar_g: 0,
-          total_water_ml: 0,
-        },
-      ),
-    [dishes],
-  );
+  const totals = useMemo(() => sumNutrition(dishes), [dishes]);
 
   const updateDishName = (index: number, name: string) =>
     setDishes((prev) => prev.map((d, i) => (i === index ? { ...d, name } : d)));
@@ -105,14 +92,31 @@ export const FoodResultModal = ({
     [],
   );
 
+  // Когда после удаления остаётся ровно одно блюдо — meal_name должен стать
+  // названием этого блюда, а не оставаться тем, что придумал ИИ для целого
+  // (изначально многосоставного) приёма пищи. Именно эту рассинхронизацию
+  // ловил handleConfirm раньше: поле ввода названия скрывалось
+  // (isMultiDish === false), но старое значение mealName оставалось в state
+  // и уходило на сервер.
   const removeDish = (index: number) =>
-    setDishes((prev) => prev.filter((_, i) => i !== index));
+    setDishes((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      if (next.length === 1) {
+        setMealName(next[0].name);
+      }
+      return next;
+    });
 
   const handleConfirm = async () => {
     setIsConfirming(true);
     try {
-      const finalName = mealName.trim() || dishes[0]?.name || '';
-      await onConfirm(dishes, finalName);
+      // Для одного блюда название всегда берём из самого блюда — игнорируя
+      // возможный устаревший mealName. Это подстраховка на случай, если
+      // state разошёлся ещё каким-то путём.
+      const finalName = isMultiDish
+        ? mealName.trim() || dishes[0]?.name || ''
+        : dishes[0]?.name || '';
+      await onConfirm(dishes, finalName, includePhoto);
     } finally {
       setIsConfirming(false);
     }
@@ -134,6 +138,46 @@ export const FoodResultModal = ({
       }}
     >
       <div className="flex flex-col gap-3">
+        {/* Фото — можно открепить перед сохранением */}
+        {photo && (
+          <div className="relative">
+            {includePhoto ? (
+              <>
+                <img
+                  src={photo}
+                  alt={mealName || 'food'}
+                  className="aspect-square w-full rounded-2xl object-cover"
+                />
+                <button
+                  onClick={() => setIncludePhoto(false)}
+                  className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full backdrop-blur-sm transition-opacity active:opacity-60"
+                  style={{
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    color: '#fff',
+                  }}
+                  aria-label={t('remove_photo')}
+                >
+                  <X size={14} />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setIncludePhoto(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 transition-opacity active:opacity-60"
+                style={{ backgroundColor: theme.secondary_bg_color }}
+              >
+                <ImageOff size={18} style={{ color: theme.hint_color }} />
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: theme.hint_color }}
+                >
+                  {t('photo_removed')}
+                </span>
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Editable meal name — shown only for multi-dish */}
         {isMultiDish && (
           <input
@@ -153,7 +197,7 @@ export const FoodResultModal = ({
           <div
             key={i}
             className="flex flex-col gap-2 rounded-2xl p-3"
-            style={{ backgroundColor: theme.section_bg_color }}
+            style={{ backgroundColor: theme.bg_color }}
           >
             {/* Name row */}
             <div className="flex items-center gap-2">

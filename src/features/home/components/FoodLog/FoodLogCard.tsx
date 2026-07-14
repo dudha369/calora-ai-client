@@ -32,7 +32,8 @@ export const FoodLogCard = ({
   };
 
   const defaultFoodName = t('food');
-  const displayName = log.meal_name ?? log.items[0]?.food_name ?? defaultFoodName;
+  const displayName =
+    log.meal_name ?? log.items[0]?.food_name ?? defaultFoodName;
 
   return (
     <div
@@ -68,7 +69,7 @@ export const FoodLogCard = ({
 
         <div className="text-xs">
           {log.items.length > 1 ? (
-            <span style={{ color: theme.button_color }}>
+            <span style={{ color: theme.accent_text_color }}>
               {t('more_dishes', { count: log.items.length - 1 })}
             </span>
           ) : (

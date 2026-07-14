@@ -94,6 +94,7 @@ export const food = {
       sugar_g?: number;
       water_ml?: number;
     }>,
+    removePhoto = false,
   ) =>
     request<CreateFoodLogResponse>(`food/${logId}`, 'PUT', {
       items: items.map((i) => ({
@@ -107,5 +108,6 @@ export const food = {
         sugar_g: i.sugar_g ?? 0,
         water_ml: i.water_ml ?? 0,
       })),
+      remove_photo: removePhoto,
     }),
 };

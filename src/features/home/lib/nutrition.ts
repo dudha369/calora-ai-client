@@ -1,14 +1,22 @@
-import type { NutritionPer, NutritionForAmount } from '@/features/scanner/types/productData';
+import type {
+  NutritionPer,
+  NutritionForAmount,
+  AllergenInfo,
+} from '@/features/scanner/types/productData';
+import type { NutritionGridStats } from '@/features/home/components/NutritionStats/NutritionGrid';
 
-// ─── Nutrition calculations ───────────────────────────────────────────────────
+// ─── Rounding ────────────────────────────────────────────────────────────────
 
 export function round1(value: number): number {
   return Math.round(value * 10) / 10;
 }
 
+// ─── Nutrition calculations ───────────────────────────────────────────────────
+
 /**
  * Вычисляет КБЖУ для произвольного кол-ва граммов продукта.
- * Основная функция для логирования приёма пищи:
+ * Используется и при логировании приёма пищи, и при пересчёте порции
+ * товара по штрихкоду (см. BarcodeResultModal).
  *
  * @example
  * const nutrition = calcNutritionForAmount(product.per100g, 150)
@@ -32,7 +40,58 @@ export function calcNutritionForAmount(
 }
 
 /**
- * Проверяет содержатся ли в продукте аллергены из списка пользователя.
+ * Минимальный набор полей, из которого можно посчитать суммарные totals
+ * (КБЖУ + клетчатка/сахар/вода) по списку блюд/items.
+ */
+interface NutritionSource {
+  calories: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  fiber_g?: number;
+  sugar_g?: number;
+  water_ml?: number;
+}
+
+const EMPTY_TOTALS: NutritionGridStats = {
+  total_calories: 0,
+  total_protein_g: 0,
+  total_fat_g: 0,
+  total_carbs_g: 0,
+  total_fiber_g: 0,
+  total_sugar_g: 0,
+  total_water_ml: 0,
+};
+
+/**
+ * Суммирует КБЖУ+клетчатка/сахар/вода по списку блюд/items.
+ * Общая логика для FoodResultModal, EditMealSheet и CopyMealSheet —
+ * раньше один и тот же .reduce() был скопирован в трёх местах.
+ */
+export function sumNutrition<T extends NutritionSource>(
+  items: T[],
+): NutritionGridStats {
+  return items.reduce(
+    (acc, d) => ({
+      total_calories: acc.total_calories + d.calories,
+      total_protein_g: round1(acc.total_protein_g + d.protein_g),
+      total_fat_g: round1(acc.total_fat_g + d.fat_g),
+      total_carbs_g: round1(acc.total_carbs_g + d.carbs_g),
+      total_fiber_g: round1(acc.total_fiber_g + (d.fiber_g ?? 0)),
+      total_sugar_g: round1(acc.total_sugar_g + (d.sugar_g ?? 0)),
+      total_water_ml: acc.total_water_ml + (d.water_ml ?? 0),
+    }),
+    EMPTY_TOTALS,
+  );
+}
+
+// ─── Allergens ────────────────────────────────────────────────────────────────
+
+/**
+ * Проверяет пересечение аллергенов продукта со списком аллергенов
+ * пользователя. Названия для отображения теперь берутся через i18n
+ * (namespace `scanner_page`, ключи `allergens.<key>`) — раньше здесь лежали
+ * захардкоженные RU/EN словари без UA и в обход общей системы локализации.
  *
  * @example
  * const userAllergens = ['gluten', 'milk']
@@ -40,7 +99,7 @@ export function calcNutritionForAmount(
  * if (result.confirmed.length > 0) showAllergenWarning(result.confirmed)
  */
 export function checkProductAllergens(
-  productAllergens: { confirmed: string[]; traces: string[] },
+  productAllergens: AllergenInfo,
   userAllergens: string[],
 ): { confirmed: string[]; possible: string[] } {
   return {
@@ -51,72 +110,26 @@ export function checkProductAllergens(
   };
 }
 
-// ─── Allergen names ───────────────────────────────────────────────────────────
-// Все 14 основных аллергенов по стандарту EU + расширенные.
-// Ключи соответствуют значениям из OFF API после удаления языкового префикса.
-
-/** Русские названия аллергенов */
-export const ALLERGEN_NAMES_RU: Record<string, string> = {
-  gluten: 'Глютен',
-  milk: 'Молоко',
-  dairy: 'Молочные продукты',
-  eggs: 'Яйца',
-  fish: 'Рыба',
-  peanuts: 'Арахис',
-  nuts: 'Орехи',
-  'tree-nuts': 'Орехи',
-  soybeans: 'Соя',
-  celery: 'Сельдерей',
-  mustard: 'Горчица',
-  'sesame-seeds': 'Кунжут',
-  sesame: 'Кунжут',
-  lupin: 'Люпин',
-  molluscs: 'Моллюски',
-  crustaceans: 'Ракообразные',
-  'sulphur-dioxide': 'Диоксид серы / Сульфиты',
-  sulphites: 'Сульфиты',
-  'sulfur-dioxide': 'Диоксид серы',
-  sulfites: 'Сульфиты',
+/**
+ * Онбординг хранит пищевые ограничения как список ключей
+ * (см. Step8Restrictions), а не как структурированный список аллергенов
+ * OpenFoodFacts. Сопоставляем то, что сопоставляется однозначно —
+ * вегетарианство/веганство/халяль/кошер это не аллергия и намеренно
+ * сюда не мэппятся.
+ */
+const RESTRICTION_ALLERGEN_MAP: Partial<Record<string, string[]>> = {
+  gluten_free: ['gluten'],
+  lactose_free: ['milk', 'dairy'],
 };
 
-/** Английские названия аллергенов */
-export const ALLERGEN_NAMES_EN: Record<string, string> = {
-  gluten: 'Gluten',
-  milk: 'Milk',
-  dairy: 'Dairy',
-  eggs: 'Eggs',
-  fish: 'Fish',
-  peanuts: 'Peanuts',
-  nuts: 'Nuts',
-  'tree-nuts': 'Tree Nuts',
-  soybeans: 'Soybeans',
-  celery: 'Celery',
-  mustard: 'Mustard',
-  'sesame-seeds': 'Sesame Seeds',
-  sesame: 'Sesame',
-  lupin: 'Lupin',
-  molluscs: 'Molluscs',
-  crustaceans: 'Crustaceans',
-  'sulphur-dioxide': 'Sulphur Dioxide / Sulphites',
-  sulphites: 'Sulphites',
-  'sulfur-dioxide': 'Sulfur Dioxide',
-  sulfites: 'Sulfites',
-};
-
-/** Возвращает локализованное название аллергена (RU/EN fallback) */
-export function getAllergenName(
-  key: string,
-  locale: 'ru' | 'en' = 'ru',
-): string {
-  const map = locale === 'ru' ? ALLERGEN_NAMES_RU : ALLERGEN_NAMES_EN;
-  return map[key] ?? key;
+export function getUserAllergenKeys(
+  dietaryRestrictions: string[] = [],
+): string[] {
+  const keys = new Set<string>();
+  for (const restriction of dietaryRestrictions) {
+    for (const allergen of RESTRICTION_ALLERGEN_MAP[restriction] ?? []) {
+      keys.add(allergen);
+    }
+  }
+  return [...keys];
 }
-
-// ─── NOVA group descriptions ──────────────────────────────────────────────────
-
-export const NOVA_DESCRIPTIONS_RU: Record<number, string> = {
-  1: 'Необработанный продукт',
-  2: 'Кулинарный ингредиент',
-  3: 'Обработанный продукт',
-  4: 'Ультраобработанный продукт',
-};

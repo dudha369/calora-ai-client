@@ -31,6 +31,7 @@ interface BottomSheetProps {
   dismissOnBackdrop?: boolean;
   dragToClose?: boolean;
   dragDismissThreshold?: number;
+  onDismissRequest?: () => boolean;
 
   secondaryAction?: {
     text?: string;
@@ -64,6 +65,7 @@ export const BottomSheet = ({
   dismissOnBackdrop = true,
   dragToClose = true,
   dragDismissThreshold,
+  onDismissRequest,
   secondaryAction,
   actionLabel = '',
   iconCustomEmojiId,
@@ -114,6 +116,13 @@ export const BottomSheet = ({
   };
 
   const closeSheet = () => {
+    // Родитель сам решил, что делать (например переключил режим) —
+    // не запускаем анимацию скрытия и не зовём onClose.
+    if (onDismissRequest?.()) {
+      resetDrag();
+      return;
+    }
+
     resetDrag();
     suppressBackdropClickRef.current = false;
     handleClose();
