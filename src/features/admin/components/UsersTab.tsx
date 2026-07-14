@@ -261,14 +261,14 @@ function PhotoLightbox({ src, onClose }: { src: string; onClose: () => void }) {
     >
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 flex size-10 items-center justify-center rounded-full bg-white/20"
+        className="absolute top-6 right-[5vw] flex rounded-full"
       >
-        <X size={20} className="text-white" />
+        <X size={24} strokeWidth={2} className="text-white" />
       </button>
       <img
         src={src}
         alt="Food photo"
-        className="max-h-[80vh] max-w-[90vw] rounded-2xl object-contain"
+        className="max-h-[80vh] w-full max-w-[90vw] rounded-xl object-contain"
         onClick={(e) => e.stopPropagation()}
       />
     </div>,

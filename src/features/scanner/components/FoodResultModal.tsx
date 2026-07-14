@@ -1,5 +1,5 @@
 import { useMemo, useState, useCallback } from 'react';
-import { Trash2, X, ImageOff } from 'lucide-react';
+import { Trash2, ImageOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import {
@@ -148,16 +148,17 @@ export const FoodResultModal = ({
                   alt={mealName || 'food'}
                   className="aspect-square w-full rounded-2xl object-cover"
                 />
+
                 <button
                   onClick={() => setIncludePhoto(false)}
-                  className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full backdrop-blur-sm transition-opacity active:opacity-60"
+                  className="absolute right-2 bottom-2 flex items-center justify-center rounded-xl p-2 backdrop-blur-md transition-opacity active:opacity-60"
                   style={{
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    color: '#fff',
+                    backgroundColor: `${theme.bg_color}99`,
+                    color: theme.destructive_text_color,
                   }}
                   aria-label={t('remove_photo')}
                 >
-                  <X size={14} />
+                  <Trash2 size={18} />
                 </button>
               </>
             ) : (

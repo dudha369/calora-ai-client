@@ -23,11 +23,11 @@ export const ProgressBar = ({ p, goalType }: ProgressBarProps) => {
 
   return (
     <div
-      className="relative h-2.5 w-full overflow-hidden rounded-full"
+      className="relative flex h-4.5 w-full items-center overflow-hidden rounded-full"
       style={{ backgroundColor: theme.section_separator_color }}
     >
       <div
-        className="absolute top-0 left-0 h-full rounded-full transition-[width,background-color] duration-300"
+        className="h-2.5 w-full rounded-full transition-[width,background-color] duration-300"
         style={{
           width: `${barWidth}%`,
           backgroundColor: barColor,
@@ -36,7 +36,7 @@ export const ProgressBar = ({ p, goalType }: ProgressBarProps) => {
 
       {(isMet || isOverPenalized) && (
         <div
-          className="absolute right-0 flex aspect-square items-center justify-center rounded-full p-px"
+          className="absolute top-1/2 right-0 flex size-3.5 -translate-y-1/2 items-center justify-center rounded-full p-px"
           style={{
             backgroundColor: barColor,
             color: theme.secondary_bg_color,

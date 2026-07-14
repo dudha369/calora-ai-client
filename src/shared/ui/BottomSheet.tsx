@@ -2,6 +2,7 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
+  type MouseEvent,
   useEffect,
   useMemo,
   useRef,
@@ -280,7 +281,7 @@ export const BottomSheet = ({
     }, 0);
   };
 
-  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleBackdropClick = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (!dismissOnBackdrop) return;
     if (suppressBackdropClickRef.current) return;

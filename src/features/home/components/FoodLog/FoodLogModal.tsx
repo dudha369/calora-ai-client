@@ -167,25 +167,40 @@ export const FoodLogModal = ({
                 isSingleIngredient ? 'gap-1' : 'gap-2',
               )}
             >
-              {log.photo_url ? (
-                <div className="@container w-full">
-                  <img
-                    src={log.photo_url}
-                    alt={displayName}
-                    className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
-                  />
-                </div>
-              ) : (
-                <div
-                  className="flex aspect-2/1 w-full items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: theme.section_bg_color }}
+              <div className="relative">
+                {log.photo_url ? (
+                  <div className="@container w-full">
+                    <img
+                      src={log.photo_url}
+                      alt={displayName}
+                      className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className="flex aspect-2/1 w-full items-center justify-center rounded-2xl"
+                    style={{ backgroundColor: theme.section_bg_color }}
+                  >
+                    <UtensilsCrossed
+                      size={36}
+                      style={{ color: theme.hint_color }}
+                    />
+                  </div>
+                )}
+
+                <button
+                  onClick={() => setMode('edit')}
+                  disabled={isProcessing}
+                  aria-label={t('edit_meal')}
+                  className="absolute right-2 bottom-2 rounded-xl p-2 backdrop-blur-md transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-70"
+                  style={{
+                    color: theme.text_color,
+                    backgroundColor: `${theme.bg_color}99`,
+                  }}
                 >
-                  <UtensilsCrossed
-                    size={36}
-                    style={{ color: theme.hint_color }}
-                  />
-                </div>
-              )}
+                  <Pencil size={18} />
+                </button>
+              </div>
 
               <div className="flex flex-col gap-0.5 px-1">
                 <p
@@ -205,26 +220,12 @@ export const FoodLogModal = ({
                   </span>
                 </p>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex gap-1.5">
-                    <Label
-                      icon={<Scale size={12} />}
-                      text={`${portion_g} ${tc('units.g')}`}
-                    />
-                    <Label icon={<Clock size={12} />} text={formattedTime} />
-                  </div>
-
-                  <button
-                    onClick={() => setMode('edit')}
-                    disabled={isProcessing}
-                    aria-label={t('edit_meal')}
-                    className="rounded-full p-1 transition-opacity hover:opacity-80 active:opacity-60 disabled:opacity-40"
-                    style={{
-                      color: theme.hint_color,
-                    }}
-                  >
-                    <Pencil size={16} />
-                  </button>
+                <div className="flex gap-1.5">
+                  <Label
+                    icon={<Scale size={12} />}
+                    text={`${portion_g} ${tc('units.g')}`}
+                  />
+                  <Label icon={<Clock size={12} />} text={formattedTime} />
                 </div>
               </div>
             </div>

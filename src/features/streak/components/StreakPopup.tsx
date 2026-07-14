@@ -167,10 +167,10 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
 
                     <div
                       title={tooltip}
-                      className="flex size-8 shrink-0 items-center justify-center rounded-full"
+                      className="flex size-7.5 shrink-0 items-center justify-center rounded-full"
                       style={{
                         backgroundColor,
-                        border: isToday
+                        outline: isToday
                           ? `2px dashed ${theme.text_color}`
                           : `2px solid ${isEffectiveStatus ? theme.text_color : theme.hint_color}`,
                       }}

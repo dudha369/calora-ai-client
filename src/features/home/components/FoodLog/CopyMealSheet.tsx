@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { X, ImageOff } from 'lucide-react';
+import { ImageOff, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { round1 } from '@/features/home/lib/nutrition';
@@ -96,16 +96,17 @@ export const CopyMealSheetContent = ({
                 alt={name}
                 className="aspect-square w-full rounded-2xl object-cover"
               />
+
               <button
                 onClick={() => setIncludePhoto(false)}
-                className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full backdrop-blur-sm transition-opacity active:opacity-60"
+                className="absolute right-2 bottom-2 rounded-xl p-2 backdrop-blur-md transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-70"
                 style={{
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  color: '#fff',
+                  backgroundColor: `${theme.bg_color}99`,
+                  color: theme.destructive_text_color,
                 }}
                 aria-label={t('remove_photo')}
               >
-                <X size={14} />
+                <Trash2 size={18} />
               </button>
             </>
           ) : (

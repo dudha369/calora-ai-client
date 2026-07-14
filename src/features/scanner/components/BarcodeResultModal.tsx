@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, X, ImageOff } from 'lucide-react';
+import { AlertTriangle, ImageOff, Trash2 } from 'lucide-react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import {
   NutritionEditGrid,
@@ -130,16 +130,17 @@ export const BarcodeResultModal = ({
                   alt={product.name}
                   className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
                 />
+
                 <button
                   onClick={() => setIncludePhoto(false)}
-                  className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full backdrop-blur-sm transition-opacity active:opacity-60"
+                  className="absolute right-2 bottom-2 flex items-center justify-center rounded-xl p-2 backdrop-blur-sm transition-opacity active:opacity-60"
                   style={{
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    color: '#fff',
+                    backgroundColor: `${theme.bg_color}99`,
+                    color: theme.destructive_text_color,
                   }}
                   aria-label={th('remove_photo')}
                 >
-                  <X size={14} />
+                  <Trash2 size={18} />
                 </button>
               </>
             ) : (

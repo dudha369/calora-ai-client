@@ -92,7 +92,7 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
             </span>
           </div>
 
-          <Section className="items-center gap-2 py-4">
+          <Section className="items-center gap-2 py-3.5">
             <div className="flex items-center gap-1.5">
               {Array.from({ length: shieldsMax }).map((_, i) => {
                 const filled = i < shieldsLeft;
