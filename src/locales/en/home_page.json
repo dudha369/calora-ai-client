@@ -37,6 +37,17 @@
       "restored": "Restored with a shield"
     }
   },
+  "lost_streak_message_one": "You lost your {{count}}-day streak",
+  "lost_streak_message_other": "You lost your {{count}}-day streak",
+  "restore_window_hint": "Time left to restore",
+  "countdown_format": "{{hours}}h {{minutes}}m",
+  "restore_window_expired": "The 48-hour restore window is over — this streak can't be recovered",
+  "no_restores_available": "No restore shields left this month",
+  "start_new_streak": "Start new streak",
+  "start_new_streak_title": "Start a new streak?",
+  "start_new_streak_description_one": "Your {{count}}-day streak can no longer be restored. Start from zero?",
+  "start_new_streak_description_other": "Your {{count}}-day streak can no longer be restored. Start from zero?",
+  "confirm": "Confirm",
   "keep_it_up": "Keep it up!",
   "understood": "Understood",
   "current_streak": "Current streak",

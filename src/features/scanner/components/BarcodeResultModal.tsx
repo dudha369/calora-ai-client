@@ -14,6 +14,7 @@ import {
   checkProductAllergens,
   getUserAllergenKeys,
 } from '@/features/home/lib/nutrition';
+import { asStringDict } from '@/shared/lib/i18nDict';
 
 interface BarcodeResultModalProps {
   product: ProductData;
@@ -26,9 +27,6 @@ interface BarcodeResultModalProps {
 }
 
 const DEFAULT_PORTION_G = 100;
-
-/** Форма словарей allergens/nova_groups в локалях — везде строка → строка. */
-type StringDict = Record<string, string>;
 
 function buildNutritionValues(
   product: ProductData,
@@ -75,12 +73,12 @@ export const BarcodeResultModal = ({
   // ── Словари переводов для динамических ключей (аллергены, NOVA-группы) ───
   // Ключ здесь статический ('allergens' / 'nova_groups'), поэтому сам вызов
   // t() типобезопасен. returnObjects: true отдаёт вложенный объект целиком,
-  // а не строку — форму этого объекта TS не выводит сам, поэтому уточняем
-  // её вручную через StringDict (обычный { [ключ]: строка }, без any).
-  const allergenNames = t('allergens', { returnObjects: true }) as StringDict;
-  const novaGroupNames = t('nova_groups', {
-    returnObjects: true,
-  }) as StringDict;
+  // а не строку — форму этого объекта уточняем через asStringDict (см.
+  // src/shared/lib/i18nDict.ts), общий для всех мест, где нужен такой словарь.
+  const allergenNames = asStringDict(t('allergens', { returnObjects: true }));
+  const novaGroupNames = asStringDict(
+    t('nova_groups', { returnObjects: true }),
+  );
 
   // ── Аллергены: сверяем ограничения из профиля с составом товара ──────────
   const userAllergenKeys = useMemo(

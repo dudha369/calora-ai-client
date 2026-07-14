@@ -2,6 +2,7 @@ import { request } from './request';
 import type { UserData } from '../types/UserData';
 import type {
   RestoreStreakResponse,
+  DeclineStreakRestoreResponse,
   StreakInfo,
 } from '../types/api/streak';
 
@@ -18,6 +19,9 @@ export const users = {
   getStreak: () => request<StreakInfo>('users/streak'),
   restoreStreak: () =>
     request<RestoreStreakResponse>('users/streak/restore', 'POST'),
+  /** Отказ от восстановления сгоревшей серии — без траты щита восстановления */
+  declineStreakRestore: () =>
+    request<DeclineStreakRestoreResponse>('users/streak/decline', 'POST'),
 
   /** DELETE /api/users/me — полное и безвозвратное удаление аккаунта */
   deleteAccount: () => request('users/me', 'DELETE'),

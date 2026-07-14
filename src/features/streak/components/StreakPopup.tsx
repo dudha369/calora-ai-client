@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Flame, Check, Shield, X, Target } from 'lucide-react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
@@ -29,9 +29,6 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
   const { t } = useTranslation('home_page');
   const { t: tc, i18n } = useTranslation('common');
   const locale = getIntlLocale(i18n.language);
-  const queryClient = useQueryClient();
-  const [restoreError, setRestoreError] = useState<string | null>(null);
-  if (restoreError) console.log(restoreError);
 
   const { data, isLoading } = useQuery<StreakInfo>({
     queryKey: ['streak'],
@@ -59,45 +56,12 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
   const todayStr = useMemo(() => toApiDate(new Date()), []);
   const weekHistory = data?.week_history ?? [];
 
-  const { mutate: doRestore, isPending: isRestoring } = useMutation({
-    mutationFn: () => users.restoreStreak(),
-    onSuccess: ({ data: res }) => {
-      queryClient.setQueryData<StreakInfo>(['streak'], (old) =>
-        old
-          ? {
-              ...old,
-              current_streak: res.restored_to,
-              can_restore: false,
-              streak_restores_available: res.restores_remaining,
-            }
-          : old,
-      );
-      queryClient.invalidateQueries({ queryKey: ['user'] });
-      // Обновляем недельную историю — restore задним числом помечает часть дней 'restored'
-      queryClient.invalidateQueries({ queryKey: ['streak'] });
-      setRestoreError(null);
-    },
-    onError: () => {
-      setRestoreError('Не удалось восстановить. Попробуй ещё раз.');
-    },
-  });
-
   return (
     <BottomSheet
       title={t(streakExtended ? 'streak_extended' : 'streak_pending')}
       onClose={onClose}
-      secondaryAction={{
-        text: data?.can_restore ? t('cancel') : undefined,
-      }}
-      actionLabel={
-        data?.can_restore
-          ? t('restore_streak')
-          : streakExtended
-            ? t('keep_it_up')
-            : t('understood')
-      }
-      onAction={data?.can_restore ? () => doRestore() : () => onClose()}
-      isProcessing={isRestoring}
+      actionLabel={streakExtended ? t('keep_it_up') : t('understood')}
+      onAction={onClose}
     >
       <div className="flex flex-col gap-2.5">
         <Section>
@@ -141,8 +105,6 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                 const isToday = day.date === todayStr;
                 const isEffectiveStatus = day.status !== 'none';
                 const isRestored = day.status === 'restored';
-
-                console.log(day.date, day.status, isEffectiveStatus);
 
                 let backgroundColor;
                 let icon;
@@ -208,11 +170,9 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                       className="flex size-8 shrink-0 items-center justify-center rounded-full"
                       style={{
                         backgroundColor,
-                        border: `2px ${isToday ? 'dashed' : 'solid'} ${
-                          isEffectiveStatus
-                            ? theme.text_color
-                            : theme.hint_color
-                        }`,
+                        border: isToday
+                          ? `2px dashed ${theme.text_color}`
+                          : `2px solid ${isEffectiveStatus ? theme.text_color : theme.hint_color}`,
                       }}
                     >
                       {isEffectiveStatus && icon}
@@ -225,7 +185,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
         </Section>
 
         {isLoading ? (
-          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-19.25 w-full" />
         ) : data?.today_progress ? (
           <Section className="gap-1.5">
             <div className="flex">
@@ -254,9 +214,9 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
         ) : null}
 
         <Section>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <Target
-              size={36}
+              size={40}
               className="shrink-0"
               style={{ color: theme.hint_color }}
             />

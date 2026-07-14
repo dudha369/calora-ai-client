@@ -15,7 +15,7 @@ import { useActiveDates } from '../hooks/useActiveDates';
 import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
 import type { CopyMealResult } from '../components/FoodLog/CopyMealSheet';
 import type { FoodLog } from '@/shared/types/api/food';
-import { StreakPopup } from '../../streak/components/StreakPopup';
+import { StreakDialog } from '../../streak/components/StreakDialog';
 
 export const HomePage = () => {
   const theme = useTheme();
@@ -201,7 +201,7 @@ export const HomePage = () => {
       </div>
 
       {streakPopupOpen && (
-        <StreakPopup
+        <StreakDialog
           currentStreak={currentStreak}
           onClose={() => setStreakPopupOpen(false)}
         />
