@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Flame, Clock } from 'lucide-react';
+import { Flame, Clock, Shield } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
@@ -51,6 +51,9 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
   const lostDays = data.lost_streak_value ?? 0;
   const flameColor = getFlameColor(lostDays, true, '');
 
+  const shieldsLeft = data.streak_restores_available;
+  const shieldsMax = data.max_restores_per_month;
+
   return (
     <>
       <BottomSheet
@@ -81,22 +84,56 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
               </span>
             </div>
 
-            <p
-              className="text-center text-lg font-semibold"
-              style={{ color: theme.text_color }}
+            <span
+              className="text-sm font-medium"
+              style={{ color: theme.hint_color }}
             >
-              {t('lost_streak_message', { count: lostDays })}
-            </p>
+              {t('days_lost_label')}
+            </span>
           </div>
 
+          <Section className="items-center gap-2 py-4">
+            <div className="flex items-center gap-1.5">
+              {Array.from({ length: shieldsMax }).map((_, i) => {
+                const filled = i < shieldsLeft;
+                return (
+                  <Shield
+                    key={i}
+                    size={22}
+                    strokeWidth={filled ? 2.5 : 2}
+                    style={{
+                      color: filled ? theme.button_color : theme.hint_color,
+                      opacity: filled ? 1 : 0.35,
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <span
+              className="text-sm font-semibold"
+              style={{ color: theme.text_color }}
+            >
+              {t('restore_shields_left', {
+                count: shieldsLeft,
+                max: shieldsMax,
+              })}
+            </span>
+            <span
+              className="text-center text-xs leading-relaxed"
+              style={{ color: theme.hint_color }}
+            >
+              {t('restore_shields_hint')}
+            </span>
+          </Section>
+
           {data.can_restore && data.restore_deadline && (
-            <Section className="items-center gap-1.5 py-4">
+            <Section className="items-center gap-1.5 py-3.5">
               <div
-                className="flex items-center gap-1.5"
+                className="flex items-center gap-1"
                 style={{ color: theme.hint_color }}
               >
                 <Clock size={14} />
-                <span className="text-sm font-medium">
+                <span className="text-sm leading-none font-medium">
                   {t('restore_window_hint')}
                 </span>
               </div>

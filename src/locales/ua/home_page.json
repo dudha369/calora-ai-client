@@ -41,10 +41,9 @@
       "restored": "Відновлено щитом"
     }
   },
-  "lost_streak_message_one": "Ти втратив серію з {{count}} дня",
-  "lost_streak_message_few": "Ти втратив серію з {{count}} днів",
-  "lost_streak_message_many": "Ти втратив серію з {{count}} днів",
-  "lost_streak_message_other": "Ти втратив серію з {{count}} днів",
+  "days_lost_label": "днів втрачено",
+  "restore_shields_left": "{{count}} з {{max}} щитів залишилось",
+  "restore_shields_hint": "Щити оновлюються щомісяця, а не з кожною новою серією",
   "restore_window_hint": "Залишилось на відновлення",
   "countdown_format": "{{hours}}год {{minutes}}хв",
   "restore_window_expired": "48 годин на відновлення сплинули — серію вже не повернути",

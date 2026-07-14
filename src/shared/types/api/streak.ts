@@ -23,13 +23,10 @@ export interface StreakInfo {
   max_streak: number;
   streak_active_today: boolean;
   streak_restores_available: number;
-  /** true только если серия реально потеряна, есть щиты и 48ч-окно ещё открыто */
+  max_restores_per_month: number;
   can_restore: boolean;
-  /** Значение серии на момент обрыва. null, если обрыва нет ИЛИ он уже закрыт (restore/decline/новая серия) */
   lost_streak_value: number | null;
-  /** ISO-дата дедлайна восстановления (обрыв + 48ч). null, если восстанавливать нечего */
   restore_deadline: string | null;
-  /** true, если серия была потеряна и 48-часовое окно восстановления уже прошло */
   restore_expired: boolean;
   today_progress: TodayProgress | null;
   goal_type: GoalType | null;

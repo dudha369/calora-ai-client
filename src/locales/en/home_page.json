@@ -37,8 +37,9 @@
       "restored": "Restored with a shield"
     }
   },
-  "lost_streak_message_one": "You lost your {{count}}-day streak",
-  "lost_streak_message_other": "You lost your {{count}}-day streak",
+  "days_lost_label": "days lost",
+  "restore_shields_left": "{{count}} of {{max}} shields left",
+  "restore_shields_hint": "Shields renew every month — not with each new streak",
   "restore_window_hint": "Time left to restore",
   "countdown_format": "{{hours}}h {{minutes}}m",
   "restore_window_expired": "The 48-hour restore window is over — this streak can't be recovered",
