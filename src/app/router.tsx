@@ -22,9 +22,11 @@ export const router = createBrowserRouter([
           {
             path: 'onboarding',
             lazy: () =>
-              import('@/features/onboarding/pages/OnboardingPage').then((m) => ({
-                Component: m.OnboardingPage,
-              })),
+              import('@/features/onboarding/pages/OnboardingPage').then(
+                (m) => ({
+                  Component: m.OnboardingPage,
+                }),
+              ),
           },
           {
             path: 'water',
@@ -74,9 +76,11 @@ export const router = createBrowserRouter([
               {
                 path: 'nutrition',
                 lazy: () =>
-                  import('@/features/profile/pages/NutritionPage').then((m) => ({
-                    Component: m.NutritionPage,
-                  })),
+                  import('@/features/profile/pages/NutritionPage').then(
+                    (m) => ({
+                      Component: m.NutritionPage,
+                    }),
+                  ),
               },
               {
                 path: 'weight',

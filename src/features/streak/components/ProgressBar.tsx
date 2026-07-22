@@ -23,11 +23,11 @@ export const ProgressBar = ({ p, goalType }: ProgressBarProps) => {
 
   return (
     <div
-      className="relative flex h-4.5 w-full items-center overflow-hidden rounded-full"
+      className="relative flex h-2 w-full items-center rounded-full"
       style={{ backgroundColor: theme.section_separator_color }}
     >
       <div
-        className="h-2.5 w-full rounded-full transition-[width,background-color] duration-300"
+        className="h-full rounded-full transition-[width,background-color] duration-300"
         style={{
           width: `${barWidth}%`,
           backgroundColor: barColor,
@@ -36,17 +36,17 @@ export const ProgressBar = ({ p, goalType }: ProgressBarProps) => {
 
       {(isMet || isOverPenalized) && (
         <div
-          className="absolute top-1/2 right-0 flex size-3.5 -translate-y-1/2 items-center justify-center rounded-full p-px"
+          className="absolute top-1/2 right-0 flex size-5 -translate-y-1/2 items-center justify-center rounded-full"
           style={{
             backgroundColor: barColor,
-            color: theme.secondary_bg_color,
+            color: theme.text_color,
             outline: `${theme.secondary_bg_color} solid 4px`,
           }}
         >
           {isOverPenalized ? (
-            <AlertTriangle strokeWidth={2} size={12} />
+            <AlertTriangle strokeWidth={3} size={12} />
           ) : (
-            <Check strokeWidth={2} size={12} />
+            <Check strokeWidth={3} size={12} />
           )}
         </div>
       )}

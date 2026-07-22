@@ -66,7 +66,12 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
       <div className="flex flex-col gap-2.5">
         <Section>
           <div className="flex items-center gap-2">
-            <Flame size={38} {...flameColorProps} />
+            <Flame
+              size={38}
+              strokeWidth={2}
+              color={flameColorProps.color}
+              fill={flameColorProps.fill}
+            />
 
             <div className="flex flex-col gap-1">
               <span
@@ -93,9 +98,9 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
           {isLoading ? (
             <div className="grid grid-cols-7 gap-2">
               {Array.from({ length: 7 }).map((_, i) => (
-                <div key={i} className="flex flex-col items-center gap-1.5">
-                  <Skeleton className="h-3.5 w-6" />
-                  <Skeleton className="size-8 rounded-full" />
+                <div key={i} className="flex flex-col items-center gap-2">
+                  <Skeleton className="h-3 w-6" />
+                  <Skeleton className="size-7.5 rounded-full" />
                 </div>
               ))}
             </div>
@@ -118,7 +123,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                     />
                   );
                 } else if (day.status === 'restored') {
-                  backgroundColor = theme.link_color;
+                  backgroundColor = theme.button_color;
                   icon = (
                     <Shield
                       strokeWidth={2.5}
@@ -154,7 +159,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                 return (
                   <div
                     key={day.date}
-                    className="flex flex-col items-center gap-1.5"
+                    className="flex flex-col items-center gap-2"
                   >
                     <span
                       className="text-xs leading-none font-medium"
@@ -170,9 +175,10 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                       className="flex size-7.5 shrink-0 items-center justify-center rounded-full"
                       style={{
                         backgroundColor,
-                        outline: isToday
-                          ? `2px dashed ${theme.text_color}`
-                          : `2px solid ${isEffectiveStatus ? theme.text_color : theme.hint_color}`,
+                        outline:
+                          isEffectiveStatus && isToday
+                            ? 'none'
+                            : `2px ${isToday ? 'dashed' : 'solid'} ${isEffectiveStatus || isToday ? theme.text_color : theme.hint_color}`,
                       }}
                     >
                       {isEffectiveStatus && icon}

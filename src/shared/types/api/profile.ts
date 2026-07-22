@@ -1,4 +1,11 @@
-import type { Profile, Gender, GoalType, ActivityLevel, WaterTrack, UnitsPreference } from '../Profile';
+import type {
+  Profile,
+  Gender,
+  GoalType,
+  ActivityLevel,
+  WaterTrack,
+  UnitsPreference,
+} from '../Profile';
 import type { Goal } from '../Goal';
 
 /**
@@ -20,6 +27,7 @@ export interface ProfileIn {
   dietary_restrictions?: string[];
   allergy_note?: string | null;
   medical_conditions?: string[];
+  allergens?: string[];
   timezone?: string;
   units_preference?: UnitsPreference;
 }

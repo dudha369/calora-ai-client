@@ -11,7 +11,7 @@ import { Skeleton } from '@/shared/ui/Skeleton';
 import { CaloriesArc } from './CaloriesArc';
 import { NutritionCard } from './NutritionCard';
 import { NoLogsBanner } from './NoLogsBanner';
-import { FoodLogList } from '../FoodLog/FoodLogList';
+import { FoodLogList } from './FoodLog/FoodLogList';
 import { stats } from '@/shared/api/stats';
 import { food } from '@/shared/api/food';
 import { toApiDate, isSameDay } from '@/shared/lib/date';
@@ -186,7 +186,7 @@ export const DayContent = ({
                   logs={foodData.logs}
                   isLoading={foodLoading}
                   deletingId={deletingId}
-                  onFoodLogClick={onFoodLogClick}
+                  onFoodLogCardClick={onFoodLogClick}
                 />
               ) : (
                 <NoLogsBanner isToday={isToday} />

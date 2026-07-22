@@ -6,7 +6,7 @@ import { useUser } from '@/shared/context/UserContext';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { DateStrip } from '../components/DateStrip/DateStrip';
 import { Calendar } from '../components/DateStrip/Calendar';
-import { DayCarousel } from '../components/NutritionStats/DayCarousel';
+import { DayCarousel } from '../components/DayCarousel';
 import { useDateStrip } from '../hooks/useDateStrip';
 import { food } from '@/shared/api/food';
 import { startOfDay, toApiDate } from '@/shared/lib/date';
@@ -159,7 +159,12 @@ export const HomePage = () => {
               }}
               onClick={() => setStreakPopupOpen(true)}
             >
-              <Flame {...flameColorProps} size={18} />
+              <Flame
+                size={18}
+                strokeWidth={2}
+                color={flameColorProps.color}
+                fill={flameColorProps.fill}
+              />
               <span className="text-lg">{currentStreak}</span>
             </div>
 

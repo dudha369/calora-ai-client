@@ -15,6 +15,7 @@ import {
   getUserAllergenKeys,
 } from '@/features/home/lib/nutrition';
 import { asStringDict } from '@/shared/lib/i18nDict';
+import { MealImageOverlay } from '@/shared/ui/MealImageOverlay.tsx';
 
 interface BarcodeResultModalProps {
   product: ProductData;
@@ -74,7 +75,7 @@ export const BarcodeResultModal = ({
   // Ключ здесь статический ('allergens' / 'nova_groups'), поэтому сам вызов
   // t() типобезопасен. returnObjects: true отдаёт вложенный объект целиком,
   // а не строку — форму этого объекта уточняем через asStringDict (см.
-  // src/shared/lib/i18nDict.ts), общий для всех мест, где нужен такой словарь.
+  // @/shared/lib/i18nDict.ts), общий для всех мест, где нужен такой словарь.
   const allergenNames = asStringDict(t('allergens', { returnObjects: true }));
   const novaGroupNames = asStringDict(
     t('nova_groups', { returnObjects: true }),
@@ -82,8 +83,12 @@ export const BarcodeResultModal = ({
 
   // ── Аллергены: сверяем ограничения из профиля с составом товара ──────────
   const userAllergenKeys = useMemo(
-    () => getUserAllergenKeys(user_data?.profile?.dietary_restrictions),
-    [user_data?.profile?.dietary_restrictions],
+    () =>
+      getUserAllergenKeys(
+        user_data?.profile?.dietary_restrictions,
+        user_data?.profile?.allergens,
+      ),
+    [user_data?.profile?.dietary_restrictions, user_data?.profile?.allergens],
   );
 
   const allergenMatch = useMemo(
@@ -122,27 +127,17 @@ export const BarcodeResultModal = ({
     >
       <div className="flex flex-col gap-3">
         {product.imageUrl && (
-          <div className="@container relative w-full">
+          <>
             {includePhoto ? (
-              <>
-                <img
-                  src={product.imageUrl}
-                  alt={product.name}
-                  className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
-                />
-
-                <button
-                  onClick={() => setIncludePhoto(false)}
-                  className="absolute right-2 bottom-2 flex items-center justify-center rounded-xl p-2 backdrop-blur-sm transition-opacity active:opacity-60"
-                  style={{
-                    backgroundColor: `${theme.bg_color}99`,
-                    color: theme.destructive_text_color,
-                  }}
-                  aria-label={th('remove_photo')}
-                >
-                  <Trash2 size={18} />
-                </button>
-              </>
+              <MealImageOverlay
+                photo_url={product.imageUrl}
+                displayName={product.name}
+                button={{
+                  onClick: () => setIncludePhoto(false),
+                  icon: Trash2,
+                  iconColor: theme.destructive_text_color,
+                }}
+              />
             ) : (
               <button
                 onClick={() => setIncludePhoto(true)}
@@ -158,7 +153,7 @@ export const BarcodeResultModal = ({
                 </span>
               </button>
             )}
-          </div>
+          </>
         )}
         {/* Product name / brand */}
         <div className="flex flex-col items-center gap-0.5 px-2 pt-1">

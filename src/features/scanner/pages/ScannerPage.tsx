@@ -43,7 +43,7 @@ export const ScannerPage = () => {
     state?.photo ?? null,
   );
 
-  const { status, runAnalysis } = useFoodAnalysis(photo);
+  const { status, runAnalysis, retry } = useFoodAnalysis(photo);
 
   // ── Ориентация зависит от состояния (сканирование vs результат) ──────────
   //
@@ -200,13 +200,6 @@ export const ScannerPage = () => {
     navigate('/');
   };
 
-  const handleRetry = () => {
-    clearPhoto();
-    if (camera.method === 'input') {
-      camera.openInputCamera();
-    }
-  };
-
   return (
     <>
       <CameraView
@@ -258,7 +251,7 @@ export const ScannerPage = () => {
           onClose={clearPhoto}
           actionLabel={t('try_again')}
           iconCustomEmojiId="5260687119092817530"
-          onAction={handleRetry}
+          onAction={retry}
         >
           <p
             className="py-2 text-center text-sm"

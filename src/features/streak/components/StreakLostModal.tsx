@@ -49,7 +49,7 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
   });
 
   const lostDays = data.lost_streak_value ?? 0;
-  const flameColor = getFlameColor(lostDays, true, '');
+  const flameColorProps = getFlameColor(lostDays, true, theme.hint_color);
 
   const shieldsLeft = data.streak_restores_available;
   const shieldsMax = data.max_restores_per_month;
@@ -73,22 +73,19 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
         }}
       >
         <div className="flex flex-col gap-3 pb-1">
-          <div className="flex flex-col items-center gap-2 py-2">
-            <div className="flex items-center gap-1">
-              <Flame size={44} {...flameColor} className="opacity-80" />
-              <span
-                className="text-4xl font-bold"
-                style={{ color: theme.text_color }}
-              >
-                {lostDays}
-              </span>
-            </div>
-
+          <div className="flex items-center gap-1 py-2">
+            <Flame
+              size={44}
+              strokeWidth={2}
+              color={flameColorProps.color}
+              fill={flameColorProps.fill}
+              className="opacity-80"
+            />
             <span
-              className="text-sm font-medium"
-              style={{ color: theme.hint_color }}
+              className="text-4xl font-bold"
+              style={{ color: theme.text_color }}
             >
-              {t('days_lost_label')}
+              {lostDays}
             </span>
           </div>
 
@@ -110,7 +107,7 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
               })}
             </div>
             <span
-              className="text-sm font-semibold"
+              className="text-base font-semibold"
               style={{ color: theme.text_color }}
             >
               {t('restore_shields_left', {
@@ -119,7 +116,7 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
               })}
             </span>
             <span
-              className="text-center text-xs leading-relaxed"
+              className="text-center text-sm leading-relaxed"
               style={{ color: theme.hint_color }}
             >
               {t('restore_shields_hint')}

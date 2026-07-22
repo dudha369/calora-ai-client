@@ -1,12 +1,12 @@
 import { useTheme } from '@/shared/context/ThemeContext';
-import { FoodLogCard } from './FoodLogCard';
-import type { FoodLog } from '@/shared/types/api/food';
+import { WaterLogCard } from './WaterLogCard';
+import type { WaterLog } from '@/shared/types/api/water';
 
-interface FoodLogListProps {
-  logs: FoodLog[];
+interface WaterLogListProps {
+  logs: WaterLog[];
   isLoading: boolean;
   deletingId: number | null;
-  onFoodLogCardClick: (log: FoodLog) => void;
+  onWaterLogCardClick: (log: WaterLog) => void;
 }
 
 const CardSkeleton = () => {
@@ -14,18 +14,20 @@ const CardSkeleton = () => {
 
   return (
     <div
-      className="h-24 animate-pulse rounded-2xl"
+      className="h-12.5 animate-pulse rounded-2xl"
       style={{ backgroundColor: theme.secondary_bg_color }}
     />
   );
 };
 
-export const FoodLogList = ({
+export const WaterLogList = ({
   logs,
   isLoading,
   deletingId,
-  onFoodLogCardClick,
-}: FoodLogListProps) => {
+  onWaterLogCardClick,
+}: WaterLogListProps) => {
+  const theme = useTheme();
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-2">
@@ -36,13 +38,18 @@ export const FoodLogList = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div
+      className="flex flex-col divide-y divide-(--tg-section-separator-color) rounded-2xl"
+      style={{
+        backgroundColor: theme.section_bg_color,
+      }}
+    >
       {logs.map((log) => (
-        <FoodLogCard
+        <WaterLogCard
           key={log.id}
           log={log}
           isDeleting={deletingId === log.id}
-          onClickRef={onFoodLogCardClick}
+          onClickRef={onWaterLogCardClick}
         />
       ))}
     </div>

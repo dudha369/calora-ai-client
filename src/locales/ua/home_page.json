@@ -41,9 +41,8 @@
       "restored": "Відновлено щитом"
     }
   },
-  "days_lost_label": "днів втрачено",
   "restore_shields_left": "{{count}} з {{max}} щитів залишилось",
-  "restore_shields_hint": "Щити оновлюються щомісяця, а не з кожною новою серією",
+  "restore_shields_hint": "Щити оновлюються щомісяця",
   "restore_window_hint": "Залишилось на відновлення",
   "countdown_format": "{{hours}}год {{minutes}}хв",
   "restore_window_expired": "48 годин на відновлення сплинули — серію вже не повернути",

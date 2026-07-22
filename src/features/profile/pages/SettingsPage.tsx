@@ -2,7 +2,15 @@ import { useNavigate } from 'react-router-dom';
 import { useBackButton } from '@/shared/hooks/useBackButton';
 import { SectionItem } from '@/shared/ui/Section/SectionItem';
 import { SectionItemIcon } from '@/shared/ui/Section/SectionItemIcon';
-import { Monitor, Sun, Moon, Globe, ChevronDown, Trash2 } from 'lucide-react';
+import {
+  type LucideIcon,
+  Monitor,
+  Sun,
+  Moon,
+  Globe,
+  ChevronDown,
+  Trash2,
+} from 'lucide-react';
 import { Section } from '@/shared/ui/Section/Section';
 import { useState, useRef, useEffect } from 'react';
 import { users } from '@/shared/api/users';
@@ -58,7 +66,7 @@ export const SettingsPage = () => {
     }
   };
 
-  const themeOptions: { key: ThemeMode; label: string; icon: typeof Sun }[] = [
+  const themeOptions: { key: ThemeMode; label: string; icon: LucideIcon }[] = [
     { key: 'telegram', label: t('theme_auto'), icon: Monitor },
     { key: 'light', label: t('theme_light'), icon: Sun },
     { key: 'dark', label: t('theme_dark'), icon: Moon },
@@ -67,7 +75,7 @@ export const SettingsPage = () => {
   const currentLang = languageOptions.find((o) => o.code === language);
 
   return (
-    <section className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 px-4">
       <Section title={t('theme')}>
         {themeOptions.map((opt) => {
           const Icon = opt.icon;
@@ -77,12 +85,11 @@ export const SettingsPage = () => {
               key={opt.key}
               icon={
                 <SectionItemIcon
+                  icon={Icon}
                   backgroundColor={
                     isActive ? theme.button_color : `${theme.hint_color}25`
                   }
-                >
-                  <Icon size={18} />
-                </SectionItemIcon>
+                />
               }
               label={opt.label}
               onClick={() => setMode(opt.key)}
@@ -102,13 +109,7 @@ export const SettingsPage = () => {
       <Section>
         <div ref={dropdownRef} className="relative">
           <SectionItem
-            icon={
-              <SectionItemIcon backgroundColor="#007AFF">
-                <span>
-                  <Globe size={18} />
-                </span>
-              </SectionItemIcon>
-            }
+            icon={<SectionItemIcon icon={Globe} backgroundColor="#007AFF" />}
             label={t('language')}
             onClick={() => setLangDropdownOpen((prev) => !prev)}
             right={
@@ -183,9 +184,10 @@ export const SettingsPage = () => {
       <Section>
         <SectionItem
           icon={
-            <SectionItemIcon color={theme.destructive_text_color}>
-              <Trash2 size={18} />
-            </SectionItemIcon>
+            <SectionItemIcon
+              icon={Trash2}
+              color={theme.destructive_text_color}
+            />
           }
           label={t('delete_account')}
           color={theme.destructive_text_color}
@@ -212,6 +214,6 @@ export const SettingsPage = () => {
           </p>
         </BottomSheet>
       )}
-    </section>
+    </div>
   );
 };

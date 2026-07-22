@@ -2,23 +2,17 @@
   "default_full_name": "User",
   "body_section": {
     "title": "My body",
-    "body": {
-      "title": "Body and Targets"
-    },
-    "nutrition": {
-      "title": "Nutrition and Health"
-    }
+    "body": { "title": "Body and Targets" },
+    "nutrition": { "title": "Nutrition and Health" }
   },
   "progress_section": {
     "title": "Progress",
-    "weight": {
-      "title": "Weight trends"
-    },
-    "quests": {
-      "title": "Quests and Achievements"
-    }
+    "weight": { "title": "Weight trends" },
+    "quests": { "title": "Quests and Achievements" }
   },
-  "settings_section": {
-    "title": "Settings"
+  "settings_section": { "title": "Settings" },
+  "nutrition_page": {
+    "title": "Allergens",
+    "subtitle": "Selected allergens will trigger a warning when scanning product barcodes"
   }
 }

@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback } from 'react';
-import { Clock, UtensilsCrossed, Copy, Scale, Pencil } from 'lucide-react';
+import { Clock, Copy, Scale, Pencil } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getIntlLocale } from '@/shared/lib/locale';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
-import { NutritionGrid } from '../NutritionStats/NutritionGrid';
+import { NutritionGrid } from '../NutritionGrid/NutritionGrid';
 import { Label } from '@/shared/ui/Label';
 import { FoodItemRow } from './FoodItemRow';
 import { CopyMealSheetContent, type CopyMealResult } from './CopyMealSheet';
@@ -12,6 +12,7 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { cn } from '@/shared/lib/cn';
+import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
 
 type Mode = 'view' | 'edit' | 'copy';
 
@@ -82,8 +83,6 @@ export const FoodLogModal = ({
     lastSpaceIndex === -1 ? '' : cleanDish.substring(0, lastSpaceIndex);
   const lastWord =
     lastSpaceIndex === -1 ? cleanDish : cleanDish.substring(lastSpaceIndex + 1);
-
-  const isProcessing = isDeleting || isEditing || isRepeating;
 
   const handleCopyText = async () => {
     await navigator.clipboard.writeText(displayName);
@@ -167,40 +166,11 @@ export const FoodLogModal = ({
                 isSingleIngredient ? 'gap-1' : 'gap-2',
               )}
             >
-              <div className="relative">
-                {log.photo_url ? (
-                  <div className="@container w-full">
-                    <img
-                      src={log.photo_url}
-                      alt={displayName}
-                      className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="flex aspect-2/1 w-full items-center justify-center rounded-2xl"
-                    style={{ backgroundColor: theme.section_bg_color }}
-                  >
-                    <UtensilsCrossed
-                      size={36}
-                      style={{ color: theme.hint_color }}
-                    />
-                  </div>
-                )}
-
-                <button
-                  onClick={() => setMode('edit')}
-                  disabled={isProcessing}
-                  aria-label={t('edit_meal')}
-                  className="absolute right-2 bottom-2 rounded-xl p-2 backdrop-blur-md transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-70"
-                  style={{
-                    color: theme.text_color,
-                    backgroundColor: `${theme.bg_color}99`,
-                  }}
-                >
-                  <Pencil size={18} />
-                </button>
-              </div>
+              <MealImageOverlay
+                photo_url={log.photo_url}
+                displayName={displayName}
+                button={{ onClick: () => setMode('edit'), icon: Pencil }}
+              />
 
               <div className="flex flex-col gap-0.5 px-1">
                 <p

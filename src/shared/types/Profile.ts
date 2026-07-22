@@ -2,7 +2,12 @@
 
 export type Gender = 'male' | 'female';
 export type GoalType = 'lose' | 'maintain' | 'gain';
-export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'active' | 'extreme';
+export type ActivityLevel =
+  | 'sedentary'
+  | 'light'
+  | 'moderate'
+  | 'active'
+  | 'extreme';
 export type WaterTrack = 'auto' | 'manual' | 'none';
 export type UnitsPreference = 'metric' | 'imperial';
 
@@ -25,6 +30,8 @@ export interface Profile {
   dietary_restrictions: string[];
   allergy_note: string | null;
   medical_conditions: string[];
+  /** Структурированный список аллергенов (ключи OpenFoodFacts) — см. BarcodeResultModal */
+  allergens: string[];
   timezone: string;
   units_preference: UnitsPreference;
   updated_at: string; // ISO datetime

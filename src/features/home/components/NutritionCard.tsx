@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { ProgressBar } from './ProgressBar';
+import { ProgressBar } from './NutritionGrid/ProgressBar';
 
 interface NutritionCardProps {
   title: string;

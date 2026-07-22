@@ -33,7 +33,7 @@ export const ProfilePage = () => {
   const isAdmin = adminConfig?.is_admin ?? false;
 
   return (
-    <div className="flex flex-col gap-6 pb-4">
+    <div className="flex flex-col gap-6 px-4">
       <section className="flex flex-col items-center gap-2 pt-1">
         <div
           className="flex size-24 items-center justify-center rounded-full"
@@ -58,15 +58,11 @@ export const ProfilePage = () => {
         </p>
       </section>
 
-      <section className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         {isAdmin && (
           <Section title="Admin Panel">
             <SectionItem
-              icon={
-                <SectionItemIcon backgroundColor="#5856D6">
-                  <Shield />
-                </SectionItemIcon>
-              }
+              icon={<SectionItemIcon icon={Shield} backgroundColor="#5856D6" />}
               label="Admin Panel"
               to="admin"
             />
@@ -75,20 +71,12 @@ export const ProfilePage = () => {
 
         <Section title={t('body_section.title')}>
           <SectionItem
-            icon={
-              <SectionItemIcon backgroundColor="#FF2D55">
-                <Target />
-              </SectionItemIcon>
-            }
+            icon={<SectionItemIcon icon={Target} backgroundColor="#FF2D55" />}
             label={t('body_section.body.title')}
             to="body"
           />
           <SectionItem
-            icon={
-              <SectionItemIcon backgroundColor="#34C759">
-                <Sprout />
-              </SectionItemIcon>
-            }
+            icon={<SectionItemIcon icon={Sprout} backgroundColor="#34C759" />}
             label={t('body_section.nutrition.title')}
             to="nutrition"
           />
@@ -97,19 +85,16 @@ export const ProfilePage = () => {
         <Section title={t('progress_section.title')}>
           <SectionItem
             icon={
-              <SectionItemIcon backgroundColor="#007AFF">
-                <ChartNoAxesCombinedIcon />
-              </SectionItemIcon>
+              <SectionItemIcon
+                icon={ChartNoAxesCombinedIcon}
+                backgroundColor="#007AFF"
+              />
             }
             label={t('progress_section.weight.title')}
             to="weight"
           />
           <SectionItem
-            icon={
-              <SectionItemIcon backgroundColor="#FF9500">
-                <Trophy />
-              </SectionItemIcon>
-            }
+            icon={<SectionItemIcon icon={Trophy} backgroundColor="#FF9500" />}
             label={t('progress_section.quests.title')}
             to="quests"
           />
@@ -117,16 +102,12 @@ export const ProfilePage = () => {
 
         <Section title={t('settings_section.title')}>
           <SectionItem
-            icon={
-              <SectionItemIcon backgroundColor="#8E8E93">
-                <Settings />
-              </SectionItemIcon>
-            }
+            icon={<SectionItemIcon icon={Settings} backgroundColor="#8E8E93" />}
             label={t('settings_section.title')}
             to="settings"
           />
         </Section>
-      </section>
+      </div>
     </div>
   );
 };

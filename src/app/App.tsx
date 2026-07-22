@@ -85,7 +85,7 @@ export function App() {
           <ScannerProvider>
             <ScrollContainerContext.Provider value={scrollContainerRef}>
               <main
-                className={`relative flex flex-1 flex-col overflow-y-auto overscroll-y-contain ${
+                className={`relative flex flex-1 flex-col overflow-y-auto overscroll-y-contain *:pb-4 ${
                   location.pathname.startsWith('/admin')
                     ? 'w-full'
                     : 'mx-auto w-full max-w-screen-sm'

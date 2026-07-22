@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2, ImageOff } from 'lucide-react';
-import { NutritionGrid } from '../NutritionStats/NutritionGrid';
+import { NutritionGrid } from '../NutritionGrid/NutritionGrid';
 import {
   NutritionEditGrid,
   type NutritionValues,
@@ -9,6 +9,7 @@ import {
 import { useTheme } from '@/shared/context/ThemeContext';
 import type { FoodLog, FoodItem } from '@/shared/types/api/food';
 import { sumNutrition } from '@/features/home/lib/nutrition';
+import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
 
 export interface EditableItem {
   food_name: string;
@@ -112,31 +113,19 @@ export const EditMealSheetContent = ({
   }, [editItems, photoRemoved, onDataChange]);
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-2.5 pb-1">
       {log.photo_url && (
-        <div className="relative">
+        <>
           {!photoRemoved ? (
-            <>
-              <div className="@container w-full">
-                <img
-                  src={log.photo_url}
-                  alt={log.meal_name ?? editItems[0]?.food_name ?? ''}
-                  className="h-auto max-h-[100cqw] w-full rounded-2xl object-cover"
-                />
-
-                <button
-                  onClick={() => setPhotoRemoved(true)}
-                  className="absolute right-2 bottom-2 rounded-xl p-2 backdrop-blur-md transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-70"
-                  style={{
-                    backgroundColor: `${theme.bg_color}99`,
-                    color: theme.destructive_text_color,
-                  }}
-                  aria-label={t('remove_photo')}
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </>
+            <MealImageOverlay
+              photo_url={log.photo_url}
+              displayName={log.meal_name ?? editItems[0]?.food_name ?? ''}
+              button={{
+                onClick: () => setPhotoRemoved(true),
+                icon: Trash2,
+                iconColor: theme.destructive_text_color,
+              }}
+            />
           ) : (
             <button
               onClick={() => setPhotoRemoved(false)}
@@ -152,7 +141,7 @@ export const EditMealSheetContent = ({
               </span>
             </button>
           )}
-        </div>
+        </>
       )}
 
       {editItems.map((item, i) => (
@@ -193,7 +182,6 @@ export const EditMealSheetContent = ({
           />
         </div>
       ))}
-
       <div className="flex flex-col gap-px">
         <span
           className="text-base font-medium"

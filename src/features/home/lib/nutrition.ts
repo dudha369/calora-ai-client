@@ -3,7 +3,7 @@ import type {
   NutritionForAmount,
   AllergenInfo,
 } from '@/features/scanner/types/productData';
-import type { NutritionGridStats } from '@/features/home/components/NutritionStats/NutritionGrid';
+import type { NutritionGridStats } from '../components/NutritionGrid/NutritionGrid';
 
 // ─── Rounding ────────────────────────────────────────────────────────────────
 
@@ -17,10 +17,6 @@ export function round1(value: number): number {
  * Вычисляет КБЖУ для произвольного кол-ва граммов продукта.
  * Используется и при логировании приёма пищи, и при пересчёте порции
  * товара по штрихкоду (см. BarcodeResultModal).
- *
- * @example
- * const nutrition = calcNutritionForAmount(product.per100g, 150)
- * // nutrition.calories — ккал в 150г продукта
  */
 export function calcNutritionForAmount(
   per100g: NutritionPer,
@@ -65,8 +61,7 @@ const EMPTY_TOTALS: NutritionGridStats = {
 
 /**
  * Суммирует КБЖУ+клетчатка/сахар/вода по списку блюд/items.
- * Общая логика для FoodResultModal, EditMealSheet и CopyMealSheet —
- * раньше один и тот же .reduce() был скопирован в трёх местах.
+ * Общая логика для FoodResultModal, EditMealSheet и CopyMealSheet.
  */
 export function sumNutrition<T extends NutritionSource>(
   items: T[],
@@ -88,15 +83,56 @@ export function sumNutrition<T extends NutritionSource>(
 // ─── Allergens ────────────────────────────────────────────────────────────────
 
 /**
+ * Канонический список аллергенов для UI-чеклиста в профиле — 14 основных
+ * аллергенов, официально требуемых к декларированию в ЕС. Используется
+ * страницей «Питание и здоровье» (NutritionPage) для выбора.
+ */
+export const ALLERGEN_KEYS = [
+  'gluten',
+  'milk',
+  'eggs',
+  'fish',
+  'peanuts',
+  'tree-nuts',
+  'soybeans',
+  'celery',
+  'mustard',
+  'sesame',
+  'lupin',
+  'molluscs',
+  'crustaceans',
+  'sulphites',
+] as const;
+
+/**
+ * OpenFoodFacts использует несколько написаний для одного и того же
+ * аллергена (nuts/tree-nuts, milk/dairy, sesame/sesame-seeds,
+ * sulphites/sulfites/-dioxide...). Раскрываем выбор пользователя во все
+ * синонимы перед сверкой с товаром — иначе, отметив «орехи», можно
+ * пропустить продукт, помеченный конкретно как «tree-nuts», что для
+ * функции безопасности недопустимо.
+ */
+const ALLERGEN_SYNONYMS: Partial<Record<string, string[]>> = {
+  milk: ['dairy'],
+  'tree-nuts': ['nuts'],
+  sesame: ['sesame-seeds'],
+  sulphites: ['sulfites', 'sulphur-dioxide', 'sulfur-dioxide'],
+};
+
+function expandAllergenSynonyms(keys: string[]): string[] {
+  const expanded = new Set<string>(keys);
+  for (const key of keys) {
+    for (const synonym of ALLERGEN_SYNONYMS[key] ?? []) {
+      expanded.add(synonym);
+    }
+  }
+  return [...expanded];
+}
+
+/**
  * Проверяет пересечение аллергенов продукта со списком аллергенов
  * пользователя. Названия для отображения теперь берутся через i18n
- * (namespace `scanner_page`, ключи `allergens.<key>`) — раньше здесь лежали
- * захардкоженные RU/EN словари без UA и в обход общей системы локализации.
- *
- * @example
- * const userAllergens = ['gluten', 'milk']
- * const result = checkProductAllergens(product.allergens, userAllergens)
- * if (result.confirmed.length > 0) showAllergenWarning(result.confirmed)
+ * (namespace `scanner_page`, ключи `allergens.<key>`).
  */
 export function checkProductAllergens(
   productAllergens: AllergenInfo,
@@ -111,11 +147,12 @@ export function checkProductAllergens(
 }
 
 /**
- * Онбординг хранит пищевые ограничения как список ключей
- * (см. Step8Restrictions), а не как структурированный список аллергенов
- * OpenFoodFacts. Сопоставляем то, что сопоставляется однозначно —
- * вегетарианство/веганство/халяль/кошер это не аллергия и намеренно
- * сюда не мэппятся.
+ * Онбординг хранит грубые пищевые ограничения как список ключей
+ * (см. Step8Restrictions: 'gluten_free', 'lactose_free', ...), а профиль
+ * дополнительно хранит структурированный список конкретных аллергенов
+ * (см. NutritionPage). Объединяем оба источника: явный список аллергенов —
+ * основной сигнал, старая привязка через dietary_restrictions — для
+ * пользователей, которые ещё не заходили на новую страницу настройки.
  */
 const RESTRICTION_ALLERGEN_MAP: Partial<Record<string, string[]>> = {
   gluten_free: ['gluten'],
@@ -124,8 +161,9 @@ const RESTRICTION_ALLERGEN_MAP: Partial<Record<string, string[]>> = {
 
 export function getUserAllergenKeys(
   dietaryRestrictions: string[] = [],
+  explicitAllergens: string[] = [],
 ): string[] {
-  const keys = new Set<string>();
+  const keys = new Set<string>(expandAllergenSynonyms(explicitAllergens));
   for (const restriction of dietaryRestrictions) {
     for (const allergen of RESTRICTION_ALLERGEN_MAP[restriction] ?? []) {
       keys.add(allergen);

@@ -1,14 +1,14 @@
-import type { ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 interface SectionItemIconProps {
-  children: ReactNode;
+  icon: LucideIcon;
   backgroundColor?: string;
   color?: string;
 }
 
 export const SectionItemIcon = ({
-  children,
+  icon: Icon,
   backgroundColor,
   color,
 }: SectionItemIconProps) => {
@@ -22,7 +22,7 @@ export const SectionItemIcon = ({
         color: color ?? theme.text_color,
       }}
     >
-      {children}
+      <Icon size={18} />
     </div>
   );
 };

@@ -6,13 +6,14 @@ import {
   NutritionEditGrid,
   type NutritionValues,
 } from '@/shared/ui/NutritionEditGrid';
-import { NutritionGrid } from '@/features/home/components/NutritionStats/NutritionGrid';
+import { NutritionGrid } from '../../home/components/NutritionGrid/NutritionGrid';
 import { sumNutrition } from '@/features/home/lib/nutrition';
 import type {
   AnalyzedDish,
   FoodAnalyzeResponse,
 } from '@/shared/types/api/food';
 import { useTheme } from '@/shared/context/ThemeContext';
+import { MealImageOverlay } from '@/shared/ui/MealImageOverlay.tsx';
 
 interface FoodResultModalProps {
   result: FoodAnalyzeResponse;
@@ -138,29 +139,18 @@ export const FoodResultModal = ({
       }}
     >
       <div className="flex flex-col gap-3">
-        {/* Фото — можно открепить перед сохранением */}
         {photo && (
-          <div className="relative">
+          <>
             {includePhoto ? (
-              <>
-                <img
-                  src={photo}
-                  alt={mealName || 'food'}
-                  className="aspect-square w-full rounded-2xl object-cover"
-                />
-
-                <button
-                  onClick={() => setIncludePhoto(false)}
-                  className="absolute right-2 bottom-2 flex items-center justify-center rounded-xl p-2 backdrop-blur-md transition-opacity active:opacity-60"
-                  style={{
-                    backgroundColor: `${theme.bg_color}99`,
-                    color: theme.destructive_text_color,
-                  }}
-                  aria-label={t('remove_photo')}
-                >
-                  <Trash2 size={18} />
-                </button>
-              </>
+              <MealImageOverlay
+                photo_url={photo}
+                displayName={mealName || 'food'}
+                button={{
+                  onClick: () => setIncludePhoto(false),
+                  icon: Trash2,
+                  iconColor: theme.destructive_text_color,
+                }}
+              />
             ) : (
               <button
                 onClick={() => setIncludePhoto(true)}
@@ -176,7 +166,7 @@ export const FoodResultModal = ({
                 </span>
               </button>
             )}
-          </div>
+          </>
         )}
 
         {/* Editable meal name — shown only for multi-dish */}
@@ -197,8 +187,8 @@ export const FoodResultModal = ({
         {dishes.map((dish, i) => (
           <div
             key={i}
-            className="flex flex-col gap-2 rounded-2xl p-3"
-            style={{ backgroundColor: theme.bg_color }}
+            className="flex flex-col gap-2.5 rounded-2xl p-3"
+            style={{ border: `2px solid ${theme.section_bg_color}` }}
           >
             {/* Name row */}
             <div className="flex items-center gap-2">

@@ -20,20 +20,20 @@ export const NutritionEditGridCell = ({
   onChange,
 }: NutritionEditGridCellProps) => {
   const theme = useTheme();
-  const [editing, setEditing] = useState(false);
+  const [isEditing, setisEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (editing && inputRef.current) {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
     }
-  }, [editing]);
+  }, [isEditing]);
 
   const handleTap = () => {
     setInputValue(fmt(value, step));
-    setEditing(true);
+    setisEditing(true);
   };
 
   const commit = () => {
@@ -41,7 +41,7 @@ export const NutritionEditGridCell = ({
     if (!isNaN(parsed) && parsed >= 0) {
       onChange(step < 1 ? Math.round(parsed * 10) / 10 : Math.round(parsed));
     }
-    setEditing(false);
+    setisEditing(false);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -52,10 +52,10 @@ export const NutritionEditGridCell = ({
 
   return (
     <div
-      className="group relative flex flex-1 cursor-pointer flex-col items-center justify-center gap-1 py-2.5 transition-opacity hover:opacity-80 active:opacity-60"
-      onClick={!editing ? handleTap : undefined}
+      className="group relative flex h-13 flex-1 cursor-pointer flex-col items-center justify-center gap-1 py-2 transition-opacity hover:opacity-80 active:opacity-60"
+      onClick={!isEditing ? handleTap : undefined}
     >
-      {editing ? (
+      {isEditing ? (
         <input
           ref={inputRef}
           type="number"
@@ -66,7 +66,7 @@ export const NutritionEditGridCell = ({
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className="w-16 rounded-lg bg-transparent text-center text-lg leading-none font-medium"
+          className="w-16 rounded-lg bg-transparent text-center text-lg leading-none font-medium focus:ring-0"
           style={{
             color: theme.button_color,
             caretColor: theme.button_color,

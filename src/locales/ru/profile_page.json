@@ -2,23 +2,17 @@
   "default_full_name": "Пользователь",
   "body_section": {
     "title": "Моё тело",
-    "body": {
-      "title": "Тело и цели"
-    },
-    "nutrition": {
-      "title": "Питание и здоровье"
-    }
+    "body": { "title": "Тело и цели" },
+    "nutrition": { "title": "Питание и здоровье" }
   },
   "progress_section": {
     "title": "Прогресс",
-    "weight": {
-      "title": "Динамика веса"
-    },
-    "quests": {
-      "title": "Квесты и достижения"
-    }
+    "weight": { "title": "Динамика веса" },
+    "quests": { "title": "Квесты и достижения" }
   },
-  "settings_section": {
-    "title": "Настройки"
+  "settings_section": { "title": "Настройки" },
+  "nutrition_page": {
+    "title": "Аллергены",
+    "subtitle": "Отмеченные аллергены будут подсвечиваться предупреждением при сканировании штрихкодов продуктов"
   }
 }

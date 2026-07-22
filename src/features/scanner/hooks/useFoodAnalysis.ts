@@ -49,6 +49,10 @@ export interface UseFoodAnalysisReturn {
   status: AnalysisStatus;
   /** Запускает ИИ-анализ с опциональным уточнением пользователя. */
   runAnalysis: (notes?: string) => void;
+  /** Повторяет последний анализ с тем же фото и теми же notes —
+   *  для кнопки "Попробовать снова" при ошибке (например 503 от Gemini),
+   *  без необходимости переснимать фото и заново вводить уточнение. */
+  retry: () => void;
 }
 
 /**
@@ -70,6 +74,7 @@ export interface UseFoodAnalysisReturn {
 export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
   const [status, setStatus] = useState<AnalysisStatus>({ kind: 'idle' });
   const requestIdRef = useRef(0);
+  const lastNotesRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     const requestId = ++requestIdRef.current;
@@ -108,6 +113,7 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
   const runAnalysis = useCallback(
     (notes?: string) => {
       if (!photo) return;
+      lastNotesRef.current = notes;
       const requestId = ++requestIdRef.current;
       setStatus({ kind: 'analyzing' });
 
@@ -129,5 +135,9 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
     [photo],
   );
 
-  return { status, runAnalysis };
+  const retry = useCallback(() => {
+    runAnalysis(lastNotesRef.current);
+    }, [runAnalysis]);
+
+  return { status, runAnalysis, retry };
 }
