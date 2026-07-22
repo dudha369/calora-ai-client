@@ -34,7 +34,7 @@ export const QuickAddButton = ({
   return (
     <button
       onClick={() => addWater(volume)}
-      className="flex flex-col items-center justify-center gap-2 rounded-2xl px-1 py-2 transition-opacity hover:opacity-80"
+      className="flex flex-col items-center justify-center gap-2 rounded-2xl px-1 py-2.5 transition-opacity hover:opacity-80"
       style={{ backgroundColor: theme.secondary_bg_color }}
     >
       <Icon size={32} strokeWidth={1.5} style={{ color: waterColor }} />

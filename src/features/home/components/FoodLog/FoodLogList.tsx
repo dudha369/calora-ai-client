@@ -1,50 +1,42 @@
-import { useTheme } from '@/shared/context/ThemeContext';
 import { FoodLogCard } from './FoodLogCard';
 import type { FoodLog } from '@/shared/types/api/food';
+import { NoLogsBanner } from '@/features/home/components/NoLogsBanner';
+import { isSameDay } from '@/shared/lib/date';
+import { Skeleton } from '@/shared/ui/Skeleton';
 
 interface FoodLogListProps {
-  logs: FoodLog[];
+  logs?: FoodLog[];
+  date: Date;
   isLoading: boolean;
   deletingId: number | null;
   onFoodLogCardClick: (log: FoodLog) => void;
 }
 
-const CardSkeleton = () => {
-  const theme = useTheme();
-
-  return (
-    <div
-      className="h-24 animate-pulse rounded-2xl"
-      style={{ backgroundColor: theme.secondary_bg_color }}
-    />
-  );
-};
-
 export const FoodLogList = ({
   logs,
+  date,
   isLoading,
   deletingId,
   onFoodLogCardClick,
 }: FoodLogListProps) => {
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-2">
-        <CardSkeleton />
-        <CardSkeleton />
-      </div>
-    );
-  }
+  const isToday = isSameDay(date, new Date());
 
   return (
     <div className="flex flex-col gap-2">
-      {logs.map((log) => (
-        <FoodLogCard
-          key={log.id}
-          log={log}
-          isDeleting={deletingId === log.id}
-          onClickRef={onFoodLogCardClick}
-        />
-      ))}
+      {isLoading ? (
+        <Skeleton className="h-36" />
+      ) : logs && logs.length > 0 ? (
+        logs.map((log) => (
+          <FoodLogCard
+            key={log.id}
+            log={log}
+            isDeleting={deletingId === log.id}
+            onClickRef={onFoodLogCardClick}
+          />
+        ))
+      ) : (
+        <NoLogsBanner isToday={isToday} />
+      )}
     </div>
   );
 };

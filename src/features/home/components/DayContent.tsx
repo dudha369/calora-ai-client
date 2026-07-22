@@ -7,14 +7,12 @@ import {
 } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { Skeleton } from '@/shared/ui/Skeleton';
 import { CaloriesArc } from './CaloriesArc';
 import { NutritionCard } from './NutritionCard';
-import { NoLogsBanner } from './NoLogsBanner';
 import { FoodLogList } from './FoodLog/FoodLogList';
 import { stats } from '@/shared/api/stats';
 import { food } from '@/shared/api/food';
-import { toApiDate, isSameDay } from '@/shared/lib/date';
+import { toApiDate } from '@/shared/lib/date';
 import type { DailyStats } from '@/shared/types/api/stats';
 import type { FoodByDateResponse, FoodLog } from '@/shared/types/api/food';
 import { RefreshCw } from 'lucide-react';
@@ -43,7 +41,6 @@ export const DayContent = ({
   const queryClient = useQueryClient();
 
   const dateStr = toApiDate(date);
-  const isToday = isSameDay(date, new Date());
 
   const [deferredFetchReady, setDeferredFetchReady] = useState(isActive);
 
@@ -175,24 +172,15 @@ export const DayContent = ({
 
         <div
           className="flex flex-col gap-3 transition-opacity duration-300"
-          style={{ opacity: isNetworkFetching && !statsLoading ? 0.65 : 1 }}
+          style={{ opacity: isNetworkFetching && !statsLoading ? 0.7 : 1 }}
         >
-          {statsLoading || foodLoading ? (
-            <Skeleton className="h-36" />
-          ) : (
-            <>
-              {foodData?.logs && foodData.logs.length > 0 ? (
-                <FoodLogList
-                  logs={foodData.logs}
-                  isLoading={foodLoading}
-                  deletingId={deletingId}
-                  onFoodLogCardClick={onFoodLogClick}
-                />
-              ) : (
-                <NoLogsBanner isToday={isToday} />
-              )}
-            </>
-          )}
+          <FoodLogList
+            logs={foodData?.logs}
+            date={date}
+            isLoading={foodLoading}
+            deletingId={deletingId}
+            onFoodLogCardClick={onFoodLogClick}
+          />
         </div>
       </div>
     </section>

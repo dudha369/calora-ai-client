@@ -134,7 +134,7 @@ export const HomePage = () => {
   });
 
   return (
-    <div className="flex h-full flex-col gap-2">
+    <div className="flex h-full flex-col gap-2 pb-0!">
       <header
         className="sticky top-0 z-10 flex flex-col gap-2 px-4 pt-1"
         style={{ backgroundColor: theme.bg_color }}

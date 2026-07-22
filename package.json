@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@lucide/lab": "^0.1.2",
-    "@tailwindcss/vite": "^4.2.4",
+    "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-query": "^5.62.0",
     "@tma.js/sdk": "^3.2.2",
     "@tma.js/sdk-react": "^3.0.21",
@@ -48,7 +48,7 @@
     "globals": "^17.5.0",
     "jsdom": "^26.1.0",
     "prettier": "^3.8.4",
-    "prettier-plugin-tailwindcss": "^0.8.0",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.10",

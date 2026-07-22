@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { GlassWater, Coffee, CupSoda, Icon } from 'lucide-react';
+import { GlassWater, Coffee, Milk, Icon } from 'lucide-react';
 import { bottlePlastic } from '@lucide/lab';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { Section } from '@/shared/ui/Section/Section';
@@ -7,6 +7,7 @@ import { ProgressBar } from '../components/ProgressBar';
 import { QuickAddButton } from '../components/QuickAddButton';
 import { CustomAddButton } from '../components/CustomAdd/CustomAddButton';
 import { CustomAddModal } from '../components/CustomAdd/CustomAddModal';
+import { WaterJug } from '@/features/water/components/WaterJug';
 import { useUser } from '@/shared/context/UserContext';
 import { useCallback, useMemo, useState } from 'react';
 import { toApiDate } from '@/shared/lib/date';
@@ -73,7 +74,7 @@ export const WaterPage = () => {
   const displayPercent = percent > 100 ? 100 : percent;
 
   return (
-    <div className="flex h-full flex-col gap-4 px-4 py-2">
+    <div className="flex flex-col gap-3 px-4 py-2">
       <Section className="relative overflow-hidden p-4">
         <div className="relative z-10 flex w-[65%] flex-col gap-4">
           <div className="flex flex-col gap-1">
@@ -132,10 +133,11 @@ export const WaterPage = () => {
         </div>
 
         <div className="absolute inset-y-0 right-4 z-0 flex w-[35%] items-center justify-end opacity-90">
-          <GlassWater
-            className="h-3/4 w-full max-w-25"
-            strokeWidth={1.5}
-            style={{ color: MARKER_WATER_COLOR }}
+          <WaterJug
+            valueMl={totalMl}
+            goalMl={goalMl}
+            waterColor={MARKER_WATER_COLOR}
+            className="h-full w-full max-w-28"
           />
         </div>
       </Section>
@@ -151,11 +153,11 @@ export const WaterPage = () => {
         <section className="grid grid-cols-5 gap-2">
           <QuickAddButton icon={GlassWater} volume={250} title={t('glass')} />
           <QuickAddButton icon={Coffee} volume={350} title={t('cup')} />
-          <QuickAddButton icon={CupSoda} volume={500} title={t('bottle')} />
+          <QuickAddButton icon={Milk} volume={500} title={t('bottle')} />
           <QuickAddButton
             icon={(props) => <Icon iconNode={bottlePlastic} {...props} />}
             volume={750}
-            title={t('large_bottle')}
+            title={t('bottle')}
           />
 
           <CustomAddButton onClick={() => setCustomAddOpen(true)} />

@@ -13,18 +13,18 @@ export const CustomAddButton = ({ onClick }: CustomAddButtonProps) => {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-1 py-2 transition-opacity hover:opacity-80"
+      className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed px-1 py-2.5 transition-opacity hover:opacity-80"
       style={{
         borderColor: theme.secondary_bg_color,
         backgroundColor: 'transparent',
       }}
     >
       <div
-        className="flex items-center justify-center rounded-full p-2"
+        className="flex items-center justify-center rounded-full p-1.5"
         style={{ backgroundColor: theme.section_bg_color }}
       >
         <Plus
-          size={28}
+          size={24}
           strokeWidth={2}
           style={{
             color: theme.button_color,
