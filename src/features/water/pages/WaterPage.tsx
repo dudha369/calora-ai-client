@@ -22,7 +22,6 @@ import { water } from '@/shared/api/water';
 import { MARKER_WATER_COLOR } from '@/shared/constants/markers';
 import { WaterLogList } from '@/features/water/components/WaterLog/WaterLogList';
 import { WaterLogModal } from '@/features/water/components/WaterLog/WaterLogModal';
-import { food } from '@/shared/api/food';
 
 export const WaterPage = () => {
   const theme = useTheme();
@@ -36,7 +35,7 @@ export const WaterPage = () => {
   const goalMl = user_data?.goal?.water_ml ?? 0;
   const today = useMemo(() => toApiDate(new Date()), []);
 
-  const [customAddOpen, setCustomAddOpen] = useState(false);
+  const [customAddModalOpen, setCustomAddModalOpen] = useState(false);
   const [waterLogModalOpen, setWaterLogModalOpen] = useState(false);
   const [currentWaterLog, setCurrentWaterLog] = useState<
     WaterLog | undefined
@@ -44,16 +43,19 @@ export const WaterPage = () => {
   const [foodLogDeleting, setWaterLogDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
+  const invalidateWater = () => {
+    qc.invalidateQueries({ queryKey: ['water', today] });
+    qc.invalidateQueries({ queryKey: ['stats', 'daily', today] });
+    qc.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+  };
+
   const { mutate: addWater } = useMutation({
     mutationFn: (ml: number) => water.add({ log_date: today, amount_ml: ml }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['water', today] });
-      qc.invalidateQueries({ queryKey: ['stats', 'daily', today] });
-    },
+    onSuccess: invalidateWater,
   });
 
   const { mutate: deleteLog } = useMutation({
-    mutationFn: (logId: number) => food.remove(logId),
+    mutationFn: (logId: number) => water.remove(logId),
     onMutate: (logId: number) => {
       setDeletingId(logId);
       setWaterLogDeleting(true);
@@ -63,6 +65,7 @@ export const WaterPage = () => {
       setWaterLogDeleting(false);
     },
     onSuccess: () => {
+      invalidateWater();
       setWaterLogModalOpen(false);
     },
   });
@@ -89,7 +92,7 @@ export const WaterPage = () => {
 
   return (
     <div className="flex flex-col gap-2.5 px-4 py-2">
-      <Section className="flex items-stretch gap-3 overflow-hidden p-4">
+      <Section className="flex flex-row items-stretch gap-3 overflow-hidden p-4">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex flex-col gap-1">
             <span
@@ -190,7 +193,7 @@ export const WaterPage = () => {
             title={t('bottle')}
           />
 
-          <CustomAddButton onClick={() => setCustomAddOpen(true)} />
+          <CustomAddButton onClick={() => setCustomAddModalOpen(true)} />
         </section>
       </div>
 
@@ -212,17 +215,18 @@ export const WaterPage = () => {
         ) : null}
       </div>
 
-      {customAddOpen && (
+      {customAddModalOpen && (
         <CustomAddModal
-          onClose={() => setCustomAddOpen(false)}
+          onClose={() => setCustomAddModalOpen(false)}
           onConfirm={addWater}
         />
       )}
       {waterLogModalOpen && currentWaterLog && (
         <WaterLogModal
+          onClose={() => !foodLogDeleting && setWaterLogModalOpen(false)}
           log={currentWaterLog}
-          isDeleting={foodLogDeleting}
           onDelete={deleteLog}
+          isDeleting={foodLogDeleting}
         />
       )}
     </div>

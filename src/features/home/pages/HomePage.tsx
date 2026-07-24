@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useEffect, useCallback, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { Sprout, Flame, CalendarDays } from 'lucide-react';
 
@@ -58,6 +59,34 @@ export const HomePage = () => {
   const [foodLogRepeating, setFoodLogRepeating] = useState(false);
   const [foodLogEditing, setFoodLogEditing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Переход из WaterLogModal ("к какому блюду привязана эта вода") —
+  // параметры разбираются один раз и сразу вычищаются из URL, чтобы
+  // повторный рендер/обновление страницы не переоткрывал модалку заново.
+  useEffect(() => {
+    const dateParam = searchParams.get('date');
+    const foodLogIdParam = searchParams.get('foodLogId');
+    if (!dateParam || !foodLogIdParam) return;
+
+    const targetDate = startOfDay(new Date(`${dateParam}T12:00:00`));
+    if (isNaN(targetDate.getTime())) {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    selectDateExternal(targetDate);
+
+    food.getByDate(dateParam).then(({ data }) => {
+      const match = data.logs.find((l) => l.id === Number(foodLogIdParam));
+      if (match) {
+        setCurrentFoodLog(match);
+        setFoodLogModalOpen(true);
+      }
+    });
+
+    setSearchParams({}, { replace: true });
+  }, [searchParams, selectDateExternal, setSearchParams]);
 
   const onClick = useCallback((log: FoodLog) => {
     setCurrentFoodLog(log);

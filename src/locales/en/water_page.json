@@ -10,5 +10,12 @@
   "goal": "goal",
   "custom": "custom",
   "add_custom": "Add custom amount",
-  "add": "Add {{mlCount}} ml"
+  "add": "Add {{mlCount}} ml",
+  "note": "Note",
+  "note_placeholder": "e.g. Big glass of water",
+  "linked_meal": "Linked meal",
+  "link_meal": "Link to a meal",
+  "link_meal_title": "Choose a meal",
+  "unlink": "Unlink",
+  "no_meals_today": "No meals logged this day yet"
 }

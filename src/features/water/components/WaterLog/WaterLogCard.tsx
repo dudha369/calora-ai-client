@@ -1,4 +1,4 @@
-import { Clock, ChevronRight, Droplets } from 'lucide-react';
+import { Clock, ChevronRight, Droplets, Link2, StickyNote } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { getIntlLocale } from '@/shared/lib/locale';
@@ -32,7 +32,10 @@ export const WaterLogCard = ({
   };
 
   const defaultWaterName = tc('nav.water');
-  const displayName = log.source_label ?? defaultWaterName;
+  const displayName =
+    log.linked_food_log?.meal_name ??
+    log.linked_food_log?.first_item_name ??
+    defaultWaterName;
 
   return (
     <div
@@ -57,11 +60,15 @@ export const WaterLogCard = ({
           </span>
 
           <div
-            className="flex items-center gap-0.5"
+            className="flex items-center gap-1.5"
             style={{ color: theme.hint_color }}
           >
-            <Clock size={12} />
-            <span className="text-xs whitespace-nowrap">{formattedTime}</span>
+            <div className="flex items-center gap-0.5">
+              <Clock size={12} />
+              <span className="text-xs whitespace-nowrap">{formattedTime}</span>
+            </div>
+            {log.linked_food_log && <Link2 size={11} />}
+            {log.notes && <StickyNote size={11} />}
           </div>
         </div>
       </div>
