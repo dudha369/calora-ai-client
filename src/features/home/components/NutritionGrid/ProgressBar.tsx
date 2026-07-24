@@ -43,7 +43,7 @@ export const ProgressBar = ({
         width={progressWidth}
         height={strokeWidth}
         rx={borderRadius}
-        fill={theme.button_color}
+        fill={theme.accent_text_color}
       />
     </svg>
   );

@@ -32,45 +32,45 @@ export const WaterLogCard = ({
   };
 
   const defaultWaterName = tc('nav.water');
-  const displayName = defaultWaterName;
+  const displayName = log.source_label ?? defaultWaterName;
 
   return (
     <div
       key={log.id}
       onClick={onClick}
-      className="flex w-full cursor-pointer items-center justify-between p-3 pr-2 transition-opacity"
+      className="flex w-full cursor-pointer items-center justify-between px-2 py-3 transition-opacity"
       style={{
         opacity: isDeleting ? 0.5 : 1,
       }}
     >
-      <div className="flex items-center gap-3">
-        <div
-          className="size-10 rounded-full p-2"
-          style={{ backgroundColor: theme.bg_color }}
-        >
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="size-10 rounded-full p-2">
           <Droplets size={24} style={{ color: MARKER_WATER_COLOR }} />
         </div>
 
-        <div className="flex flex-col">
-          <div
-            className="flex items-center gap-px"
-            style={{ color: theme.hint_color }}
-          >
-            <Clock size={12} />
-            <span className="text-xs">{formattedTime}</span>
-          </div>
-
+        <div className="flex min-w-0 flex-1 flex-col">
           <span
-            className="text-base font-medium"
+            className="truncate text-base font-medium"
             style={{ color: theme.text_color }}
           >
             {displayName}
           </span>
+
+          <div
+            className="flex items-center gap-0.5"
+            style={{ color: theme.hint_color }}
+          >
+            <Clock size={12} />
+            <span className="text-xs whitespace-nowrap">{formattedTime}</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-base" style={{ color: theme.text_color }}>
+      <div className="flex shrink-0 items-center gap-2 pl-3">
+        <span
+          className="text-lg font-medium whitespace-nowrap"
+          style={{ color: theme.text_color }}
+        >
           <b>{log.amount_ml}</b> {tc('units.ml')}
         </span>
 

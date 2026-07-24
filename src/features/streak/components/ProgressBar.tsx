@@ -1,6 +1,6 @@
-import { useTheme } from '@/shared/context/ThemeContext.ts';
+import { useTheme } from '@/shared/context/ThemeContext';
 import { Check, AlertTriangle } from 'lucide-react';
-import type { TodayProgress, GoalType } from '@/shared/types/api/streak.ts';
+import type { TodayProgress, GoalType } from '@/shared/types/api/streak';
 
 interface ProgressBarProps {
   p: TodayProgress;
@@ -19,7 +19,7 @@ export const ProgressBar = ({ p, goalType }: ProgressBarProps) => {
 
   const barColor = isOverPenalized
     ? theme.destructive_text_color
-    : theme.button_color;
+    : theme.accent_text_color;
 
   return (
     <div

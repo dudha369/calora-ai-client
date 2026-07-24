@@ -15,7 +15,7 @@ import {
   useDeviceOrientationAngle,
   iconCounterRotationDeg,
 } from '../../hooks/useDeviceOrientationAngle';
-import { useTelegram } from '@/shared/hooks/useTelegram.ts';
+import { useTelegram } from '@/shared/hooks/useTelegram';
 
 const ICON_SIZE = 24;
 

@@ -13,7 +13,7 @@ import type {
   FoodAnalyzeResponse,
 } from '@/shared/types/api/food';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { MealImageOverlay } from '@/shared/ui/MealImageOverlay.tsx';
+import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
 
 interface FoodResultModalProps {
   result: FoodAnalyzeResponse;

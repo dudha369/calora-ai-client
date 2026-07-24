@@ -8,5 +8,7 @@
   "left": "left",
   "of": "of",
   "goal": "goal",
-  "custom": "custom"
+  "custom": "custom",
+  "add_custom": "Add custom amount",
+  "add": "Add {{mlCount}} ml"
 }

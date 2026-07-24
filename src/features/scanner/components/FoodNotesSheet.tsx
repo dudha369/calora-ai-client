@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { BottomSheet } from '@/shared/ui/BottomSheet.tsx';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
 import type { FocusEvent } from 'react';
 
 interface FoodNotesSheetProps {

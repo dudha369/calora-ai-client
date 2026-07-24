@@ -15,7 +15,7 @@ import {
   getUserAllergenKeys,
 } from '@/features/home/lib/nutrition';
 import { asStringDict } from '@/shared/lib/i18nDict';
-import { MealImageOverlay } from '@/shared/ui/MealImageOverlay.tsx';
+import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
 
 interface BarcodeResultModalProps {
   product: ProductData;
@@ -257,8 +257,8 @@ export const BarcodeResultModal = ({
                 }
                 className="rounded-xl px-3 py-1.5 text-xs font-medium transition-opacity active:opacity-60"
                 style={{
-                  backgroundColor: `${theme.button_color}20`,
-                  color: theme.button_color,
+                  backgroundColor: theme.button_color,
+                  color: theme.button_text_color,
                 }}
               >
                 {product.servingSizeStr ?? `${product.servingSizeG} г`}

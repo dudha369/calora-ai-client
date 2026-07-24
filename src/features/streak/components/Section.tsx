@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useTheme } from '@/shared/context/ThemeContext.ts';
+import { useTheme } from '@/shared/context/ThemeContext';
 import { cn } from '@/shared/lib/cn';
 
 interface SectionProps {

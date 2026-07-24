@@ -1,4 +1,4 @@
-import { useTheme } from '@/shared/context/ThemeContext.ts';
+import { useTheme } from '@/shared/context/ThemeContext';
 
 interface ProgressBarProps {
   current: number;
@@ -19,7 +19,7 @@ export const ProgressBar = ({ current, goal }: ProgressBarProps) => {
         className="h-full rounded-full transition-all duration-300"
         style={{
           width: `${barWidth}%`,
-          backgroundColor: theme.button_color,
+          backgroundColor: theme.accent_text_color,
         }}
       />
     </div>

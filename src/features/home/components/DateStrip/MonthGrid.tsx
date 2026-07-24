@@ -54,7 +54,7 @@ export const MonthGrid = ({
         let txtColor = theme.text_color;
 
         if (isSelected) {
-          bg = theme.button_color;
+          bg = theme.accent_text_color;
           txtColor = theme.button_text_color;
         } else if (isItToday) {
           border = `2px dashed ${theme.text_color}`;
@@ -66,7 +66,13 @@ export const MonthGrid = ({
         const hasFood = activeDates.foodDates.has(apiDate);
         const hasWater = activeDates.waterDates.has(apiDate);
 
-        const bar_bg = getMarkerBackground(hasFood, hasWater, isDisabled, theme.text_color, theme.hint_color);
+        const bar_bg = getMarkerBackground(
+          hasFood,
+          hasWater,
+          isDisabled,
+          theme.text_color,
+          theme.hint_color,
+        );
 
         return (
           <button

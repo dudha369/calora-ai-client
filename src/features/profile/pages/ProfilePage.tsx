@@ -15,7 +15,7 @@ import { initData } from '@tma.js/sdk-react';
 import { Section } from '@/shared/ui/Section/Section';
 import { SectionItem } from '@/shared/ui/Section/SectionItem';
 import { admin } from '@/shared/api/admin';
-import { SectionItemIcon } from '@/shared/ui/Section/SectionItemIcon.tsx';
+import { SectionItemIcon } from '@/shared/ui/Section/SectionItemIcon';
 
 export const ProfilePage = () => {
   const { user_data } = useUser();
@@ -46,7 +46,7 @@ export const ProfilePage = () => {
               alt="User photo"
             />
           ) : (
-            <User size={48} style={{ color: theme.button_color }} />
+            <User size={48} style={{ color: theme.accent_text_color }} />
           )}
         </div>
 

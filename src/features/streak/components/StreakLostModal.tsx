@@ -8,7 +8,7 @@ import { users } from '@/shared/api/users';
 import type { StreakInfo } from '@/shared/types/api/streak';
 import { useCountdown, formatCountdown } from '../hooks/useCountdown';
 import { Section } from './Section';
-import { getFlameColor } from '@/features/home/lib/getFlameColor.ts';
+import { getFlameColor } from '@/features/home/lib/getFlameColor';
 
 interface StreakLostModalProps {
   data: StreakInfo;
@@ -99,7 +99,9 @@ export const StreakLostModal = ({ data, onClose }: StreakLostModalProps) => {
                     size={22}
                     strokeWidth={filled ? 2.5 : 2}
                     style={{
-                      color: filled ? theme.button_color : theme.hint_color,
+                      color: filled
+                        ? theme.accent_text_color
+                        : theme.hint_color,
                       opacity: filled ? 1 : 0.35,
                     }}
                   />

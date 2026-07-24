@@ -11,19 +11,25 @@ import { WaterJug } from '@/features/water/components/WaterJug';
 import { useUser } from '@/shared/context/UserContext';
 import { useCallback, useMemo, useState } from 'react';
 import { toApiDate } from '@/shared/lib/date';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import type { WaterByDateResponse, WaterLog } from '@/shared/types/api/water';
 import { water } from '@/shared/api/water';
 import { MARKER_WATER_COLOR } from '@/shared/constants/markers';
 import { WaterLogList } from '@/features/water/components/WaterLog/WaterLogList';
 import { WaterLogModal } from '@/features/water/components/WaterLog/WaterLogModal';
-import { food } from '@/shared/api/food.ts';
+import { food } from '@/shared/api/food';
 
 export const WaterPage = () => {
   const theme = useTheme();
   const { t } = useTranslation('water_page');
   const { t: tc } = useTranslation('common');
   const { user_data } = useUser();
+  const qc = useQueryClient();
 
   const userProfile = user_data?.profile;
   const waterTrack = userProfile?.water_track ?? 'none';
@@ -37,6 +43,14 @@ export const WaterPage = () => {
   >();
   const [foodLogDeleting, setWaterLogDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const { mutate: addWater } = useMutation({
+    mutationFn: (ml: number) => water.add({ log_date: today, amount_ml: ml }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['water', today] });
+      qc.invalidateQueries({ queryKey: ['stats', 'daily', today] });
+    },
+  });
 
   const { mutate: deleteLog } = useMutation({
     mutationFn: (logId: number) => food.remove(logId),
@@ -74,9 +88,9 @@ export const WaterPage = () => {
   const displayPercent = percent > 100 ? 100 : percent;
 
   return (
-    <div className="flex flex-col gap-3 px-4 py-2">
-      <Section className="relative overflow-hidden p-4">
-        <div className="relative z-10 flex w-[65%] flex-col gap-4">
+    <div className="flex flex-col gap-2.5 px-4 py-2">
+      <Section className="flex items-stretch gap-3 overflow-hidden p-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex flex-col gap-1">
             <span
               className="text-sm font-medium"
@@ -124,15 +138,15 @@ export const WaterPage = () => {
           <span
             className="w-fit rounded-xl px-3 py-2 text-xs font-medium"
             style={{
-              backgroundColor: theme.button_color,
-              color: theme.button_text_color,
+              backgroundColor: theme.accent_text_color,
+              color: theme.text_color,
             }}
           >
             {remainMl} {tc('units.ml')} {t('left')}
           </span>
         </div>
 
-        <div className="absolute inset-y-0 right-4 z-0 flex w-[35%] items-center justify-end opacity-90">
+        <div className="flex w-32 shrink-0 items-center justify-center">
           <WaterJug
             valueMl={totalMl}
             goalMl={goalMl}
@@ -142,7 +156,7 @@ export const WaterPage = () => {
         </div>
       </Section>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <span
           className="ml-1 text-base font-semibold"
           style={{ color: theme.subtitle_text_color }}
@@ -151,10 +165,26 @@ export const WaterPage = () => {
         </span>
 
         <section className="grid grid-cols-5 gap-2">
-          <QuickAddButton icon={GlassWater} volume={250} title={t('glass')} />
-          <QuickAddButton icon={Coffee} volume={350} title={t('cup')} />
-          <QuickAddButton icon={Milk} volume={500} title={t('bottle')} />
           <QuickAddButton
+            onClick={addWater}
+            icon={GlassWater}
+            volume={250}
+            title={t('glass')}
+          />
+          <QuickAddButton
+            onClick={addWater}
+            icon={Coffee}
+            volume={350}
+            title={t('cup')}
+          />
+          <QuickAddButton
+            onClick={addWater}
+            icon={Milk}
+            volume={500}
+            title={t('bottle')}
+          />
+          <QuickAddButton
+            onClick={addWater}
             icon={(props) => <Icon iconNode={bottlePlastic} {...props} />}
             volume={750}
             title={t('bottle')}
@@ -164,7 +194,7 @@ export const WaterPage = () => {
         </section>
       </div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <span
           className="ml-1 text-base font-semibold tracking-wide"
           style={{ color: theme.subtitle_text_color }}
@@ -182,7 +212,12 @@ export const WaterPage = () => {
         ) : null}
       </div>
 
-      {customAddOpen && <CustomAddModal />}
+      {customAddOpen && (
+        <CustomAddModal
+          onClose={() => setCustomAddOpen(false)}
+          onConfirm={addWater}
+        />
+      )}
       {waterLogModalOpen && currentWaterLog && (
         <WaterLogModal
           log={currentWaterLog}

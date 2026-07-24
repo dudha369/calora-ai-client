@@ -87,7 +87,7 @@ export const SettingsPage = () => {
                 <SectionItemIcon
                   icon={Icon}
                   backgroundColor={
-                    isActive ? theme.button_color : `${theme.hint_color}25`
+                    isActive ? theme.accent_text_color : `${theme.hint_color}25`
                   }
                 />
               }
@@ -97,7 +97,7 @@ export const SettingsPage = () => {
                 isActive ? (
                   <div
                     className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: theme.button_color }}
+                    style={{ backgroundColor: theme.accent_text_color }}
                   />
                 ) : undefined
               }
@@ -152,7 +152,7 @@ export const SettingsPage = () => {
                   className="flex w-full items-center gap-3.5 px-4 py-3 transition-colors"
                   style={{
                     backgroundColor: isActive
-                      ? `${theme.button_color}12`
+                      ? theme.accent_text_color
                       : 'transparent',
                   }}
                 >
@@ -162,7 +162,7 @@ export const SettingsPage = () => {
                   <span
                     className="text-base"
                     style={{
-                      color: isActive ? theme.button_color : theme.text_color,
+                      color: theme.text_color,
                       fontWeight: isActive ? 600 : 400,
                     }}
                   >
@@ -171,7 +171,7 @@ export const SettingsPage = () => {
                   {isActive && (
                     <div
                       className="ml-auto h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: theme.button_color }}
+                      style={{ backgroundColor: theme.accent_text_color }}
                     />
                   )}
                 </button>

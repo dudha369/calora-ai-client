@@ -54,7 +54,7 @@ export function CaloriesArc({
           strokeDashoffset={offset}
           className="transition-colors duration-500"
           style={{
-            color: theme.button_color,
+            color: theme.accent_text_color,
           }}
         />
       </svg>

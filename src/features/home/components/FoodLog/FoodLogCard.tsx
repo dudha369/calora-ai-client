@@ -58,12 +58,13 @@ export const FoodLogCard = ({
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <p
+          <span
+            title={displayName}
             className="truncate text-[16px] font-semibold"
             style={{ color: theme.text_color }}
           >
             {displayName}
-          </p>
+          </span>
 
           <div className="text-xs">
             {log.items.length > 1 ? (

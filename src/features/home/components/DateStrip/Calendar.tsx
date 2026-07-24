@@ -13,7 +13,7 @@ import {
   type MonthWindowData,
 } from '../../lib/calendarMonths';
 import { MonthGrid } from './MonthGrid';
-import { BottomSheet } from '@/shared/ui/BottomSheet.tsx';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
 
 interface CalendarProps {
   selectedDate: Date;

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@/shared/context/ThemeContext.ts';
+import { useTheme } from '@/shared/context/ThemeContext';
 import { type LucideIcon, UtensilsCrossed } from 'lucide-react';
 
 interface MealImageOverlayProps {

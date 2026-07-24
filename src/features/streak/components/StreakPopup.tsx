@@ -10,8 +10,8 @@ import { capitalizeFirst, getIntlLocale } from '@/shared/lib/locale';
 import { toApiDate } from '@/shared/lib/date';
 import { Section } from './Section';
 import { ProgressBar } from './ProgressBar';
-import { Skeleton } from '@/shared/ui/Skeleton.tsx';
-import { getFlameColor } from '@/features/home/lib/getFlameColor.ts';
+import { Skeleton } from '@/shared/ui/Skeleton';
+import { getFlameColor } from '@/features/home/lib/getFlameColor';
 
 interface StreakPopupProps {
   currentStreak: number;
@@ -114,7 +114,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                 let backgroundColor;
                 let icon;
                 if (day.status === 'met') {
-                  backgroundColor = theme.button_color;
+                  backgroundColor = theme.accent_text_color;
                   icon = (
                     <Check
                       strokeWidth={2.5}
@@ -123,7 +123,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                     />
                   );
                 } else if (day.status === 'restored') {
-                  backgroundColor = theme.button_color;
+                  backgroundColor = theme.accent_text_color;
                   icon = (
                     <Shield
                       strokeWidth={2.5}

@@ -178,7 +178,9 @@ export const NutritionEditGrid = ({
             onClick={() => setSyncEnabled(true)}
             className="rounded-lg px-2 py-1 text-sm transition-all duration-200"
             style={{
-              backgroundColor: syncEnabled ? theme.button_color : 'transparent',
+              backgroundColor: syncEnabled
+                ? theme.accent_text_color
+                : 'transparent',
               color: syncEnabled ? theme.button_text_color : theme.hint_color,
             }}
           >
@@ -190,7 +192,7 @@ export const NutritionEditGrid = ({
             className="rounded-lg px-2 py-1 text-sm transition-all duration-200"
             style={{
               backgroundColor: !syncEnabled
-                ? theme.button_color
+                ? theme.accent_text_color
                 : 'transparent',
               color: !syncEnabled ? theme.button_text_color : theme.hint_color,
             }}

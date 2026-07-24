@@ -47,8 +47,8 @@ export const DateStripItem = ({
   let nameColor: string;
 
   if (isSelected) {
-    bg = theme.button_color;
-    border = `2px solid ${theme.button_color}`;
+    bg = theme.accent_text_color;
+    border = `2px solid ${theme.accent_text_color}`;
     numColor = theme.button_text_color;
     nameColor = withOpacity(theme.button_text_color, 0.7);
   } else if (isDisabled) {
@@ -68,7 +68,13 @@ export const DateStripItem = ({
     nameColor = theme.hint_color;
   }
 
-  const bar_bg = getMarkerBackground(hasFood, hasWater, isDisabled, theme.text_color, theme.hint_color);
+  const bar_bg = getMarkerBackground(
+    hasFood,
+    hasWater,
+    isDisabled,
+    theme.text_color,
+    theme.hint_color,
+  );
 
   return (
     <button

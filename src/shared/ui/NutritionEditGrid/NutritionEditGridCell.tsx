@@ -68,8 +68,7 @@ export const NutritionEditGridCell = ({
           onKeyDown={handleKeyDown}
           className="w-16 rounded-lg bg-transparent text-center text-lg leading-none font-medium focus:ring-0"
           style={{
-            color: theme.button_color,
-            caretColor: theme.button_color,
+            color: theme.text_color,
           }}
         />
       ) : (

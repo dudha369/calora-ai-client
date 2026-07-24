@@ -30,7 +30,7 @@ import {
   ChevronDown,
   X,
 } from 'lucide-react';
-import { useTelegram } from '@/shared/hooks/useTelegram.ts';
+import { useTelegram } from '@/shared/hooks/useTelegram';
 
 const FILTERS = [
   { id: 'all', label: 'All' },
