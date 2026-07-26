@@ -2,19 +2,6 @@ import { memo, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/shared/lib/cn';
 import { MARKER_WATER_COLOR } from '@/shared/constants/markers';
 
-/**
- * Интерактивный мерный кувшин (SVG).
- *
- * Форма — по образцу простого линейного эскиза: практически прямые бока,
- * скругление только у самого дна, волнистая кромка горлышка. Специально
- * без "плечо → брюхо" кривой — именно она раньше ломалась и превращала
- * кувшин то в шар с коробкой сверху, то в мешанину.
- *
- * Презентационный компонент: сам следит за valueMl и при каждом изменении
- * проигрывает анимацию "подъём с небольшим перелётом — быстрая посадка на
- * нужный уровень". Ничего вызывать вручную не нужно.
- */
-
 type WaterJugProps = {
   valueMl: number;
   goalMl?: number;
@@ -31,34 +18,46 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-// ─── Геометрия кувшина ───────────────────────────────────────────────────
-// Волнистая кромка (2 пологие волны) → почти прямые бока (простые прямые
-// линии, без риска сломать кривые) → скруглённое дно.
-const BODY_D =
-  'M50,34 ' +
-  'Q60,20 72,32 Q84,44 96,32 Q108,20 120,30 Q135,38 150,34 ' +
-  'L160,260 ' +
-  'C165,280 155,296 138,300 ' +
-  'C124,304 76,304 62,300 ' +
-  'C45,296 35,280 40,260 ' +
-  'L50,34 Z';
+// Кувшин с более плоской верхней кромкой, небольшим носиком слева,
+// без лишнего "подбородка", и с ручкой, которая выглядит как отдельная внешняя дуга.
+const BODY_D = [
+  'M31 30',
+  'C32 22 37 17 44 16',
+  'C53 15 62 18 70 21',
+  'C79 25 90 28 104 28',
+  'H138',
+  'C146 28 152 33 152 41',
+  'V47',
+  'C152 52 150 56 147 59',
+  'C158 83 166 111 168 141',
+  'V235',
+  'C168 255 152 270 133 270',
+  'H57',
+  'C38 270 23 255 23 235',
+  'V141',
+  'C25 111 33 83 45 59',
+  'C42 56 40 52 40 47',
+  'V39',
+  'C40 35 37 31 31 30',
+  'Z',
+].join(' ');
 
-// Ручка крепится ровно в тех же точках, что лежат на самом контуре тела
-// (152,70 и 157,195) — касается стенок, не проваливается внутрь и не висит
-// в воздухе. Нижняя точка — на уровне декоративной волнистой полосы.
-const HANDLE_D = 'M152,70 C206,66 218,110 214,140 C210,168 195,190 157,195';
+// Ручка должна читаться как внешняя Г-образная дуга с округлением,
+// а не как тонкий штрих, уходящий внутрь корпуса.
+const HANDLE_D = [
+  'M145 72',
+  'C167 74 184 90 190 113',
+  'C193 125 193 139 193 156',
+  'C193 173 193 188 193 205',
+].join(' ');
 
-// Декоративная волнистая полоса-блик — по высоте совпадает с нижней точкой
-// ручки, стилистически как на референсе (похожа на блик, а не на кривую
-// линию воды).
-const STRIPE_D = 'M43,195 Q60,187 76,195 Q92,203 108,195 Q124,187 157,195';
+const BODY_LEFT = 23;
+const BODY_RIGHT = 168;
+const BODY_TOP = 16;
+const BODY_BOTTOM = 270;
 
-const BODY_LEFT = 35;
-const BODY_RIGHT = 165;
-const BODY_TOP = 34;
-const BODY_BOTTOM = 302;
-
-const SCALE_STOPS = [0, 0.25, 0.5, 0.75, 1] as const; // снизу вверх
+const MAJOR_STOPS = [0, 0.25, 0.5, 0.75, 1] as const;
+const MINOR_STOPS = Array.from({ length: 11 }, (_, i) => (i + 1) / 12);
 
 function fillTopFor(value: number, chartMax: number): number {
   const pct = clamp((value / Math.max(chartMax, 1)) * 100, 0, 100);
@@ -87,9 +86,6 @@ const WaterJug = memo(function WaterJug({
   );
   const fillTop = fillTopFor(valueMl, chartMax);
 
-  // ── Анимация: подъём с небольшим (умеренным!) перелётом за целевой ──
-  // ── уровень, затем быстрая посадка ровно на него. Один keyframe на ──
-  // ── изменение — никаких параллельных transition/transform. ──────────
   const prevValueRef = useRef(valueMl);
   const animIdRef = useRef(0);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -98,32 +94,47 @@ const WaterJug = memo(function WaterJug({
     from: number;
     overshoot: number;
     to: number;
+    duration: number;
   } | null>(null);
 
   useLayoutEffect(() => {
-    if (valueMl === prevValueRef.current) return;
+    const prev = prevValueRef.current;
+    if (valueMl === prev) return;
 
-    const from = fillTopFor(prevValueRef.current, chartMax);
+    const from = fillTopFor(prev, chartMax);
     const to = fillTopFor(valueMl, chartMax);
-    // Перелёт умеренный и ограниченный сверху — раньше здесь было слишком
-    // много (до 14px), из-за чего казалось, что вода "взлетает" выше, чем
-    // нужно.
-    const overshootPx = clamp(Math.abs(to - from) * 0.1, 3, 8);
-    const overshoot = to > from ? to + overshootPx : to - overshootPx;
+    const deltaMl = Math.abs(valueMl - prev);
+    const deltaPx = Math.abs(to - from);
+    const isIncrease = valueMl > prev;
+
+    const shouldAnimate = isIncrease
+      ? deltaMl >= Math.max(20, chartMax * 0.012) && deltaPx >= 8
+      : deltaMl >= 1;
 
     animIdRef.current += 1;
-    setAnim({ id: animIdRef.current, from, overshoot, to });
+
+    if (!shouldAnimate) {
+      setAnim(null);
+      prevValueRef.current = valueMl;
+      return;
+    }
+
+    const overshootPx = clamp(deltaPx * 0.08, 2, 6);
+    const overshoot = isIncrease ? to - overshootPx : to + overshootPx;
+    const duration = isIncrease ? 600 : 460;
+
+    setAnim({ id: animIdRef.current, from, overshoot, to, duration });
     prevValueRef.current = valueMl;
 
     if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
-    clearTimerRef.current = setTimeout(() => setAnim(null), 660);
+    clearTimerRef.current = setTimeout(() => setAnim(null), duration);
 
     return () => {
       if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
     };
   }, [valueMl, chartMax]);
 
-  const viewBox = showScale ? '0 10 320 310' : '0 10 260 310';
+  const viewBox = showScale ? '0 0 338 286' : '0 0 230 286';
 
   return (
     <div
@@ -138,12 +149,12 @@ const WaterJug = memo(function WaterJug({
       >
         <defs>
           <linearGradient id={`${uid}-water`} x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor={waterColor} stopOpacity="0.92" />
-            <stop offset="100%" stopColor="#1D4ED8" stopOpacity="0.88" />
+            <stop offset="0%" stopColor={waterColor} stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#1D4ED8" stopOpacity="0.9" />
           </linearGradient>
           <linearGradient id={`${uid}-glassStroke`} x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="rgba(255,255,255,0.34)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0.10)" />
+            <stop offset="100%" stopColor="rgba(255,255,255,0.12)" />
           </linearGradient>
           <clipPath id={`${uid}-clip`}>
             <path d={BODY_D} />
@@ -155,94 +166,99 @@ const WaterJug = memo(function WaterJug({
             @keyframes ${uid}-rise${anim.id} {
               0%   { y: ${anim.from}; height: ${BODY_BOTTOM + 10 - anim.from};
                      animation-timing-function: cubic-bezier(0.45,0,0.85,0.35); }
-              68%  { y: ${anim.overshoot}; height: ${BODY_BOTTOM + 10 - anim.overshoot};
+              70%  { y: ${anim.overshoot}; height: ${BODY_BOTTOM + 10 - anim.overshoot};
                      animation-timing-function: cubic-bezier(0.22,1,0.36,1); }
               100% { y: ${anim.to}; height: ${BODY_BOTTOM + 10 - anim.to}; }
             }
           `}</style>
         )}
 
-        {/* тень на "столе" */}
-        <ellipse cx="100" cy="312" rx="46" ry="7" fill="rgba(0,0,0,0.22)" />
+        <ellipse cx="98" cy="276" rx="46" ry="6" fill="rgba(0,0,0,0.22)" />
 
-        {/* ручка — крепится ровно в тех же точках, что и контур тела */}
+        {/* Ручка рисуется до корпуса, чтобы её внутренняя часть пряталась за стенкой кувшина */}
         <path
           d={HANDLE_D}
           fill="none"
           stroke={`url(#${uid}-glassStroke)`}
-          strokeWidth="10"
+          strokeWidth="11"
           strokeLinecap="round"
+          strokeLinejoin="round"
         />
 
-        {/* вода, обрезанная по силуэту кувшина */}
         <g clipPath={`url(#${uid}-clip)`}>
           <rect
-            x={BODY_LEFT - 10}
+            x={BODY_LEFT - 12}
             y={fillTop}
-            width={BODY_RIGHT - BODY_LEFT + 20}
+            width={BODY_RIGHT - BODY_LEFT + 24}
             height={BODY_BOTTOM + 10 - fillTop}
             fill={`url(#${uid}-water)`}
             style={
               anim
-                ? { animation: `${uid}-rise${anim.id} 600ms both` }
+                ? { animation: `${uid}-rise${anim.id} ${anim.duration}ms both` }
                 : undefined
             }
           />
+
+          <path
+            d={`M ${BODY_LEFT - 1} ${fillTop + 1.5} C ${BODY_LEFT + 18} ${fillTop - 2}, ${BODY_LEFT + 34} ${fillTop + 4}, ${BODY_LEFT + 52} ${fillTop + 1.5} S ${BODY_LEFT + 98} ${fillTop - 2}, ${BODY_RIGHT + 4} ${fillTop + 1.5}`}
+            fill="none"
+            stroke="rgba(255,255,255,0.16)"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
         </g>
 
-        {/* контур стекла поверх воды */}
         <path
           d={BODY_D}
           fill={glassColor}
           stroke={`url(#${uid}-glassStroke)`}
-          strokeWidth="2.4"
+          strokeWidth="3"
           strokeLinejoin="round"
         />
 
-        {/* декоративная волнистая полоса-блик — на уровне низа ручки */}
-        <path
-          d={STRIPE_D}
-          fill="none"
-          stroke="rgba(255,255,255,0.22)"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-
-        {/* мерная шкала — только в развёрнутых местах (например модалка) */}
         {showScale && (
           <g>
-            <line
-              x1="240"
-              y1={BODY_TOP}
-              x2="240"
-              y2={BODY_BOTTOM}
-              stroke="rgba(255,255,255,0.16)"
-              strokeWidth="1"
-            />
-            {SCALE_STOPS.map((stop, i) => {
+            {MINOR_STOPS.map((stop) => {
               const y = BODY_BOTTOM - stop * (BODY_BOTTOM - BODY_TOP);
-              const isMax = i === SCALE_STOPS.length - 1;
+              const active = fillPct / 100 >= stop - 0.001;
+              return (
+                <line
+                  key={stop}
+                  x1={BODY_RIGHT - 6}
+                  y1={y}
+                  x2={BODY_RIGHT + 14}
+                  y2={y}
+                  stroke={active ? rim : 'rgba(255,255,255,0.26)'}
+                  strokeWidth={1.3}
+                  strokeLinecap="round"
+                />
+              );
+            })}
+
+            {MAJOR_STOPS.map((stop, i) => {
+              const y = BODY_BOTTOM - stop * (BODY_BOTTOM - BODY_TOP);
+              const isMax = i === MAJOR_STOPS.length - 1;
               const active = fillPct / 100 >= stop - 0.001;
               return (
                 <g key={stop}>
                   <line
-                    x1="232"
+                    x1={BODY_RIGHT - 6}
                     y1={y}
-                    x2="248"
+                    x2={BODY_RIGHT + 58}
                     y2={y}
-                    stroke={active ? rim : 'rgba(255,255,255,0.35)'}
-                    strokeWidth="2"
+                    stroke={active ? rim : 'rgba(255,255,255,0.38)'}
+                    strokeWidth={active ? 2.5 : 2}
                     strokeLinecap="round"
-                    style={{ transition: 'stroke 300ms ease-out' }}
+                    style={{ transition: 'stroke 220ms ease-out' }}
                   />
                   <text
-                    x="256"
+                    x={BODY_RIGHT + 66}
                     y={y + 4}
-                    fontSize="12"
+                    fontSize={isMax ? '12' : '11'}
                     fontWeight={active ? 600 : 400}
                     fontFamily="inherit"
-                    fill={active ? rim : 'rgba(255,255,255,0.55)'}
-                    style={{ transition: 'fill 300ms ease-out' }}
+                    fill={active ? rim : 'rgba(255,255,255,0.56)'}
+                    style={{ transition: 'fill 220ms ease-out' }}
                   >
                     {isMax ? 'MAX' : `${Math.round(chartMax * stop)} мл`}
                   </text>

@@ -92,7 +92,7 @@ export const WaterPage = () => {
 
   return (
     <div className="flex flex-col gap-2.5 px-4 py-2">
-      <Section className="flex flex-row items-stretch gap-3 overflow-hidden p-4">
+      <Section className="flex flex-row items-stretch gap-2 overflow-hidden p-4">
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex flex-col gap-1">
             <span
@@ -139,7 +139,7 @@ export const WaterPage = () => {
           </div>
 
           <span
-            className="w-fit rounded-xl px-3 py-2 text-xs font-medium"
+            className="w-fit rounded-xl px-3 py-2 text-sm font-medium"
             style={{
               backgroundColor: theme.accent_text_color,
               color: theme.text_color,
@@ -149,7 +149,7 @@ export const WaterPage = () => {
           </span>
         </div>
 
-        <div className="flex w-32 shrink-0 items-center justify-center">
+        <div className="flex w-28 shrink-0 items-center justify-center">
           <WaterJug
             valueMl={totalMl}
             goalMl={goalMl}

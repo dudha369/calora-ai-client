@@ -6,6 +6,7 @@
   "theme_dark": "Dark",
   "failed_to_delete": "Failed to delete the account. Check your connection and try again.",
   "delete_account": "Delete account",
+  "delete": "Delete",
   "delete_account_title": "Delete account?",
   "confirm": "Confirm",
   "cancel": "Cancel",

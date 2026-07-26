@@ -17,5 +17,7 @@
   "link_meal": "Link to a meal",
   "link_meal_title": "Choose a meal",
   "unlink": "Unlink",
-  "no_meals_today": "No meals logged this day yet"
+  "no_meals_today": "No meals logged this day yet",
+  "amount": "Amount",
+  "no_linked_meal": "Not linked to any meal"
 }

@@ -175,10 +175,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
                       className="flex size-7.5 shrink-0 items-center justify-center rounded-full"
                       style={{
                         backgroundColor,
-                        outline:
-                          isEffectiveStatus && isToday
-                            ? 'none'
-                            : `2px ${isToday ? 'dashed' : 'solid'} ${isEffectiveStatus || isToday ? theme.text_color : theme.hint_color}`,
+                        outline: `2px ${isToday && !isEffectiveStatus ? 'dashed' : 'solid'} ${isEffectiveStatus || isToday ? theme.text_color : theme.hint_color}`,
                       }}
                     >
                       {isEffectiveStatus && icon}

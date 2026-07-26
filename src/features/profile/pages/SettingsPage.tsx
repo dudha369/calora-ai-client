@@ -199,7 +199,7 @@ export const SettingsPage = () => {
         <BottomSheet
           title={t('delete_account_title')}
           onClose={() => !isDeleting && setAccountDeleteConfirmOpen(false)}
-          actionLabel={t('confirm')}
+          actionLabel={t('delete')}
           iconCustomEmojiId="5258130763148172425"
           onAction={handleDeleteAccount}
           isProcessing={isDeleting}

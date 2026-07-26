@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { Sprout, Flame, CalendarDays } from 'lucide-react';
+import { CalendarDays, Flame, Sprout } from 'lucide-react';
 
 import { useUser } from '@/shared/context/UserContext';
 import { useTheme } from '@/shared/context/ThemeContext';
@@ -168,10 +168,18 @@ export const HomePage = () => {
         className="sticky top-0 z-10 flex flex-col gap-2 px-4 pt-1"
         style={{ backgroundColor: theme.bg_color }}
       >
-        <section className="flex h-6 justify-between px-1">
-          <div className="flex items-center gap-1">
+        <section className="relative flex items-center justify-between px-px">
+          <button
+            onClick={() => setCalendarOpen(true)}
+            className="flex items-center rounded-xl transition-opacity active:opacity-60"
+            style={{ color: theme.hint_color }}
+          >
+            <CalendarDays size={26} />
+          </button>
+
+          <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1">
             <span
-              className="text-2xl leading-none font-semibold tracking-wide"
+              className=" text-xl leading-none font-semibold tracking-wide"
               style={{ color: theme.text_color }}
             >
               Calora AI
@@ -179,31 +187,21 @@ export const HomePage = () => {
             <Sprout className="text-[#90EE90]" size={20} />
           </div>
 
-          <div className="flex items-center gap-3">
-            <div
-              className="flex cursor-pointer items-center gap-1 rounded-2xl pr-2.25 pl-1.5 transition-opacity active:opacity-70"
-              style={{
-                backgroundColor: theme.section_bg_color,
-                color: theme.text_color,
-              }}
-              onClick={() => setStreakPopupOpen(true)}
-            >
-              <Flame
-                size={18}
-                strokeWidth={2}
-                color={flameColorProps.color}
-                fill={flameColorProps.fill}
-              />
-              <span className="text-lg">{currentStreak}</span>
-            </div>
-
-            <button
-              onClick={() => setCalendarOpen(true)}
-              className="flex items-center rounded-xl transition-opacity active:opacity-60"
-              style={{ color: theme.hint_color }}
-            >
-              <CalendarDays size={24} />
-            </button>
+          <div
+            className="flex cursor-pointer items-center gap-1 rounded-2xl py-px pr-3 pl-2 transition-opacity active:opacity-70"
+            style={{
+              backgroundColor: theme.section_bg_color,
+              color: theme.text_color,
+            }}
+            onClick={() => setStreakPopupOpen(true)}
+          >
+            <Flame
+              size={18}
+              strokeWidth={2}
+              color={flameColorProps.color}
+              fill={flameColorProps.fill}
+            />
+            <span className="text-lg">{currentStreak}</span>
           </div>
         </section>
 

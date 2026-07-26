@@ -19,6 +19,8 @@ import { UserContext } from '@/shared/context/UserContext';
 import { ScrollContainerContext } from '@/shared/context/ScrollContainerContext';
 import { ScannerProvider } from '@/features/scanner/context/ScannerProvider';
 
+import logoUrl from '@/shared/assets/favicon.svg';
+
 export function App() {
   const { ready, safeTop } = useTelegram();
   const theme = useTheme();
@@ -79,31 +81,53 @@ export function App() {
           onRetry={() => window.location.reload()}
         />
       ) : session.status === 'ready' ? (
-        <UserContext.Provider
-          value={{ user_data: session.userData, isLoading: false }}
-        >
-          <ScannerProvider>
-            <ScrollContainerContext.Provider value={scrollContainerRef}>
-              <main
-                className={`relative flex flex-1 flex-col overflow-y-auto overscroll-y-contain *:pb-4 ${
-                  location.pathname.startsWith('/admin')
-                    ? 'w-full'
-                    : 'mx-auto w-full max-w-screen-sm'
-                }`}
-                style={{
-                  backgroundColor: theme.bg_color,
-                }}
-              >
-                <Outlet />
-              </main>
-            </ScrollContainerContext.Provider>
+        <>
+          {/* Рендерим шапку только если safeTop достаточно большой, чтобы вместить интерфейс */}
+          {safeTop >= 44 && (
+            <header
+              className="pointer-events-none fixed top-0 left-0 flex w-full flex-col justify-end"
+              style={{
+                height: safeTop,
+                color: theme.button_text_color,
+              }}
+            >
+              {/* Контейнер высотой с нативную панель кнопок TG (44px) */}
+              {/* Логотип автоматически отцентрируется ровно между "Close" и "Menu" */}
+              <div className="flex h-11 w-full items-center justify-center">
+                <img
+                  src={logoUrl}
+                  alt="logo"
+                  className="pointer-events-auto h-9 w-9 shrink-0 rounded-full bg-white shadow-sm"
+                />
+              </div>
+            </header>
+          )}
+          <UserContext.Provider
+            value={{ user_data: session.userData, isLoading: false }}
+          >
+            <ScannerProvider>
+              <ScrollContainerContext.Provider value={scrollContainerRef}>
+                <main
+                  className={`relative flex flex-1 flex-col overflow-y-auto overscroll-y-contain *:pb-4 ${
+                    location.pathname.startsWith('/admin')
+                      ? 'w-full'
+                      : 'mx-auto w-full max-w-screen-sm'
+                  }`}
+                  style={{
+                    backgroundColor: theme.bg_color,
+                  }}
+                >
+                  <Outlet />
+                </main>
+              </ScrollContainerContext.Provider>
 
-            {location.pathname !== '/onboarding' &&
-              !location.pathname.startsWith('/profile/admin') && (
-                <NavigationBar />
-              )}
-          </ScannerProvider>
-        </UserContext.Provider>
+              {location.pathname !== '/onboarding' &&
+                !location.pathname.startsWith('/profile/admin') && (
+                  <NavigationBar />
+                )}
+            </ScannerProvider>
+          </UserContext.Provider>
+        </>
       ) : null}
     </div>
   );

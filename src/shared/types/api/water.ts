@@ -31,6 +31,7 @@ export interface WaterIn {
 /** PATCH-тело: поле, не переданное вовсе, не трогается на бэкенде.
  *  Явный null — очищает заметку / отвязывает от еды. */
 export interface WaterUpdateIn {
+  amount_ml?: number;
   notes?: string | null;
   food_log_id?: number | null;
 }

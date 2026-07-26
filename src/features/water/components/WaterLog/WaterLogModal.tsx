@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Link2, Unlink, UtensilsCrossed } from 'lucide-react';
+import { Clock, Droplets, Link, Unlink, UtensilsCrossed } from 'lucide-react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { getIntlLocale } from '@/shared/lib/locale';
@@ -18,7 +18,7 @@ interface WaterLogModalProps {
   isDeleting: boolean;
 }
 
-type Mode = 'view' | 'link';
+type Mode = 'view' | 'edit' | 'link';
 
 export const WaterLogModal = ({
   onClose,
@@ -33,7 +33,17 @@ export const WaterLogModal = ({
   const { t: tc } = useTranslation('common');
 
   const [mode, setMode] = useState<Mode>('view');
+
+  // Черновик редактирования — независим от log до момента Save.
+  // Инициализируется/сбрасывается только при входе в edit / отмене,
+  // а не на каждый рендер — иначе правки терялись бы при инвалидации кэша.
+  const [amount, setAmount] = useState(log.amount_ml);
   const [notes, setNotes] = useState(log.notes ?? '');
+
+  const resetDraft = () => {
+    setAmount(log.amount_ml);
+    setNotes(log.notes ?? '');
+  };
 
   const formattedTime = new Date(log.logged_at).toLocaleTimeString(
     getIntlLocale(i18n.language),
@@ -44,10 +54,16 @@ export const WaterLogModal = ({
     queryClient.invalidateQueries({ queryKey: ['water', log.log_date] });
   };
 
-  const { mutate: saveNotes, isPending: isSavingNotes } = useMutation({
-    mutationFn: (value: string) =>
-      water.update(log.id, { notes: value || null }),
-    onSuccess: invalidate,
+  const { mutate: saveEdits, isPending: isSaving } = useMutation({
+    mutationFn: () =>
+      water.update(log.id, {
+        amount_ml: amount,
+        notes: notes.trim() || null,
+      }),
+    onSuccess: () => {
+      invalidate();
+      setMode('view');
+    },
   });
 
   const { mutate: linkMeal, isPending: isLinking } = useMutation({
@@ -55,7 +71,7 @@ export const WaterLogModal = ({
       water.update(log.id, { food_log_id: foodLogId }),
     onSuccess: () => {
       invalidate();
-      setMode('view');
+      setMode('edit');
     },
   });
 
@@ -85,42 +101,65 @@ export const WaterLogModal = ({
     log.linked_food_log?.first_item_name ??
     null;
 
+  const handleDismissRequest = () => {
+    if (mode === 'link') {
+      setMode('edit');
+      return true;
+    }
+    if (mode === 'edit') {
+      resetDraft();
+      setMode('view');
+      return true;
+    }
+    return false;
+  };
+
+  const mainButton =
+    mode === 'view'
+      ? { label: tc('buttons.edit'), onAction: () => setMode('edit') }
+      : mode === 'edit'
+        ? { label: tc('buttons.save'), onAction: () => saveEdits() }
+        : { label: tc('buttons.cancel'), onAction: () => setMode('edit') };
+
+  const secondaryAction =
+    mode === 'view'
+      ? {
+          text: tc('buttons.delete'),
+          textColor: theme.destructive_text_color,
+          onClick: () => onDelete(log.id),
+          isProcessing: isDeleting,
+          position: 'left' as const,
+        }
+      : mode === 'edit'
+        ? {
+            text: tc('buttons.cancel'),
+            onClick: () => {
+              resetDraft();
+              setMode('view');
+            },
+            position: 'left' as const,
+          }
+        : undefined;
+
   return (
     <BottomSheet
       onClose={onClose}
-      onDismissRequest={() => {
-        if (mode !== 'view') {
-          setMode('view');
-          return true;
-        }
-        return false;
-      }}
+      onDismissRequest={handleDismissRequest}
       title={mode === 'link' ? t('link_meal_title') : undefined}
       dragToClose={mode === 'view'}
-      secondaryAction={
-        mode === 'view'
-          ? {
-              text: tc('buttons.delete'),
-              textColor: theme.destructive_text_color,
-              onClick: () => onDelete(log.id),
-              isProcessing: isDeleting,
-              position: 'left' as const,
-            }
-          : {
-              text: tc('buttons.cancel'),
-              onClick: () => setMode('view'),
-              position: 'left' as const,
-            }
-      }
+      actionLabel={mainButton.label}
+      onAction={mainButton.onAction}
+      isProcessing={mode === 'edit' ? isSaving : undefined}
+      secondaryAction={secondaryAction}
     >
-      {mode === 'view' ? (
+      {mode === 'view' && (
         <div className="flex flex-col gap-3 pb-1">
           <div className="flex items-center gap-3">
             <div
               className="flex size-12 shrink-0 items-center justify-center rounded-full text-2xl"
-              style={{ backgroundColor: `${MARKER_WATER_COLOR}20` }}
+              style={{ color: MARKER_WATER_COLOR }}
             >
-              💧
+              <Droplets />
             </div>
             <div className="flex min-w-0 flex-1 flex-col">
               <span
@@ -139,6 +178,101 @@ export const WaterLogModal = ({
             </div>
           </div>
 
+          {log.notes && (
+            <div className="flex flex-col gap-1.5">
+              <span
+                className="px-1 text-xs font-medium"
+                style={{ color: theme.hint_color }}
+              >
+                {t('note')}
+              </span>
+              <p
+                className="rounded-xl px-3 py-2 text-sm whitespace-pre-wrap"
+                style={{
+                  backgroundColor: theme.section_bg_color,
+                  color: theme.text_color,
+                }}
+              >
+                {log.notes}
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1.5">
+            <span
+              className="px-1 text-xs font-medium"
+              style={{ color: theme.hint_color }}
+            >
+              {t('linked_meal')}
+            </span>
+            {log.linked_food_log ? (
+              <button
+                onClick={goToMeal}
+                className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-opacity active:opacity-60"
+                style={{ backgroundColor: theme.section_bg_color }}
+              >
+                <UtensilsCrossed
+                  size={16}
+                  style={{ color: theme.hint_color }}
+                />
+                <span
+                  className="min-w-0 flex-1 truncate text-sm font-medium"
+                  style={{ color: theme.text_color }}
+                >
+                  {linkedName ?? t('linked_meal')}
+                </span>
+              </button>
+            ) : (
+              <span
+                className="rounded-xl px-3 py-2.5 text-sm"
+                style={{
+                  backgroundColor: theme.section_bg_color,
+                  color: theme.hint_color,
+                }}
+              >
+                {t('no_linked_meal')}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {mode === 'edit' && (
+        <div className="flex flex-col gap-3 pb-1">
+          <div className="flex flex-col gap-1.5">
+            <span
+              className="px-1 text-xs font-medium"
+              style={{ color: theme.hint_color }}
+            >
+              {t('amount')}
+            </span>
+            <div className="relative">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={amount}
+                min={1}
+                max={5000}
+                onChange={(e) =>
+                  setAmount(
+                    Math.max(1, Math.round(Number(e.target.value) || 0)),
+                  )
+                }
+                className="w-full rounded-xl py-2.5 pr-10 pl-3 text-sm font-medium"
+                style={{
+                  backgroundColor: theme.section_bg_color,
+                  color: theme.text_color,
+                }}
+              />
+              <span
+                className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs"
+                style={{ color: theme.hint_color }}
+              >
+                {tc('units.ml')}
+              </span>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <span
               className="px-1 text-xs font-medium"
@@ -149,17 +283,12 @@ export const WaterLogModal = ({
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              onBlur={() => {
-                const trimmed = notes.trim();
-                if (trimmed !== (log.notes ?? '')) saveNotes(trimmed);
-              }}
               placeholder={t('note_placeholder')}
               rows={2}
-              className="w-full rounded-xl px-3 py-2 text-sm transition-opacity"
+              className="w-full rounded-xl px-3 py-2 text-sm"
               style={{
                 backgroundColor: theme.section_bg_color,
                 color: theme.text_color,
-                opacity: isSavingNotes ? 0.6 : 1,
               }}
             />
           </div>
@@ -176,20 +305,23 @@ export const WaterLogModal = ({
                 className="flex items-center gap-2 rounded-xl px-3 py-2.5"
                 style={{ backgroundColor: theme.section_bg_color }}
               >
-                <button
-                  onClick={goToMeal}
-                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                <UtensilsCrossed
+                  size={16}
+                  className="shrink-0"
+                  style={{ color: theme.hint_color }}
+                />
+                <span
+                  className="min-w-0 flex-1 truncate text-sm font-medium"
+                  style={{ color: theme.text_color }}
                 >
-                  <UtensilsCrossed
-                    size={16}
-                    style={{ color: theme.hint_color }}
-                  />
-                  <span
-                    className="truncate text-sm font-medium"
-                    style={{ color: theme.text_color }}
-                  >
-                    {linkedName ?? t('linked_meal')}
-                  </span>
+                  {linkedName ?? t('linked_meal')}
+                </span>
+                <button
+                  onClick={() => setMode('link')}
+                  className="shrink-0 rounded-lg p-1.5 transition-opacity active:opacity-60"
+                  style={{ color: theme.hint_color }}
+                >
+                  <Link size={14} />
                 </button>
                 <button
                   onClick={() => unlinkMeal()}
@@ -210,13 +342,15 @@ export const WaterLogModal = ({
                   color: theme.hint_color,
                 }}
               >
-                <Link2 size={14} />
+                <Link size={14} />
                 {t('link_meal')}
               </button>
             )}
           </div>
         </div>
-      ) : (
+      )}
+
+      {mode === 'link' && (
         <div className="flex flex-col gap-2 pb-1">
           {mealsLoading ? (
             <span

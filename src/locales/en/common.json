@@ -9,7 +9,8 @@
     "copy": "Copy",
     "copied": "Copied!",
     "delete": "Delete",
-    "open_today": "Go to today"
+    "open_today": "Go to today",
+    "edit": "Edit"
   },
   "nav": {
     "home": "Home",

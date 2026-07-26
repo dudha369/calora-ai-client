@@ -55,11 +55,7 @@ export const CustomAddModal = ({ onClose, onConfirm }: CustomAddModalProps) => {
           className="relative flex h-10 justify-between rounded-lg"
           style={{ backgroundColor: theme.secondary_bg_color }}
         >
-          <InputButton
-            icon={Minus}
-            side={'left'}
-            onClick={() => handleClick(-1)}
-          />
+          <InputButton icon={Minus} onClick={() => handleClick(-1)} />
 
           <input
             type="number"
@@ -72,11 +68,7 @@ export const CustomAddModal = ({ onClose, onConfirm }: CustomAddModalProps) => {
             }}
           />
 
-          <InputButton
-            icon={Plus}
-            side={'right'}
-            onClick={() => handleClick(1)}
-          />
+          <InputButton icon={Plus} onClick={() => handleClick(1)} />
         </div>
 
         <div className="grid grid-cols-4 gap-2">
