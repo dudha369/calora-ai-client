@@ -1,7 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { useBackButton } from '@/shared/hooks/useBackButton';
-import { SectionItem } from '@/shared/ui/Section/SectionItem';
-import { SectionItemIcon } from '@/shared/ui/Section/SectionItemIcon';
 import {
   type LucideIcon,
   Monitor,
@@ -11,7 +8,11 @@ import {
   ChevronDown,
   Trash2,
 } from 'lucide-react';
+import { useBackButton } from '@/shared/hooks/useBackButton';
+import { SectionItem } from '@/shared/ui/Section/SectionItem';
+import { SectionItemIcon } from '@/shared/ui/Section/SectionItemIcon';
 import { Section } from '@/shared/ui/Section/Section';
+import { AddToHomeScreenCard } from '../components/AddToHomeScreenCard';
 import { useState, useRef, useEffect } from 'react';
 import { users } from '@/shared/api/users';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
@@ -149,16 +150,18 @@ export const SettingsPage = () => {
                     setLanguage(opt.code);
                     setLangDropdownOpen(false);
                   }}
-                  className="flex w-full items-center gap-3.5 px-4 py-3 transition-colors"
-                  style={{
-                    backgroundColor: isActive
-                      ? theme.accent_text_color
-                      : 'transparent',
-                  }}
+                  className="flex w-full items-center gap-3.5 px-4 py-3 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                 >
-                  <span className="flex h-7.5 w-7.5 shrink-0 items-center justify-center rounded-lg text-base">
+                  <span
+                    className="flex h-7.5 w-7.5 shrink-0 items-center justify-center text-xl"
+                    style={{
+                      fontFamily:
+                        '"Apple Color Emoji", "Noto Color Emoji", "Twemoji Country Flags", "Segoe UI Emoji", sans-serif',
+                    }}
+                  >
                     {opt.flag}
                   </span>
+
                   <span
                     className="text-base"
                     style={{
@@ -168,6 +171,7 @@ export const SettingsPage = () => {
                   >
                     {opt.label}
                   </span>
+
                   {isActive && (
                     <div
                       className="ml-auto h-2.5 w-2.5 rounded-full"
@@ -180,6 +184,8 @@ export const SettingsPage = () => {
           </div>
         </div>
       </Section>
+
+      <AddToHomeScreenCard />
 
       <Section>
         <SectionItem

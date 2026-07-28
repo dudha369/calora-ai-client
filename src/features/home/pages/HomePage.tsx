@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { CalendarDays, Flame, Sprout } from 'lucide-react';
+import { CalendarDays, Flame } from 'lucide-react';
 
 import { useUser } from '@/shared/context/UserContext';
 import { useTheme } from '@/shared/context/ThemeContext';
@@ -179,16 +179,15 @@ export const HomePage = () => {
 
           <div className="absolute left-1/2 flex -translate-x-1/2 items-center gap-1">
             <span
-              className=" text-xl leading-none font-semibold tracking-wide"
+              className="text-xl leading-none font-semibold tracking-wide"
               style={{ color: theme.text_color }}
             >
               Calora AI
             </span>
-            <Sprout className="text-[#90EE90]" size={20} />
           </div>
 
           <div
-            className="flex cursor-pointer items-center gap-1 rounded-2xl py-px pr-3 pl-2 transition-opacity active:opacity-70"
+            className="flex cursor-pointer items-center gap-1 rounded-2xl py-1 pr-2.5 pl-2 transition-opacity active:opacity-70"
             style={{
               backgroundColor: theme.section_bg_color,
               color: theme.text_color,
@@ -201,7 +200,7 @@ export const HomePage = () => {
               color={flameColorProps.color}
               fill={flameColorProps.fill}
             />
-            <span className="text-lg">{currentStreak}</span>
+            <span className="text-lg leading-none">{currentStreak}</span>
           </div>
         </section>
 

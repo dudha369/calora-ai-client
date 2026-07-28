@@ -60,6 +60,12 @@ export function App() {
     return <Navigate to="/onboarding" replace />;
   }
 
+  const isAdminPage = location.pathname.startsWith('/profile/admin');
+  const isHomePage = location.pathname === '/';
+  const logoSize = isHomePage
+    ? { width: 32, height: 32 }
+    : { width: 28, height: 28 };
+
   return (
     <div
       className="relative flex h-full flex-col"
@@ -82,7 +88,6 @@ export function App() {
         />
       ) : session.status === 'ready' ? (
         <>
-          {/* Рендерим шапку только если safeTop достаточно большой, чтобы вместить интерфейс */}
           {safeTop >= 44 && (
             <header
               className="pointer-events-none fixed top-0 left-0 flex w-full flex-col justify-end"
@@ -91,14 +96,22 @@ export function App() {
                 color: theme.button_text_color,
               }}
             >
-              {/* Контейнер высотой с нативную панель кнопок TG (44px) */}
-              {/* Логотип автоматически отцентрируется ровно между "Close" и "Menu" */}
-              <div className="flex h-11 w-full items-center justify-center">
+              <div className="flex h-11 w-full items-center justify-center gap-1">
                 <img
                   src={logoUrl}
                   alt="logo"
-                  className="pointer-events-auto h-9 w-9 shrink-0 rounded-full bg-white shadow-sm"
+                  className="size-${isHomePage ? 7 : 9} pointer-events-auto shrink-0 rounded-full bg-white shadow-sm"
+                  style={logoSize}
                 />
+
+                {!isHomePage && (
+                  <span
+                    className="text-xl leading-none font-semibold tracking-wide"
+                    style={{ color: theme.text_color }}
+                  >
+                    Calora AI
+                  </span>
+                )}
               </div>
             </header>
           )}
@@ -108,10 +121,9 @@ export function App() {
             <ScannerProvider>
               <ScrollContainerContext.Provider value={scrollContainerRef}>
                 <main
+                  ref={scrollContainerRef}
                   className={`relative flex flex-1 flex-col overflow-y-auto overscroll-y-contain *:pb-4 ${
-                    location.pathname.startsWith('/admin')
-                      ? 'w-full'
-                      : 'mx-auto w-full max-w-screen-sm'
+                    isAdminPage ? 'w-full' : 'mx-auto w-full max-w-screen-sm'
                   }`}
                   style={{
                     backgroundColor: theme.bg_color,
@@ -121,10 +133,9 @@ export function App() {
                 </main>
               </ScrollContainerContext.Provider>
 
-              {location.pathname !== '/onboarding' &&
-                !location.pathname.startsWith('/profile/admin') && (
-                  <NavigationBar />
-                )}
+              {location.pathname !== '/onboarding' && !isAdminPage && (
+                <NavigationBar />
+              )}
             </ScannerProvider>
           </UserContext.Provider>
         </>

@@ -34,7 +34,7 @@ export const ProfilePage = () => {
 
   return (
     <div className="flex flex-col gap-6 px-4">
-      <section className="flex flex-col items-center gap-2 pt-1">
+      <section className="flex flex-col items-center gap-3 pt-3">
         <div
           className="flex size-24 items-center justify-center rounded-full"
           style={{ backgroundColor: theme.secondary_bg_color }}
