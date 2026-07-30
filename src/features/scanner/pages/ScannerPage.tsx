@@ -43,19 +43,9 @@ export const ScannerPage = () => {
     state?.photo ?? null,
   );
 
-  const { status, runAnalysis, retry } = useFoodAnalysis(photo);
+  const { status, runAnalysis, retry, pendingNotes } = useFoodAnalysis(photo);
 
   // ── Ориентация зависит от состояния (сканирование vs результат) ──────────
-  //
-  // Сканирование (photo === null):
-  //   • data-page="scanner" → исключает body из CSS portrait lock
-  //   • Разблокируем ориентацию → телефон может повернуться в landscape
-  //   • NavigationBar переключается в вертикальный sidebar-режим
-  //
-  // Результат (photo !== null):
-  //   • Убираем data-page → CSS portrait lock снова активен
-  //   • Блокируем ориентацию → стабильный portrait UI для просмотра результата
-  //   • NavigationBar возвращается в обычный горизонтальный режим
   useEffect(() => {
     if (photo === null) {
       document.body.setAttribute('data-page', 'scanner');
@@ -74,11 +64,6 @@ export const ScannerPage = () => {
     };
   }, [photo]);
 
-  // ── Сообщаем NavigationBar когда камера реально стримит живую картинку ────
-  //
-  // isLiveCamera=true → NavigationBar активирует counter-rotation иконок.
-  // Как только фото сделано (photo !== null) → иконки возвращаются в 0°,
-  // т.к. в режиме просмотра результата нужен стабильный portrait UI.
   const { setLiveCamera } = useScanner();
   useEffect(() => {
     setLiveCamera(photo === null);
@@ -97,10 +82,7 @@ export const ScannerPage = () => {
     return () => {
       const key = pendingPhotoKeyRef.current;
       if (key) {
-        food.deleteOrphanPhoto(key).catch(() => {
-          // Молчаливый fail — фото останется в B2, но это некритично.
-          // Периодический cleanup job решит это на уровне инфраструктуры.
-        });
+        food.deleteOrphanPhoto(key).catch(() => {});
       }
     };
   }, []);
@@ -169,8 +151,6 @@ export const ScannerPage = () => {
     if (status.kind !== 'food') return;
     pendingPhotoKeyRef.current = null;
 
-    // Пользователь открепил фото — чистим уже загруженный в B2 orphan-файл,
-    // раз он не будет привязан ни к одному FoodLog.
     if (!includePhoto && status.result.photo_key) {
       food.deleteOrphanPhoto(status.result.photo_key).catch(() => {});
     }
@@ -225,6 +205,7 @@ export const ScannerPage = () => {
           onSubmit={runAnalysis}
           onClose={clearPhoto}
           isProcessing={status.kind === 'analyzing'}
+          initialNotes={status.kind === 'analyzing' ? pendingNotes : undefined}
         />
       )}
 
@@ -251,7 +232,9 @@ export const ScannerPage = () => {
           onClose={clearPhoto}
           actionLabel={t('try_again')}
           iconCustomEmojiId="5260687119092817530"
-          onAction={retry}
+          // "Еда не найдена" — это не сбой, а сигнал переснять фото:
+          // retry с тем же кадром бессмысленен, ведём на камеру заново.
+          onAction={status.isNoFood ? clearPhoto : retry}
         >
           <p
             className="py-2 text-center text-sm"

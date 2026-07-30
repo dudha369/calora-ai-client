@@ -8,6 +8,7 @@ interface FoodNotesSheetProps {
   onSubmit: (notes: string) => void;
   onClose: () => void;
   isProcessing: boolean;
+  initialNotes?: string;
 }
 
 const MAX_NOTES_LENGTH = 300;
@@ -16,10 +17,11 @@ export const FoodNotesSheet = ({
   onSubmit,
   onClose,
   isProcessing,
+  initialNotes = '',
 }: FoodNotesSheetProps) => {
   const theme = useTheme();
   const { t } = useTranslation('scanner_page');
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(initialNotes);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {

@@ -63,8 +63,8 @@ export function App() {
   const isAdminPage = location.pathname.startsWith('/profile/admin');
   const isHomePage = location.pathname === '/';
   const logoSize = isHomePage
-    ? { width: 32, height: 32 }
-    : { width: 28, height: 28 };
+    ? { width: 30, height: 30 }
+    : { width: 24, height: 24 };
 
   return (
     <div
@@ -96,7 +96,7 @@ export function App() {
                 color: theme.button_text_color,
               }}
             >
-              <div className="flex h-11 w-full items-center justify-center gap-1">
+              <div className="flex h-11 w-full items-center justify-center gap-2">
                 <img
                   src={logoUrl}
                   alt="logo"

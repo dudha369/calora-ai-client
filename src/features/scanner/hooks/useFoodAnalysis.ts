@@ -16,16 +16,28 @@ function dataUrlToFile(dataUrl: string, filename = 'photo.jpg'): File {
   return new File([bytes], filename, { type: mime });
 }
 
-function resolveErrorMessage(err: unknown): string {
-  let detail: string | undefined;
-
+function extractErrorDetail(err: unknown): string | undefined {
   if (axios.isAxiosError(err)) {
-    detail = err.response?.data?.detail;
-  } else if (err && typeof err === 'object' && 'detail' in err) {
-    detail = (err as { detail?: string }).detail;
+    return err.response?.data?.detail;
   }
+  if (err && typeof err === 'object' && 'detail' in err) {
+    return (err as { detail?: string }).detail;
+  }
+  return undefined;
+}
 
-  if (detail === 'no_food_detected') {
+/**
+ * "Еда не найдена" — не сбой анализа, а сигнал переснять фото.
+ * Отличаем от прочих ошибок (Gemini недоступен, сеть и т.п.), для которых
+ * уместен retry с тем же фото/notes — см. ScannerPage: для no_food_detected
+ * кнопка ошибки должна вести на clearPhoto(), а не на retry().
+ */
+function isNoFoodDetected(err: unknown): boolean {
+  return extractErrorDetail(err) === 'no_food_detected';
+}
+
+function resolveErrorMessage(err: unknown): string {
+  if (isNoFoodDetected(err)) {
     return 'На фотографии не найдена еда. Убедитесь, что продукт в кадре, и попробуйте ещё раз.';
   }
   if (err instanceof Error) return err.message;
@@ -43,7 +55,8 @@ export type AnalysisStatus =
   | { kind: 'ready' }
   | { kind: 'analyzing' }
   | { kind: 'food'; result: FoodAnalyzeResponse }
-  | { kind: 'error'; message: string };
+  /** isNoFood=true → еда не распознана на фото, retry бессмысленен, нужно новое фото */
+  | { kind: 'error'; message: string; isNoFood: boolean };
 
 export interface UseFoodAnalysisReturn {
   status: AnalysisStatus;
@@ -53,6 +66,10 @@ export interface UseFoodAnalysisReturn {
    *  для кнопки "Попробовать снова" при ошибке (например 503 от Gemini),
    *  без необходимости переснимать фото и заново вводить уточнение. */
   retry: () => void;
+  /** Notes, с которыми выполняется/выполнялся последний анализ. Нужно,
+   *  чтобы FoodNotesSheet, смонтированный заново во время retry (минуя
+   *  'ready'), мог показать уже сохранённое уточнение, а не пустое поле. */
+  pendingNotes: string | undefined;
 }
 
 /**
@@ -127,7 +144,11 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
           }
         } catch (err) {
           if (requestIdRef.current === requestId) {
-            setStatus({ kind: 'error', message: resolveErrorMessage(err) });
+            setStatus({
+              kind: 'error',
+              message: resolveErrorMessage(err),
+              isNoFood: isNoFoodDetected(err),
+            });
           }
         }
       })();
@@ -137,7 +158,7 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
 
   const retry = useCallback(() => {
     runAnalysis(lastNotesRef.current);
-    }, [runAnalysis]);
+  }, [runAnalysis]);
 
-  return { status, runAnalysis, retry };
+  return { status, runAnalysis, retry, pendingNotes: lastNotesRef.current };
 }
