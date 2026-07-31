@@ -1,11 +1,12 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, ImageOff, Trash2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import {
   NutritionEditGrid,
   type NutritionValues,
 } from '@/shared/ui/NutritionEditGrid';
+import { MealPhotoToggle } from '@/shared/ui/MealPhotoToggle';
 import type { ProductData } from '../types/productData';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { useUser } from '@/shared/context/UserContext';
@@ -15,7 +16,6 @@ import {
   getUserAllergenKeys,
 } from '@/features/home/lib/nutrition';
 import { asStringDict } from '@/shared/lib/i18nDict';
-import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
 
 interface BarcodeResultModalProps {
   product: ProductData;
@@ -58,7 +58,6 @@ export const BarcodeResultModal = ({
 }: BarcodeResultModalProps) => {
   const theme = useTheme();
   const { t } = useTranslation('scanner_page');
-  const { t: th } = useTranslation('home_page');
   const { user_data } = useUser();
   const startPortion = product.servingSizeG ?? DEFAULT_PORTION_G;
   const [isConfirming, setIsConfirming] = useState(false);
@@ -71,17 +70,11 @@ export const BarcodeResultModal = ({
     buildNutritionValues(product, startPortion),
   );
 
-  // ── Словари переводов для динамических ключей (аллергены, NOVA-группы) ───
-  // Ключ здесь статический ('allergens' / 'nova_groups'), поэтому сам вызов
-  // t() типобезопасен. returnObjects: true отдаёт вложенный объект целиком,
-  // а не строку — форму этого объекта уточняем через asStringDict (см.
-  // @/shared/lib/i18nDict.ts), общий для всех мест, где нужен такой словарь.
   const allergenNames = asStringDict(t('allergens', { returnObjects: true }));
   const novaGroupNames = asStringDict(
     t('nova_groups', { returnObjects: true }),
   );
 
-  // ── Аллергены: сверяем ограничения из профиля с составом товара ──────────
   const userAllergenKeys = useMemo(
     () =>
       getUserAllergenKeys(
@@ -113,49 +106,26 @@ export const BarcodeResultModal = ({
 
   return (
     <BottomSheet
-      title="Продукт найден"
+      title={t('product_found')}
       onClose={onClose}
-      actionLabel="Добавить"
+      actionLabel={t('add')}
       iconCustomEmojiId="5274008024585871702"
       onAction={handleConfirm}
       isProcessing={isConfirming}
       secondaryAction={{
-        text: 'Отменить',
+        text: t('cancel'),
         iconCustomEmojiId: '5260342697075416641',
         position: 'left',
       }}
     >
       <div className="flex flex-col gap-3">
-        {product.imageUrl && (
-          <>
-            {includePhoto ? (
-              <MealImageOverlay
-                photo_url={product.imageUrl}
-                displayName={product.name}
-                button={{
-                  onClick: () => setIncludePhoto(false),
-                  icon: Trash2,
-                  iconColor: theme.destructive_text_color,
-                }}
-              />
-            ) : (
-              <button
-                onClick={() => setIncludePhoto(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 transition-opacity active:opacity-60"
-                style={{ backgroundColor: theme.secondary_bg_color }}
-              >
-                <ImageOff size={18} style={{ color: theme.hint_color }} />
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: theme.hint_color }}
-                >
-                  {th('photo_removed')}
-                </span>
-              </button>
-            )}
-          </>
-        )}
-        {/* Product name / brand */}
+        <MealPhotoToggle
+          photoUrl={product.imageUrl}
+          displayName={product.name}
+          included={includePhoto}
+          onToggle={setIncludePhoto}
+        />
+
         <div className="flex flex-col items-center gap-0.5 px-2 pt-1">
           <p
             className="text-center text-sm font-medium"
@@ -173,7 +143,6 @@ export const BarcodeResultModal = ({
           )}
         </div>
 
-        {/* NOVA — степень промышленной обработки */}
         {product.novaGroup != null && (
           <div className="flex justify-center">
             <span
@@ -189,7 +158,6 @@ export const BarcodeResultModal = ({
           </div>
         )}
 
-        {/* Предупреждение об аллергенах */}
         {hasAllergyWarning && (
           <div
             className="flex items-start gap-2 rounded-2xl p-3"
@@ -234,8 +202,6 @@ export const BarcodeResultModal = ({
           </div>
         )}
 
-        {/* Аллергия указана свободным текстом — структурно сверить нельзя,
-            только напоминаем проверить состав самостоятельно */}
         {allergyNote && (
           <p
             className="px-1 text-center text-xs leading-relaxed"
@@ -245,7 +211,6 @@ export const BarcodeResultModal = ({
           </p>
         )}
 
-        {/* Serving size quick-pick */}
         {product.servingSizeG != null &&
           values.portion_g !== product.servingSizeG && (
             <div className="flex justify-center">
@@ -266,7 +231,6 @@ export const BarcodeResultModal = ({
             </div>
           )}
 
-        {/* Editable nutrition grid (with portion) */}
         <NutritionEditGrid
           values={values}
           baseValues={baseValues}

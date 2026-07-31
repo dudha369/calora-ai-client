@@ -43,5 +43,8 @@
     "confirmed": "Contains allergen",
     "possible": "May contain traces",
     "check_manually": "You have a noted allergy ({{note}}) — please check the ingredients manually"
-  }
+  },
+  "add": "Add",
+  "product_found": "Product found",
+  "meal_name_placeholder": "Meal name"
 }

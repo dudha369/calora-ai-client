@@ -1,5 +1,4 @@
 import { useState, useMemo, useEffect } from 'react';
-import { ImageOff, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { round1 } from '@/features/home/lib/nutrition';
@@ -8,7 +7,7 @@ import {
   type NutritionGridStats,
 } from '../NutritionGrid/NutritionGrid';
 import type { FoodLog, FoodItemIn } from '@/shared/types/api/food';
-import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
+import { MealPhotoToggle } from '@/shared/ui/MealPhotoToggle';
 
 export interface CopyMealResult {
   items: FoodItemIn[];
@@ -25,7 +24,6 @@ export const CopyMealSheetContent = ({
   onDataChange,
 }: CopyMealSheetContentProps) => {
   const theme = useTheme();
-  const { t } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
 
   const [name, setName] = useState(
@@ -88,35 +86,12 @@ export const CopyMealSheetContent = ({
 
   return (
     <div className="flex flex-col gap-3 pb-1">
-      {log.photo_url && (
-        <>
-          {includePhoto ? (
-            <MealImageOverlay
-              photo_url={log.photo_url}
-              displayName={name}
-              button={{
-                onClick: () => setIncludePhoto(false),
-                icon: Trash2,
-                iconColor: theme.destructive_text_color,
-              }}
-            />
-          ) : (
-            <button
-              onClick={() => setIncludePhoto(true)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 transition-opacity active:opacity-60"
-              style={{ backgroundColor: theme.secondary_bg_color }}
-            >
-              <ImageOff size={18} style={{ color: theme.hint_color }} />
-              <span
-                className="text-sm font-medium"
-                style={{ color: theme.hint_color }}
-              >
-                {t('photo_removed')}
-              </span>
-            </button>
-          )}
-        </>
-      )}
+      <MealPhotoToggle
+        photoUrl={log.photo_url}
+        displayName={name}
+        included={includePhoto}
+        onToggle={setIncludePhoto}
+      />
 
       <div className="flex flex-col gap-1.5">
         <span

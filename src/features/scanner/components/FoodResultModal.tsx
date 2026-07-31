@@ -1,19 +1,14 @@
-import { useMemo, useState, useCallback } from 'react';
-import { Trash2, ImageOff } from 'lucide-react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
-import {
-  NutritionEditGrid,
-  type NutritionValues,
-} from '@/shared/ui/NutritionEditGrid';
-import { NutritionGrid } from '../../home/components/NutritionGrid/NutritionGrid';
-import { sumNutrition } from '@/features/home/lib/nutrition';
+import { DishEditList, type DishEditListItem } from '@/shared/ui/DishEditList';
+import { MealPhotoToggle } from '@/shared/ui/MealPhotoToggle';
+import type { NutritionValues } from '@/shared/ui/NutritionEditGrid';
 import type {
   AnalyzedDish,
   FoodAnalyzeResponse,
 } from '@/shared/types/api/food';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
 
 interface FoodResultModalProps {
   result: FoodAnalyzeResponse;
@@ -66,54 +61,49 @@ export const FoodResultModal = ({
   onClose,
 }: FoodResultModalProps) => {
   const theme = useTheme();
-  const { t } = useTranslation('home_page');
+  const { t } = useTranslation('scanner_page');
   const [dishes, setDishes] = useState<AnalyzedDish[]>(result.dishes);
   const [mealName, setMealName] = useState(result.meal_name ?? '');
   const [isConfirming, setIsConfirming] = useState(false);
   const [includePhoto, setIncludePhoto] = useState(!!photo);
   const isMultiDish = dishes.length > 1;
 
-  // Snapshot of original values per dish for proportional sync
   const [baseValues] = useState<NutritionValues[]>(() =>
     result.dishes.map(dishToNutrition),
   );
 
-  const totals = useMemo(() => sumNutrition(dishes), [dishes]);
+  const dishItems: DishEditListItem[] = dishes.map((d) => ({
+    name: d.name,
+    values: dishToNutrition(d),
+  }));
 
-  const updateDishName = (index: number, name: string) =>
-    setDishes((prev) => prev.map((d, i) => (i === index ? { ...d, name } : d)));
-
-  const updateDishNutrition = useCallback(
-    (index: number, values: NutritionValues) =>
+  const handleItemChange = useCallback(
+    (index: number, item: DishEditListItem) => {
       setDishes((prev) =>
         prev.map((d, i) =>
-          i === index ? nutritionToDish(d.name, d.confidence, values) : d,
+          i === index
+            ? nutritionToDish(item.name, d.confidence, item.values)
+            : d,
         ),
-      ),
+      );
+    },
     [],
   );
 
   // Когда после удаления остаётся ровно одно блюдо — meal_name должен стать
   // названием этого блюда, а не оставаться тем, что придумал ИИ для целого
-  // (изначально многосоставного) приёма пищи. Именно эту рассинхронизацию
-  // ловил handleConfirm раньше: поле ввода названия скрывалось
-  // (isMultiDish === false), но старое значение mealName оставалось в state
-  // и уходило на сервер.
-  const removeDish = (index: number) =>
+  // (изначально многосоставного) приёма пищи.
+  const handleRemoveItem = useCallback((index: number) => {
     setDishes((prev) => {
       const next = prev.filter((_, i) => i !== index);
-      if (next.length === 1) {
-        setMealName(next[0].name);
-      }
+      if (next.length === 1) setMealName(next[0].name);
       return next;
     });
+  }, []);
 
   const handleConfirm = async () => {
     setIsConfirming(true);
     try {
-      // Для одного блюда название всегда берём из самого блюда — игнорируя
-      // возможный устаревший mealName. Это подстраховка на случай, если
-      // state разошёлся ещё каким-то путём.
       const finalName = isMultiDish
         ? mealName.trim() || dishes[0]?.name || ''
         : dishes[0]?.name || '';
@@ -125,57 +115,33 @@ export const FoodResultModal = ({
 
   return (
     <BottomSheet
-      title="Оценка блюда"
+      title={t('dish_rating')}
       onClose={onClose}
-      actionLabel="Добавить"
+      actionLabel={t('add')}
       iconCustomEmojiId="5274008024585871702"
       onAction={handleConfirm}
       isProcessing={isConfirming}
       actionDisabled={dishes.length === 0}
       secondaryAction={{
-        text: 'Отменить',
+        text: t('cancel'),
         iconCustomEmojiId: '5260342697075416641',
         position: 'left',
       }}
     >
       <div className="flex flex-col gap-3">
-        {photo && (
-          <>
-            {includePhoto ? (
-              <MealImageOverlay
-                photo_url={photo}
-                displayName={mealName || 'food'}
-                button={{
-                  onClick: () => setIncludePhoto(false),
-                  icon: Trash2,
-                  iconColor: theme.destructive_text_color,
-                }}
-              />
-            ) : (
-              <button
-                onClick={() => setIncludePhoto(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 transition-opacity active:opacity-60"
-                style={{ backgroundColor: theme.secondary_bg_color }}
-              >
-                <ImageOff size={18} style={{ color: theme.hint_color }} />
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: theme.hint_color }}
-                >
-                  {t('photo_removed')}
-                </span>
-              </button>
-            )}
-          </>
-        )}
+        <MealPhotoToggle
+          photoUrl={photo}
+          displayName={mealName || t('captured_photo')}
+          included={includePhoto}
+          onToggle={setIncludePhoto}
+        />
 
-        {/* Editable meal name — shown only for multi-dish */}
         {isMultiDish && (
           <input
             type="text"
             value={mealName}
             onChange={(e) => setMealName(e.target.value)}
-            placeholder="Название приёма пищи"
+            placeholder={t('meal_name_placeholder')}
             className="w-full rounded-xl px-3 py-2.5 text-base font-bold"
             style={{
               backgroundColor: theme.secondary_bg_color,
@@ -184,47 +150,12 @@ export const FoodResultModal = ({
           />
         )}
 
-        {dishes.map((dish, i) => (
-          <div
-            key={i}
-            className="flex flex-col gap-2.5 rounded-2xl p-3"
-            style={{ border: `2px solid ${theme.section_bg_color}` }}
-          >
-            {/* Name row */}
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={dish.name}
-                onChange={(e) => updateDishName(i, e.target.value)}
-                className="min-w-0 flex-1 rounded-xl px-3 py-2 text-sm font-semibold"
-                style={{
-                  backgroundColor: theme.secondary_bg_color,
-                  color: theme.text_color,
-                }}
-              />
-              {dishes.length > 1 && (
-                <button
-                  onClick={() => removeDish(i)}
-                  aria-label="Удалить блюдо"
-                  className="shrink-0 rounded-lg p-2 transition-opacity active:opacity-60"
-                  style={{ color: theme.destructive_text_color }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              )}
-            </div>
-
-            {/* Editable nutrition grid */}
-            <NutritionEditGrid
-              values={dishToNutrition(dish)}
-              baseValues={baseValues[i] ?? dishToNutrition(dish)}
-              onChange={(v) => updateDishNutrition(i, v)}
-            />
-          </div>
-        ))}
-
-        {/* Totals (read-only NutritionGrid) — shown only for multi-dish */}
-        {dishes.length > 1 && <NutritionGrid data={totals} />}
+        <DishEditList
+          items={dishItems}
+          baseValues={baseValues}
+          onItemChange={handleItemChange}
+          onRemoveItem={handleRemoveItem}
+        />
 
         {result.ask_user && result.portion_note && (
           <p

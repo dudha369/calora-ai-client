@@ -1,15 +1,8 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Trash2, ImageOff } from 'lucide-react';
-import { NutritionGrid } from '../NutritionGrid/NutritionGrid';
-import {
-  NutritionEditGrid,
-  type NutritionValues,
-} from '@/shared/ui/NutritionEditGrid';
-import { useTheme } from '@/shared/context/ThemeContext';
+import { useState, useCallback, useEffect } from 'react';
+import { DishEditList, type DishEditListItem } from '@/shared/ui/DishEditList';
+import { MealPhotoToggle } from '@/shared/ui/MealPhotoToggle';
+import type { NutritionValues } from '@/shared/ui/NutritionEditGrid';
 import type { FoodLog, FoodItem } from '@/shared/types/api/food';
-import { sumNutrition } from '@/features/home/lib/nutrition';
-import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
 
 export interface EditableItem {
   food_name: string;
@@ -73,122 +66,53 @@ export const EditMealSheetContent = ({
   log,
   onDataChange,
 }: EditMealSheetContentProps) => {
-  const theme = useTheme();
-  const { t } = useTranslation('home_page');
-
   const [editItems, setEditItems] = useState<EditableItem[]>(() =>
     log.items.map(toEditable),
   );
-  const [baseItems] = useState<NutritionValues[]>(() =>
+  const [baseValues] = useState<NutritionValues[]>(() =>
     log.items.map(toEditable).map(itemToNutrition),
   );
-  const [photoRemoved, setPhotoRemoved] = useState(false);
+  const [photoIncluded, setPhotoIncluded] = useState(!!log.photo_url);
 
-  const manyItems = editItems.length > 1;
-
-  const updateItemName = (index: number, name: string) =>
-    setEditItems((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, food_name: name } : item,
-      ),
-    );
-
-  const updateItemNutrition = useCallback(
-    (index: number, values: NutritionValues) =>
+  const handleItemChange = useCallback(
+    (index: number, item: DishEditListItem) => {
       setEditItems((prev) =>
-        prev.map((item, i) =>
-          i === index ? nutritionToItem(item.food_name, values) : item,
+        prev.map((it, i) =>
+          i === index ? nutritionToItem(item.name, item.values) : it,
         ),
-      ),
+      );
+    },
     [],
   );
 
-  const removeItem = (index: number) =>
+  const handleRemoveItem = useCallback((index: number) => {
     setEditItems((prev) => prev.filter((_, i) => i !== index));
-
-  const editTotals = useMemo(() => sumNutrition(editItems), [editItems]);
+  }, []);
 
   useEffect(() => {
-    onDataChange(editItems, photoRemoved);
-  }, [editItems, photoRemoved, onDataChange]);
+    onDataChange(editItems, !!log.photo_url && !photoIncluded);
+  }, [editItems, photoIncluded, log.photo_url, onDataChange]);
+
+  const dishItems: DishEditListItem[] = editItems.map((item) => ({
+    name: item.food_name,
+    values: itemToNutrition(item),
+  }));
 
   return (
     <div className="flex flex-col gap-2.5 pb-1">
-      {log.photo_url && (
-        <>
-          {!photoRemoved ? (
-            <MealImageOverlay
-              photo_url={log.photo_url}
-              displayName={log.meal_name ?? editItems[0]?.food_name ?? ''}
-              button={{
-                onClick: () => setPhotoRemoved(true),
-                icon: Trash2,
-                iconColor: theme.destructive_text_color,
-              }}
-            />
-          ) : (
-            <button
-              onClick={() => setPhotoRemoved(false)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl py-4 transition-opacity active:opacity-60"
-              style={{ backgroundColor: theme.secondary_bg_color }}
-            >
-              <ImageOff size={18} style={{ color: theme.hint_color }} />
-              <span
-                className="text-sm font-medium"
-                style={{ color: theme.hint_color }}
-              >
-                {t('photo_removed')}
-              </span>
-            </button>
-          )}
-        </>
-      )}
+      <MealPhotoToggle
+        photoUrl={log.photo_url}
+        displayName={log.meal_name ?? editItems[0]?.food_name ?? ''}
+        included={photoIncluded}
+        onToggle={setPhotoIncluded}
+      />
 
-      {editItems.map((item, i) => (
-        <div
-          key={i}
-          className="flex flex-col gap-2.5 rounded-2xl p-3"
-          style={{ border: `2px solid ${theme.section_bg_color}` }}
-        >
-          <div className="flex items-center gap-2">
-            {manyItems && (
-              <span
-                className="inline-flex size-7.5 shrink-0 items-center justify-center rounded-full text-base font-medium"
-                style={{
-                  border: `${theme.hint_color} 2px dashed`,
-                  color: theme.text_color,
-                }}
-              >
-                {i + 1}
-              </span>
-            )}
-
-            <textarea
-              value={item.food_name}
-              onChange={(e) => updateItemName(i, e.target.value)}
-              className="field-sizing-content max-h-[calc(2lh+1rem)] min-h-[calc(1lh+1rem)] w-full flex-1 rounded-xl px-3 py-2 text-sm font-semibold"
-              style={{
-                backgroundColor: theme.section_bg_color,
-                color: theme.text_color,
-              }}
-            />
-          </div>
-
-          <NutritionEditGrid
-            values={itemToNutrition(item)}
-            baseValues={baseItems[i] ?? itemToNutrition(item)}
-            onRemoveItem={manyItems ? () => removeItem(i) : undefined}
-            onChange={(v) => updateItemNutrition(i, v)}
-          />
-        </div>
-      ))}
-      <div className="flex flex-col gap-px">
-        <span
-          className="text-base font-medium"
-          style={{ color: theme.text_color }}
-        ></span>
-        <NutritionGrid data={editTotals} />
-      </div>
+      <DishEditList
+        items={dishItems}
+        baseValues={baseValues}
+        onItemChange={handleItemChange}
+        onRemoveItem={handleRemoveItem}
+      />
     </div>
   );
 };
