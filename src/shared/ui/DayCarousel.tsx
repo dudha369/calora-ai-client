@@ -1,9 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import useEmblaCarousel from 'embla-carousel-react';
-import { DayContent } from './DayContent';
 import { addDays, isSameDay, startOfDay, toApiDate } from '@/shared/lib/date';
-import type { FoodLog } from '@/shared/types/api/food';
 
 interface DayCarouselProps {
   selectedDate: Date;
@@ -11,8 +9,7 @@ interface DayCarouselProps {
   minDate: Date;
   maxDate: Date;
   onDateChange: (date: Date) => void;
-  onFoodLogClick: (log: FoodLog) => void;
-  deletingId: number | null;
+  renderDay: (date: Date, isActive: boolean) => ReactNode;
 }
 
 const BUFFER_SIZE = 14;
@@ -58,8 +55,7 @@ export const DayCarousel = ({
   minDate,
   maxDate,
   onDateChange,
-  onFoodLogClick,
-  deletingId,
+  renderDay,
 }: DayCarouselProps) => {
   const allowedDates = useMemo(
     () => new Set(dates.map((date) => toApiDate(startOfDay(date)))),
@@ -214,12 +210,7 @@ export const DayCarousel = ({
           return (
             <div key={date.toISOString()} className="min-w-0 flex-[0_0_100%]">
               {isVisible ? (
-                <DayContent
-                  date={date}
-                  isActive={isActive}
-                  onFoodLogClick={onFoodLogClick}
-                  deletingId={deletingId}
-                />
+                renderDay(date, isActive)
               ) : (
                 <div className="h-full w-full" />
               )}

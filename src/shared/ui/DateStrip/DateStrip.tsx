@@ -4,7 +4,7 @@ import { WheelGesturesPlugin } from 'embla-carousel-wheel-gestures';
 
 import { DateStripItem } from './DateStripItem';
 import { isSameDay, toApiDate, startOfDay } from '@/shared/lib/date';
-import type { ActiveDateSets } from '../../hooks/useActiveDates';
+import type { ActiveDateSets } from '@/shared/hooks/useActiveDates';
 
 const GAP = 4;
 const MIN_ITEM = 48;

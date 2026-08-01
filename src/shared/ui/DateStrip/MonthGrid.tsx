@@ -1,8 +1,8 @@
 import { useTheme } from '@/shared/context/ThemeContext';
-import { useActiveDates } from '../../hooks/useActiveDates';
+import { useActiveDates } from '@/shared/hooks/useActiveDates';
 import { isSameDay, startOfDay, toApiDate } from '@/shared/lib/date';
-import { buildCalendarCells } from '../../lib/calendarMonths';
-import { getMarkerBackground } from '../../lib/getMarkerBackground';
+import { buildCalendarCells } from '@/shared/lib/calendarMonths';
+import { getMarkerBackground } from '@/shared/lib/getMarkerBackground';
 
 interface MonthGridProps {
   year: number;
@@ -14,12 +14,6 @@ interface MonthGridProps {
   onSelect: (date: Date) => void;
 }
 
-/**
- * Сетка дней одного месяца + собственный useActiveDates под этот месяц.
- * Рендерится только для активного слайда и его ближайших соседей
- * (см. RENDER_RADIUS в Calendar.tsx) — иначе пришлось бы держать
- * по сетевому запросу на каждый месяц в окне карусели одновременно.
- */
 export const MonthGrid = ({
   year,
   month,

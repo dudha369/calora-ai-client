@@ -5,14 +5,15 @@ import { CalendarDays, Flame } from 'lucide-react';
 
 import { useUser } from '@/shared/context/UserContext';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { DateStrip } from '../components/DateStrip/DateStrip';
-import { Calendar } from '../components/DateStrip/Calendar';
-import { DayCarousel } from '../components/DayCarousel';
-import { useDateStrip } from '../hooks/useDateStrip';
+import { DateStrip } from '@/shared/ui/DateStrip/DateStrip';
+import { Calendar } from '@/shared/ui/DateStrip/Calendar';
+import { DayCarousel } from '@/shared/ui/DayCarousel';
+import { DayContent } from '../components/DayContent';
+import { useDateStrip } from '@/shared/hooks/useDateStrip';
 import { food } from '@/shared/api/food';
 import { startOfDay, toApiDate } from '@/shared/lib/date';
 import { getFlameColor } from '../lib/getFlameColor';
-import { useActiveDates } from '../hooks/useActiveDates';
+import { useActiveDates } from '@/shared/hooks/useActiveDates';
 import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
 import type { CopyMealResult } from '../components/FoodLog/CopyMealSheet';
 import type { FoodLog } from '@/shared/types/api/food';
@@ -61,9 +62,6 @@ export const HomePage = () => {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Переход из WaterLogModal ("к какому блюду привязана эта вода") —
-  // параметры разбираются один раз и сразу вычищаются из URL, чтобы
-  // повторный рендер/обновление страницы не переоткрывал модалку заново.
   useEffect(() => {
     const dateParam = searchParams.get('date');
     const foodLogIdParam = searchParams.get('foodLogId');
@@ -171,7 +169,7 @@ export const HomePage = () => {
         <section className="relative flex items-center justify-between px-px">
           <button
             onClick={() => setCalendarOpen(true)}
-            className="flex items-center rounded-xl transition-opacity active:opacity-60"
+            className="flex items-center rounded-xl transition-opacity hover:opacity-80"
             style={{ color: theme.hint_color }}
           >
             <CalendarDays size={26} />
@@ -226,8 +224,14 @@ export const HomePage = () => {
           minDate={minDate}
           maxDate={today}
           onDateChange={selectDate}
-          onFoodLogClick={onClick}
-          deletingId={deletingId}
+          renderDay={(date, isActive) => (
+            <DayContent
+              date={date}
+              isActive={isActive}
+              onFoodLogClick={onClick}
+              deletingId={deletingId}
+            />
+          )}
         />
       </div>
 

@@ -65,7 +65,7 @@ export const WaterLogCard = ({
               style={{ color: theme.hint_color }}
             >
               <Clock size={12} />
-              <span className="text-xs leading-none whitespace-nowrap">
+              <span className="w-8 text-xs leading-none whitespace-nowrap">
                 {formattedTime}
               </span>
             </div>
@@ -73,9 +73,8 @@ export const WaterLogCard = ({
             {(log.linked_food_log || log.notes) && (
               <>
                 <div
-                  className="mx-2 h-3 shrink-0 opacity-40"
+                  className="mx-2 h-3 w-px shrink-0 opacity-40"
                   style={{
-                    width: '1.5px',
                     backgroundColor: theme.hint_color,
                   }}
                 />

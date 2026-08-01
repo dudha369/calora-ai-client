@@ -11,7 +11,7 @@ import {
   generateMonthWindow,
   isSameMonth,
   type MonthWindowData,
-} from '../../lib/calendarMonths';
+} from '@/shared/lib/calendarMonths';
 import { MonthGrid } from './MonthGrid';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 
@@ -69,8 +69,6 @@ export const Calendar = ({
   const isSilentJump = useRef(false);
   const [activeIndex, setActiveIndex] = useState(windowData.activeIndex);
 
-  // Свайп пальцем и клик по стрелкам ведут к одному и тому же emblaApi —
-  // единственный источник правды о "текущем" месяце, не два рассинхронных state.
   useEffect(() => {
     if (!emblaApi) return;
 
@@ -79,8 +77,6 @@ export const Calendar = ({
       setActiveIndex(emblaApi.selectedScrollSnap());
     };
 
-    // Регенерация окна при приближении к его краю — тот же приём,
-    // что onSettle в DayCarousel.tsx.
     const onSettle = () => {
       const index = emblaApi.selectedScrollSnap();
       const current = windowRef.current.months[index];

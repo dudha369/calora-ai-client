@@ -1,5 +1,8 @@
 import { withOpacity } from '@/shared/lib/colors';
-import { MARKER_FOOD_COLOR, MARKER_WATER_COLOR } from '@/shared/constants/markers';
+import {
+  MARKER_FOOD_COLOR,
+  MARKER_WATER_COLOR,
+} from '@/shared/constants/markers';
 
 /**
  * Determines the activity-marker background for a date cell.

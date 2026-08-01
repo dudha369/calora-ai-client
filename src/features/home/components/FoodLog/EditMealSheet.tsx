@@ -2,60 +2,13 @@ import { useState, useCallback, useEffect } from 'react';
 import { DishEditList, type DishEditListItem } from '@/shared/ui/DishEditList';
 import { MealPhotoToggle } from '@/shared/ui/MealPhotoToggle';
 import type { NutritionValues } from '@/shared/ui/NutritionEditGrid';
-import type { FoodLog, FoodItem } from '@/shared/types/api/food';
-
-export interface EditableItem {
-  food_name: string;
-  portion_g: number;
-  calories: number;
-  protein_g: number;
-  fat_g: number;
-  carbs_g: number;
-  fiber_g: number;
-  sugar_g: number;
-  water_ml: number;
-}
-
-function toEditable(item: FoodItem): EditableItem {
-  return {
-    food_name: item.food_name,
-    portion_g: item.portion_g,
-    calories: item.calories,
-    protein_g: item.protein_g,
-    fat_g: item.fat_g,
-    carbs_g: item.carbs_g,
-    fiber_g: item.fiber_g,
-    sugar_g: item.sugar_g,
-    water_ml: item.water_ml,
-  };
-}
-
-function itemToNutrition(item: EditableItem): NutritionValues {
-  return {
-    portion_g: item.portion_g,
-    calories: item.calories,
-    protein_g: item.protein_g,
-    fat_g: item.fat_g,
-    carbs_g: item.carbs_g,
-    fiber_g: item.fiber_g,
-    sugar_g: item.sugar_g,
-    water_ml: item.water_ml,
-  };
-}
-
-function nutritionToItem(name: string, v: NutritionValues): EditableItem {
-  return {
-    food_name: name,
-    portion_g: v.portion_g,
-    calories: v.calories,
-    protein_g: v.protein_g,
-    fat_g: v.fat_g,
-    carbs_g: v.carbs_g,
-    fiber_g: v.fiber_g,
-    sugar_g: v.sugar_g,
-    water_ml: v.water_ml,
-  };
-}
+import type { FoodLog } from '@/shared/types/api/food';
+import type { EditableItem } from '../../types/EditableItem';
+import {
+  toEditable,
+  itemToNutrition,
+  nutritionToItem,
+} from '../../lib/convert';
 
 interface EditMealSheetContentProps {
   log: FoodLog;

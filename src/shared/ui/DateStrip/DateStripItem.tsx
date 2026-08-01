@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { getIntlLocale, capitalizeFirst } from '@/shared/lib/locale';
 import { withOpacity } from '@/shared/lib/colors';
-import { getMarkerBackground } from '../../lib/getMarkerBackground';
+import { getMarkerBackground } from '@/shared/lib/getMarkerBackground';
 import { useMemo } from 'react';
 
 interface DateStripItemProps {

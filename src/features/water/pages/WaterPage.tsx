@@ -1,232 +1,188 @@
-import { useTranslation } from 'react-i18next';
-import { GlassWater, Coffee, Milk, Icon } from 'lucide-react';
-import { bottlePlastic } from '@lucide/lab';
-import { useTheme } from '@/shared/context/ThemeContext';
-import { Section } from '@/shared/ui/Section/Section';
-import { ProgressBar } from '../components/ProgressBar';
-import { QuickAddButton } from '../components/QuickAddButton';
-import { CustomAddButton } from '../components/CustomAdd/CustomAddButton';
-import { CustomAddModal } from '../components/CustomAdd/CustomAddModal';
-import { WaterJug } from '@/features/water/components/WaterJug';
-import { useUser } from '@/shared/context/UserContext';
 import { useCallback, useMemo, useState } from 'react';
-import { toApiDate } from '@/shared/lib/date';
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
-import type { WaterByDateResponse, WaterLog } from '@/shared/types/api/water';
+import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CalendarDays } from 'lucide-react';
+
+import { useTheme } from '@/shared/context/ThemeContext';
+import { useUser } from '@/shared/context/UserContext';
+import { DateStrip } from '@/shared/ui/DateStrip/DateStrip';
+import { Calendar } from '@/shared/ui/DateStrip/Calendar';
+import { DayCarousel } from '@/shared/ui/DayCarousel';
+import { useDateStrip } from '@/shared/hooks/useDateStrip';
+import { useActiveDates } from '@/shared/hooks/useActiveDates';
+import { startOfDay, toApiDate } from '@/shared/lib/date';
 import { water } from '@/shared/api/water';
-import { MARKER_WATER_COLOR } from '@/shared/constants/markers';
-import { WaterLogList } from '@/features/water/components/WaterLog/WaterLogList';
-import { WaterLogModal } from '@/features/water/components/WaterLog/WaterLogModal';
+import type { WaterLog } from '@/shared/types/api/water';
+
+import { WaterDayContent } from '../components/WaterDayContent';
+import { WaterLogModal } from '../components/WaterLog/WaterLogModal';
+import { CustomAddModal } from '../components/CustomAdd/CustomAddModal';
 
 export const WaterPage = () => {
   const theme = useTheme();
-  const { t } = useTranslation('water_page');
   const { t: tc } = useTranslation('common');
   const { user_data } = useUser();
-  const qc = useQueryClient();
+  const queryClient = useQueryClient();
 
-  const userProfile = user_data?.profile;
-  const waterTrack = userProfile?.water_track ?? 'none';
-  const goalMl = user_data?.goal?.water_ml ?? 0;
-  const today = useMemo(() => toApiDate(new Date()), []);
+  const createdAt = user_data?.user.created_at;
 
-  const [customAddModalOpen, setCustomAddModalOpen] = useState(false);
+  const {
+    dates,
+    selectedDate,
+    monthKey,
+    today,
+    selectDate,
+    selectDateExternal,
+    pendingScrollDate,
+    clearPendingScroll,
+  } = useDateStrip();
+
+  const activeDates = useActiveDates(dates[0], dates[dates.length - 1]);
+
+  const minDate = useMemo(
+    () => (createdAt ? startOfDay(new Date(createdAt)) : today),
+    [createdAt, today],
+  );
+
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [waterLogModalOpen, setWaterLogModalOpen] = useState(false);
   const [currentWaterLog, setCurrentWaterLog] = useState<
     WaterLog | undefined
   >();
-  const [foodLogDeleting, setWaterLogDeleting] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const invalidateWater = () => {
-    qc.invalidateQueries({ queryKey: ['water', today] });
-    qc.invalidateQueries({ queryKey: ['stats', 'daily', today] });
-    qc.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
-  };
-
-  const { mutate: addWater } = useMutation({
-    mutationFn: (ml: number) => water.add({ log_date: today, amount_ml: ml }),
-    onSuccess: invalidateWater,
-  });
-
-  const { mutate: deleteLog } = useMutation({
-    mutationFn: (logId: number) => water.remove(logId),
-    onMutate: (logId: number) => {
-      setDeletingId(logId);
-      setWaterLogDeleting(true);
-    },
-    onSettled: () => {
-      setDeletingId(null);
-      setWaterLogDeleting(false);
-    },
-    onSuccess: () => {
-      invalidateWater();
-      setWaterLogModalOpen(false);
-    },
-  });
+  // CustomAddModal рендерится здесь, а не внутри WaterDayContent — тот
+  // компонент живёт в слайде DayCarousel/embla, а слайды трансформируются
+  // (translate3d) для листания. position:fixed внутри трансформированного
+  // предка перестаёт быть привязан к вьюпорту, из-за чего модалка "плывёт"
+  // и остаётся свайпаемой вместе со слайдом (см. память проекта).
+  const [customAddOpen, setCustomAddOpen] = useState(false);
 
   const onClick = useCallback((log: WaterLog) => {
     setCurrentWaterLog(log);
     setWaterLogModalOpen(true);
   }, []);
 
-  const { data, isLoading: waterLoading } = useQuery<WaterByDateResponse>({
-    queryKey: ['water', today],
-    queryFn: async () => (await water.getByDate(today)).data,
-    staleTime: 30_000,
-    placeholderData: keepPreviousData,
-    enabled: waterTrack !== 'none',
+  const invalidateAfterChange = useCallback(
+    (dateStr: string) => {
+      queryClient.invalidateQueries({ queryKey: ['water', dateStr] });
+      queryClient.invalidateQueries({ queryKey: ['stats', 'daily', dateStr] });
+      queryClient.invalidateQueries({ queryKey: ['stats', 'active-dates'] });
+    },
+    [queryClient],
+  );
+
+  const { mutate: deleteLog } = useMutation({
+    mutationFn: (logId: number) => water.remove(logId),
+    onMutate: (logId: number) => {
+      setDeletingId(logId);
+      setIsDeleting(true);
+    },
+    onSettled: () => {
+      setDeletingId(null);
+      setIsDeleting(false);
+    },
+    onSuccess: () => {
+      invalidateAfterChange(currentWaterLog?.log_date ?? toApiDate(new Date()));
+      setWaterLogModalOpen(false);
+    },
   });
 
-  const logs = data?.logs ?? [];
-  const totalMl = data?.total_ml ?? 0;
-  const remainMl = Math.max(goalMl - totalMl, 0);
+  const todayStr = toApiDate(new Date());
 
-  const percent = goalMl > 0 ? Math.round((totalMl * 100) / goalMl) : 0;
-  const displayPercent = percent > 100 ? 100 : percent;
+  const { mutate: addWaterCustom } = useMutation({
+    mutationFn: (ml: number) =>
+      water.add({ log_date: todayStr, amount_ml: ml }),
+    onSuccess: () => invalidateAfterChange(todayStr),
+  });
 
   return (
-    <div className="flex flex-col gap-2.5 px-4 py-2">
-      <Section className="flex flex-row items-stretch gap-2 overflow-hidden p-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <span
-              className="text-sm font-medium"
-              style={{ color: theme.hint_color }}
-            >
-              {t('today_progress')}
-            </span>
-
-            <div className="flex items-baseline gap-2">
-              <span
-                className="text-5xl font-bold tracking-tight"
-                style={{ color: MARKER_WATER_COLOR }}
-              >
-                {totalMl}
-              </span>
-              <span
-                className="text-xl font-medium"
-                style={{ color: MARKER_WATER_COLOR }}
-              >
-                {tc('units.ml')}
-              </span>
-            </div>
-
-            <span
-              className="text-sm font-medium"
-              style={{ color: theme.text_color }}
-            >
-              {t('of')} {goalMl} {tc('units.ml')} {t('goal')}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <ProgressBar current={totalMl} goal={goalMl} />
-            </div>
-
-            <span
-              className="text-sm font-medium"
-              style={{ color: theme.text_color }}
-            >
-              {displayPercent}%
-            </span>
-          </div>
+    <div className="flex h-full flex-col gap-2 pb-0!">
+      <header
+        className="sticky top-0 z-10 flex flex-col gap-2 px-4 pt-1"
+        style={{ backgroundColor: theme.bg_color }}
+      >
+        <section className="relative flex items-center justify-center px-px">
+          <button
+            onClick={() => setCalendarOpen(true)}
+            className="absolute left-0 flex items-center rounded-xl transition-opacity active:opacity-60"
+            style={{ color: theme.hint_color }}
+          >
+            <CalendarDays size={26} />
+          </button>
 
           <span
-            className="w-fit rounded-xl px-3 py-2 text-sm font-medium"
-            style={{
-              backgroundColor: theme.accent_text_color,
-              color: theme.text_color,
-            }}
+            className="text-xl leading-none font-semibold tracking-wide"
+            style={{ color: theme.text_color }}
           >
-            {remainMl} {tc('units.ml')} {t('left')}
+            {tc('nav.water')}
           </span>
-        </div>
-
-        <div className="flex w-28 shrink-0 items-center justify-center">
-          <WaterJug
-            valueMl={totalMl}
-            goalMl={goalMl}
-            waterColor={MARKER_WATER_COLOR}
-            className="h-full w-full max-w-28"
-          />
-        </div>
-      </Section>
-
-      <div className="flex flex-col gap-0.5">
-        <span
-          className="ml-1 text-base font-semibold"
-          style={{ color: theme.subtitle_text_color }}
-        >
-          {t('quick_add')}
-        </span>
-
-        <section className="grid grid-cols-5 gap-2">
-          <QuickAddButton
-            onClick={addWater}
-            icon={GlassWater}
-            volume={250}
-            title={t('glass')}
-          />
-          <QuickAddButton
-            onClick={addWater}
-            icon={Coffee}
-            volume={350}
-            title={t('cup')}
-          />
-          <QuickAddButton
-            onClick={addWater}
-            icon={Milk}
-            volume={500}
-            title={t('bottle')}
-          />
-          <QuickAddButton
-            onClick={addWater}
-            icon={(props) => <Icon iconNode={bottlePlastic} {...props} />}
-            volume={750}
-            title={t('bottle')}
-          />
-
-          <CustomAddButton onClick={() => setCustomAddModalOpen(true)} />
         </section>
-      </div>
 
-      <div className="flex flex-col gap-0.5">
-        <span
-          className="ml-1 text-base font-semibold tracking-wide"
-          style={{ color: theme.subtitle_text_color }}
-        >
-          {t('today_logs')}
-        </span>
-
-        {logs.length > 0 ? (
-          <WaterLogList
-            logs={logs}
-            isLoading={waterLoading}
-            deletingId={deletingId}
-            onWaterLogCardClick={onClick}
+        <section>
+          <DateStrip
+            key={monthKey}
+            dates={dates}
+            selectedDate={selectedDate}
+            today={today}
+            minDate={minDate}
+            activeDates={activeDates}
+            onSelect={selectDate}
+            pendingScrollDate={pendingScrollDate}
+            onScrollConsumed={clearPendingScroll}
           />
-        ) : null}
+        </section>
+      </header>
+
+      <div className="min-h-0 flex-1">
+        <DayCarousel
+          selectedDate={selectedDate}
+          dates={dates}
+          minDate={minDate}
+          maxDate={today}
+          onDateChange={selectDate}
+          renderDay={(date, isActive) => (
+            <WaterDayContent
+              date={date}
+              isActive={isActive}
+              onWaterLogClick={onClick}
+              onOpenCustomAdd={() => setCustomAddOpen(true)}
+              deletingId={deletingId}
+            />
+          )}
+        />
       </div>
 
-      {customAddModalOpen && (
-        <CustomAddModal
-          onClose={() => setCustomAddModalOpen(false)}
-          onConfirm={addWater}
+      {calendarOpen && (
+        <Calendar
+          selectedDate={selectedDate}
+          minDate={minDate}
+          maxDate={today}
+          onSelect={(date) => {
+            selectDateExternal(date);
+            setCalendarOpen(false);
+          }}
+          onClose={() => setCalendarOpen(false)}
         />
       )}
+
       {waterLogModalOpen && currentWaterLog && (
         <WaterLogModal
-          onClose={() => !foodLogDeleting && setWaterLogModalOpen(false)}
+          onClose={() => !isDeleting && setWaterLogModalOpen(false)}
           log={currentWaterLog}
           onDelete={deleteLog}
-          isDeleting={foodLogDeleting}
+          isDeleting={isDeleting}
+        />
+      )}
+
+      {customAddOpen && (
+        <CustomAddModal
+          onClose={() => setCustomAddOpen(false)}
+          onConfirm={(ml) => {
+            addWaterCustom(ml);
+            setCustomAddOpen(false);
+          }}
         />
       )}
     </div>
