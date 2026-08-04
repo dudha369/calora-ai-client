@@ -70,5 +70,7 @@
   "edit_meal": "Редагування",
   "copy_meal": "Копіювання",
   "remove_photo": "Видалити фото",
-  "photo_removed": "Фото видалено — натисніть, щоб відновити"
+  "photo_removed": "Фото видалено — натисніть, щоб відновити",
+  "add_to_favorites": "В обране",
+  "added_to_favorites": "Додано"
 }

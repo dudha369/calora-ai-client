@@ -28,6 +28,12 @@ export const NutritionEditGridCell = ({
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();
+      setTimeout(() => {
+        inputRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }, 250);
     }
   }, [isEditing]);
 

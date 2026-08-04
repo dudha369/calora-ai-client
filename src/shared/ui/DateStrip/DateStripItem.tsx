@@ -106,6 +106,9 @@ export const DateStripItem = ({
         className="h-1 w-1/2 rounded-full"
         style={{
           background: bar_bg,
+          ...(isSelected && {
+            outline: `1px solid ${theme.button_text_color}`,
+          }),
         }}
       />
     </button>

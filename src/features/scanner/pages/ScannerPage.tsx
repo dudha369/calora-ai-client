@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 
 import { useScannerCapture } from '../hooks/useScannerCapture';
 import { useFoodAnalysis } from '../hooks/useFoodAnalysis';
@@ -8,19 +9,24 @@ import { useBackButton } from '@/shared/hooks/useBackButton';
 import { useTheme } from '@/shared/context/ThemeContext';
 
 import { CameraView } from '../components/CameraView';
+import { LiveBarcodeScanner } from '../components/LiveBarcodeScanner';
+import { ManualCameraBarcodeScreen } from '../components/ManualCameraBarcodeScreen';
+import { ManualBarcodeSheet } from '../components/ManualBarcodeSheet';
 import { BarcodeResultModal } from '../components/BarcodeResultModal';
 import { FoodResultModal } from '../components/FoodResultModal';
 import { FoodNotesSheet } from '../components/FoodNotesSheet';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 
 import { food, todayApiDate } from '@/shared/api/food';
+import { isIOSDevice } from '@/shared/lib/isIOSDevice';
 import type { ProductData } from '../types/productData';
+import type { ScannerMode } from '../types/ScannerMode';
 import type { AnalyzedDish } from '@/shared/types/api/food';
 import { useScanner } from '../hooks/useScanner';
-import { useTranslation } from 'react-i18next';
 
 interface ScannerLocationState {
   photo?: string;
+  mode?: ScannerMode;
 }
 
 type TgOrient = {
@@ -35,19 +41,38 @@ export const ScannerPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { t } = useTranslation('scanner_page');
+  const { t: tq } = useTranslation('quick_actions');
   const theme = useTheme();
 
   const state = location.state as ScannerLocationState | null;
+  const mode: ScannerMode = state?.mode ?? 'food';
 
-  const { photo, clearPhoto, handleFileChange, camera } = useScannerCapture(
-    state?.photo ?? null,
+  const isIOS = useMemo(() => isIOSDevice(), []);
+  const useLiveBarcode = mode === 'barcode' && !isIOS;
+  const isIOSBarcode = mode === 'barcode' && isIOS;
+
+  const [pickedProduct, setPickedProduct] = useState<ProductData | null>(null);
+  const [manualEntryOpen, setManualEntryOpen] = useState(false);
+
+  const { photo, clearPhoto, handleFileChange, camera, capture } =
+    useScannerCapture(state?.photo ?? null, !useLiveBarcode);
+
+  const { status, runAnalysis, retry, pendingNotes } = useFoodAnalysis(
+    photo,
+    mode === 'barcode',
   );
 
-  const { status, runAnalysis, retry, pendingNotes } = useFoodAnalysis(photo);
+  // "Живая камера" в смысле ориентации/rotation имеет смысл только для
+  // фото еды (live-стрим) и живого сканера штрихкода — у iOS-штрихкода нет
+  // видео вообще, крутить иконки там незачем.
+  const isCameraLive = useLiveBarcode
+    ? !pickedProduct
+    : isIOSBarcode
+      ? false
+      : photo === null;
 
-  // ── Ориентация зависит от состояния (сканирование vs результат) ──────────
   useEffect(() => {
-    if (photo === null) {
+    if (isCameraLive) {
       document.body.setAttribute('data-page', 'scanner');
       getTg()?.unlockOrientation?.();
       screen.orientation?.unlock?.();
@@ -56,19 +81,27 @@ export const ScannerPage = () => {
       getTg()?.lockOrientation?.();
       screen.orientation?.lock?.('portrait').catch(() => null);
     }
-
     return () => {
       document.body.removeAttribute('data-page');
       getTg()?.lockOrientation?.();
       screen.orientation?.lock?.('portrait').catch(() => null);
     };
-  }, [photo]);
+  }, [isCameraLive]);
 
-  const { setLiveCamera } = useScanner();
+  const { setLiveCamera, setShutterHandler } = useScanner();
   useEffect(() => {
-    setLiveCamera(photo === null);
+    setLiveCamera(isCameraLive);
     return () => setLiveCamera(false);
-  }, [photo, setLiveCamera]);
+  }, [isCameraLive, setLiveCamera]);
+
+  // FAB играет роль затвора: живое фото (Android/десктоп) ИЛИ любой из
+  // iOS-путей без живого стрима (фото еды, штрихкод) — во всех случаях
+  // тап по FAB должен открывать нативную камеру/делать снимок.
+  useEffect(() => {
+    const isShutterActive = !photo && (mode === 'food' || isIOSBarcode);
+    setShutterHandler(isShutterActive ? capture : null);
+    return () => setShutterHandler(null);
+  }, [mode, isIOSBarcode, photo, capture, setShutterHandler]);
 
   const pendingPhotoKeyRef = useRef<string | null>(null);
 
@@ -95,7 +128,23 @@ export const ScannerPage = () => {
     clearPhoto();
   };
 
-  useBackButton(clearPhoto, !!photo);
+  // Для штрихкода (live и iOS) backbutton активен ВСЕГДА на этой странице:
+  // есть найденный товар — возвращаемся к сканированию, нет — выходим со
+  // страницы совсем. Для фото — как раньше: активен только когда есть снимок.
+  useBackButton(
+    () => {
+      if (pickedProduct) {
+        setPickedProduct(null);
+        return;
+      }
+      if (mode === 'barcode') {
+        navigate(-1);
+        return;
+      }
+      clearPhoto();
+    },
+    mode === 'barcode' || !!photo,
+  );
 
   const invalidateLoggedQueries = (hadWater: boolean) => {
     const date = todayApiDate();
@@ -139,7 +188,6 @@ export const ScannerPage = () => {
     });
 
     invalidateLoggedQueries(false);
-
     navigate('/');
   };
 
@@ -176,9 +224,110 @@ export const ScannerPage = () => {
     });
 
     invalidateLoggedQueries(totalWaterMl > 0);
-
     navigate('/');
   };
+
+  const manualEntrySheet = manualEntryOpen && (
+    <ManualBarcodeSheet
+      onClose={() => setManualEntryOpen(false)}
+      onFound={(product) => {
+        setManualEntryOpen(false);
+        setPickedProduct(product);
+      }}
+    />
+  );
+
+  // ── Живое сканирование штрихкода (Android/десктоп) ────────────────────────
+  if (useLiveBarcode) {
+    if (pickedProduct) {
+      return (
+        <BarcodeResultModal
+          product={pickedProduct}
+          onConfirm={handleBarcodeConfirm}
+          onClose={() => setPickedProduct(null)}
+        />
+      );
+    }
+    return (
+      <>
+        <LiveBarcodeScanner
+          onProductFound={setPickedProduct}
+          onManualEntry={() => setManualEntryOpen(true)}
+        />
+        {manualEntrySheet}
+      </>
+    );
+  }
+
+  // ── Штрихкод на iOS: нет live-стрима, выбор камера/вручную ────────────────
+  if (isIOSBarcode) {
+    if (pickedProduct) {
+      return (
+        <BarcodeResultModal
+          product={pickedProduct}
+          onConfirm={handleBarcodeConfirm}
+          onClose={() => setPickedProduct(null)}
+        />
+      );
+    }
+    if (status.kind === 'barcode') {
+      return (
+        <BarcodeResultModal
+          product={status.product}
+          onConfirm={handleBarcodeConfirm}
+          onClose={clearPhoto}
+        />
+      );
+    }
+    if (photo && status.kind === 'ready') {
+      // decodeBarcode отработал на снимке и штрихкода не нашёл
+      return (
+        <BottomSheet
+          title={t('error')}
+          onClose={clearPhoto}
+          actionLabel={t('try_again')}
+          onAction={clearPhoto}
+          secondaryAction={{
+            text: tq('barcode_manual.link'),
+            onClick: () => {
+              clearPhoto();
+              setManualEntryOpen(true);
+            },
+            position: 'left',
+          }}
+        >
+          <p
+            className="py-2 text-center text-sm"
+            style={{ color: theme.subtitle_text_color }}
+          >
+            {tq('barcode_manual.not_found_photo')}
+          </p>
+        </BottomSheet>
+      );
+    }
+    if (photo) {
+      // decodeBarcode ещё выполняется
+      return (
+        <div className="relative flex w-full flex-1 items-center justify-center bg-black">
+          <img
+            src={photo}
+            className="h-auto w-full object-cover opacity-50"
+            alt=""
+          />
+        </div>
+      );
+    }
+    return (
+      <>
+        <ManualCameraBarcodeScreen
+          camera={camera}
+          onFileChange={handleFileChange}
+          onManualEntry={() => setManualEntryOpen(true)}
+        />
+        {manualEntrySheet}
+      </>
+    );
+  }
 
   return (
     <>
@@ -209,14 +358,6 @@ export const ScannerPage = () => {
         />
       )}
 
-      {status.kind === 'barcode' && (
-        <BarcodeResultModal
-          product={status.product}
-          onConfirm={handleBarcodeConfirm}
-          onClose={clearPhoto}
-        />
-      )}
-
       {status.kind === 'food' && (
         <FoodResultModal
           result={status.result}
@@ -232,8 +373,6 @@ export const ScannerPage = () => {
           onClose={clearPhoto}
           actionLabel={t('try_again')}
           iconCustomEmojiId="5260687119092817530"
-          // "Еда не найдена" — это не сбой, а сигнал переснять фото:
-          // retry с тем же кадром бессмысленен, ведём на камеру заново.
           onAction={status.isNoFood ? clearPhoto : retry}
         >
           <p

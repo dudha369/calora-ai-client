@@ -8,18 +8,36 @@ import type {
   CreateFoodLogResponse,
   FoodLog,
   FoodItemIn,
+  FoodSearchResponse,
 } from '../types/api/food';
 import { toApiDate } from '../lib/date';
 
 export const todayApiDate = (): string => toApiDate(new Date());
 
 export const food = {
-  /** notes — необязательное уточнение пользователя для ИИ (см. FoodNotesSheet) */
-  analyze: (file: File, notes?: string) => {
+  analyze: (file: File, notes?: string, language?: string) => {
     const formData = new FormData();
     formData.append('file', file);
     if (notes) formData.append('notes', notes);
+    if (language) formData.append('language', language);
     return request<FoodAnalyzeResponse>('food/analyze', 'POST', formData);
+  },
+
+  analyzeText: (description: string, language?: string) =>
+    request<FoodAnalyzeResponse>('food/analyze-text', 'POST', {
+      description,
+      language,
+    }),
+
+  /** POST /api/food/transcribe-voice — голосовая запись → текст */
+  transcribeVoice: (blob: Blob) => {
+    const formData = new FormData();
+    formData.append('file', blob, 'voice.wav');
+    return request<{ transcript: string }>(
+      'food/transcribe-voice',
+      'POST',
+      formData,
+    );
   },
 
   log: (data: FoodLogIn) =>
@@ -27,6 +45,10 @@ export const food = {
 
   logBarcode: (payload: BarcodeLogIn) =>
     request<CreateFoodLogResponse>('food/log-barcode', 'POST', payload),
+
+  /** GET /api/food/search?q=... — поиск по уже залогированным блюдам */
+  search: (q: string) =>
+    request<FoodSearchResponse>(`food/search?q=${encodeURIComponent(q)}`),
 
   getByDate: (date: string) => request<FoodByDateResponse>(`food/${date}`),
 

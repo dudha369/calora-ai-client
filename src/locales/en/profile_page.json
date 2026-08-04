@@ -3,7 +3,8 @@
   "body_section": {
     "title": "My body",
     "body": { "title": "Body and Targets" },
-    "nutrition": { "title": "Nutrition and Health" }
+    "nutrition": { "title": "Nutrition and Health" },
+    "favorites": { "title": "Favorite dishes" }
   },
   "progress_section": {
     "title": "Progress",

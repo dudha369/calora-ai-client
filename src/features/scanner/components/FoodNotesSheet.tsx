@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
-import type { FocusEvent } from 'react';
+import { LabeledTextarea } from '@/shared/ui/LabeledTextarea';
 
 interface FoodNotesSheetProps {
   onSubmit: (notes: string) => void;
@@ -21,22 +21,8 @@ export const FoodNotesSheet = ({
 }: FoodNotesSheetProps) => {
   const theme = useTheme();
   const { t } = useTranslation('scanner_page');
+  const { t: tc } = useTranslation('common');
   const [notes, setNotes] = useState(initialNotes);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      textAreaRef.current?.focus();
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleFocus = (e: FocusEvent<HTMLTextAreaElement>) => {
-    setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 250);
-  };
 
   return (
     <BottomSheet
@@ -58,39 +44,16 @@ export const FoodNotesSheet = ({
         <p className="ml-1 text-base" style={{ color: theme.text_color }}>
           {t('clarification')}
         </p>
-        <div
-          className="relative h-16.5 w-full rounded-xl"
-          style={{
-            backgroundColor: theme.section_bg_color,
-            border: `1px solid ${theme.section_separator_color}`,
-          }}
-          onClick={() => textAreaRef.current?.focus()}
-        >
-          <textarea
-            disabled={isProcessing}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder={t('clarification_example')}
-            rows={2}
-            maxLength={MAX_NOTES_LENGTH}
-            ref={textAreaRef}
-            onFocus={handleFocus}
-            className="h-12 w-full rounded-t-2xl p-2 pb-0 text-sm"
-            style={{
-              backgroundColor: theme.section_bg_color,
-              color: theme.text_color,
-            }}
-          />
-          <div
-            className="pointer-events-none absolute bottom-1 flex w-full justify-between px-1.5 text-xs leading-none"
-            style={{ color: theme.hint_color }}
-          >
-            <span>{t('optional')}</span>
-            <span>
-              {notes.length}/{MAX_NOTES_LENGTH}
-            </span>
-          </div>
-        </div>
+        <LabeledTextarea
+          value={notes}
+          onChange={setNotes}
+          placeholder={t('clarification_example')}
+          optionalLabel={`*${tc('optional')}`}
+          maxLength={MAX_NOTES_LENGTH}
+          rows={2}
+          disabled={isProcessing}
+          autoFocus
+        />
       </div>
     </BottomSheet>
   );

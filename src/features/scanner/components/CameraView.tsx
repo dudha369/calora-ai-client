@@ -1,4 +1,4 @@
-import { type ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 import type { UseCameraReturn } from '../hooks/useCamera';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
@@ -10,16 +10,6 @@ interface CameraViewProps {
   onFileChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-/**
- * Чистый UI-компонент без собственного state.
- * Рендерит один из трёх вариантов в зависимости от окружения и наличия фото:
- *   • stream + нет фото → <video> с живым стримом
- *   • input (iOS) + нет фото → текстовый плейсхолдер
- *   • есть фото → <img> превью
- *
- * Всегда монтирует скрытые <canvas> и <input> — они нужны для логики
- * в useCamera / useScannerCapture вне зависимости от видимого состояния.
- */
 export const CameraView = ({
   camera,
   photo,
@@ -31,7 +21,6 @@ export const CameraView = ({
 
   return (
     <div className="relative flex w-full flex-1 items-center overflow-hidden">
-      {/* Скрытые утилиты — всегда в DOM */}
       <canvas ref={canvasRef} className="hidden" />
       <input
         ref={inputRef}
@@ -42,7 +31,6 @@ export const CameraView = ({
         onChange={onFileChange}
       />
 
-      {/* Баннер ошибки камеры */}
       {error && !photo && (
         <div className="absolute top-4 right-4 left-4 z-10 flex items-center justify-between rounded-xl bg-red-500/80 p-3 text-sm text-white">
           <span className="mr-2 flex-1">{error}</span>
@@ -52,7 +40,6 @@ export const CameraView = ({
         </div>
       )}
 
-      {/* Стрим (не-iOS): скрываем через CSS а не unmount — камера продолжает работать */}
       {method === 'stream' && (
         <video
           ref={videoRef}
@@ -65,18 +52,20 @@ export const CameraView = ({
         />
       )}
 
-      {/* iOS-плейсхолдер */}
+      {/* iOS: живого стрима нет, съёмка запускается через FAB (см.
+          shutterHandler в ScannerPage) — тут только подсказка, иконка не
+          кликабельна, чтобы не путать с реальной кнопкой. */}
       {method === 'input' && !photo && (
         <div
           className="relative flex h-full flex-col items-center justify-center gap-3"
           style={{ color: theme.text_color }}
         >
-          <div
+          <span
             className="flex items-center justify-center rounded-full p-3.5"
             style={{ backgroundColor: theme.secondary_bg_color }}
           >
             <Sprout size={34} />
-          </div>
+          </span>
           <div className="flex flex-col gap-1 px-12 text-center">
             <p className="text-lg font-medium tracking-wider">
               {t('ready_to_analyze?')}
@@ -96,7 +85,6 @@ export const CameraView = ({
         </div>
       )}
 
-      {/* Превью захваченного фото */}
       {photo && (
         <img
           src={photo}

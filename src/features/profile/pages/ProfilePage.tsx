@@ -10,6 +10,7 @@ import {
   ChartNoAxesCombinedIcon,
   Trophy,
   Settings,
+  Star,
 } from 'lucide-react';
 import { initData } from '@tma.js/sdk-react';
 import { Section } from '@/shared/ui/Section/Section';
@@ -79,6 +80,11 @@ export const ProfilePage = () => {
             icon={<SectionItemIcon icon={Sprout} backgroundColor="#34C759" />}
             label={t('body_section.nutrition.title')}
             to="nutrition"
+          />
+          <SectionItem
+            icon={<SectionItemIcon icon={Star} backgroundColor="#FFCC00" />}
+            label={t('body_section.favorites.title')}
+            to="favorites"
           />
         </Section>
 

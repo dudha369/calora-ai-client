@@ -127,3 +127,20 @@ export interface FoodByDateResponse {
   logs: FoodLog[];
   daily_total: NutritionTotals;
 }
+
+export interface FoodSearchResult {
+  food_name: string;
+  portion_g: number;
+  calories: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  fiber_g: number;
+  sugar_g: number;
+  water_ml: number;
+  photo_url: string | null;
+}
+
+export interface FoodSearchResponse {
+  results: FoodSearchResult[];
+}

@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { NutritionEditGridCell } from './NutritionEditGridCell';
 import { useState } from 'react';
+import { SegmentedControl } from '@/shared/ui/SegmentedControl';
 
 export interface NutritionValues {
   portion_g: number;
@@ -168,38 +169,14 @@ export const NutritionEditGrid = ({
           <span style={{ color: theme.hint_color }}>{tc('units.g')}</span>
         </div>
 
-        <div
-          className="inline-flex gap-px rounded-xl p-1"
-          style={{
-            backgroundColor: theme.secondary_bg_color,
-          }}
-        >
-          <button
-            onClick={() => setSyncEnabled(true)}
-            className="rounded-lg px-2 py-1 text-sm transition-all duration-200"
-            style={{
-              backgroundColor: syncEnabled
-                ? theme.accent_text_color
-                : 'transparent',
-              color: syncEnabled ? theme.button_text_color : theme.hint_color,
-            }}
-          >
-            Авто
-          </button>
-
-          <button
-            onClick={() => setSyncEnabled(false)}
-            className="rounded-lg px-2 py-1 text-sm transition-all duration-200"
-            style={{
-              backgroundColor: !syncEnabled
-                ? theme.accent_text_color
-                : 'transparent',
-              color: !syncEnabled ? theme.button_text_color : theme.hint_color,
-            }}
-          >
-            Вручную
-          </button>
-        </div>
+        <SegmentedControl
+          options={[
+            { value: 'auto', label: tc('auto') },
+            { value: 'manual', label: tc('manual') },
+          ]}
+          value={syncEnabled ? 'auto' : 'manual'}
+          onChange={(v) => setSyncEnabled(v === 'auto')}
+        />
 
         {onRemoveItem && (
           <button

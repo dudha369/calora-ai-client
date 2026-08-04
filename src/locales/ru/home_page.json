@@ -70,5 +70,7 @@
   "edit_meal": "Редактирование",
   "copy_meal": "Копирование",
   "remove_photo": "Убрать фото",
-  "photo_removed": "Фото убрано — нажмите, чтобы вернуть"
+  "photo_removed": "Фото убрано — нажмите, чтобы вернуть",
+  "add_to_favorites": "В избранное",
+  "added_to_favorites": "Добавлено"
 }

@@ -163,7 +163,7 @@ export const HomePage = () => {
   return (
     <div className="flex h-full flex-col gap-2 pb-0!">
       <header
-        className="sticky top-0 z-10 flex flex-col gap-2 px-4 pt-1"
+        className="sticky top-0 flex flex-col gap-2 px-4 pt-1"
         style={{ backgroundColor: theme.bg_color }}
       >
         <section className="relative flex items-center justify-between px-px">
@@ -185,7 +185,7 @@ export const HomePage = () => {
           </div>
 
           <div
-            className="flex cursor-pointer items-center gap-1 rounded-2xl py-1 pr-2.5 pl-2 transition-opacity active:opacity-70"
+            className="flex cursor-pointer items-center gap-1 rounded-2xl py-1 pr-3 pl-2 transition-opacity active:opacity-70"
             style={{
               backgroundColor: theme.section_bg_color,
               color: theme.text_color,

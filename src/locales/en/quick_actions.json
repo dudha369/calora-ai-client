@@ -1,0 +1,63 @@
+{
+  "weight_sheet": {
+    "title": "Current weight",
+    "label": "Weight",
+    "note_label": "Note",
+    "note_placeholder": "E.g.: after workout",
+    "save": "Save"
+  },
+  "weight_page": {
+    "empty": "No weight entries yet"
+  },
+  "describe_sheet": {
+    "title": "Describe your dish",
+    "placeholder": "E.g.: a bowl of borscht with sour cream and bread",
+    "analyze": "Analyze",
+    "voice": "Record voice",
+    "recording": "Recording…",
+    "mic_denied": "Microphone access denied"
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorite dishes yet",
+    "add_today": "Add to today",
+    "delete": "Delete",
+    "manage": "Manage favorites"
+  },
+  "barcode_live": {
+    "hint": "Point the camera at a barcode",
+    "not_found": "Barcode not found, try again"
+  },
+  "menu": {
+    "barcode": "Barcode",
+    "weight": "Weight",
+    "water": "Water",
+    "food_photo": "Photo",
+    "search": "Search",
+    "describe_food": "Text",
+    "voice": "Voice"
+  },
+  "barcode_manual": {
+    "link": "Enter code manually",
+    "ready_title": "Ready to scan a barcode?",
+    "ready_subtitle": "Tap the camera button below",
+    "not_found_photo": "Barcode not found in photo",
+    "title": "Enter barcode",
+    "input_placeholder": "Barcode number",
+    "not_found": "No product found for this barcode"
+  },
+  "voice_sheet": {
+    "title": "Voice",
+    "hint": "Tap and describe your meal",
+    "transcribing": "Transcribing…",
+    "analyzing": "Calculating macros…",
+    "empty_transcript": "Couldn't make out the recording, try again"
+  },
+  "search_sheet": {
+    "title": "Search dishes",
+    "placeholder": "Dish name",
+    "empty": "No matches found",
+    "tab_all": "All",
+    "tab_favorites": "Favorites"
+  }
+}

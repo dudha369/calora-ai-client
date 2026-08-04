@@ -29,6 +29,18 @@ export const router = createBrowserRouter([
               ),
           },
           {
+            path: 'log',
+            children: [
+              {
+                path: 'search',
+                lazy: () =>
+                  import('@/features/log/pages/LogSearchPage').then((m) => ({
+                    Component: m.LogSearchPage,
+                  })),
+              },
+            ],
+          },
+          {
             path: 'water',
             lazy: () =>
               import('@/features/water/pages/WaterPage').then((m) => ({
@@ -79,6 +91,15 @@ export const router = createBrowserRouter([
                   import('@/features/profile/pages/NutritionPage').then(
                     (m) => ({
                       Component: m.NutritionPage,
+                    }),
+                  ),
+              },
+              {
+                path: 'favorites',
+                lazy: () =>
+                  import('@/features/profile/pages/FavoritesPage').then(
+                    (m) => ({
+                      Component: m.FavoritesPage,
                     }),
                   ),
               },

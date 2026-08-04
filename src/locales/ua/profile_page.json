@@ -3,7 +3,8 @@
   "body_section": {
     "title": "Моє тіло",
     "body": { "title": "Тіло та цілі" },
-    "nutrition": { "title": "Харчування та здоров'я" }
+    "nutrition": { "title": "Харчування та здоров'я" },
+    "favorites": { "title": "Обрані страви" }
   },
   "progress_section": {
     "title": "Прогрес",

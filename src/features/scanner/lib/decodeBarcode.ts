@@ -178,3 +178,45 @@ export function decodeBarcode(dataUrl: string): Promise<string | null> {
     img.src = dataUrl;
   });
 }
+
+export interface LiveBarcodeControls {
+  stop: () => void;
+}
+
+/**
+ * Непрерывное сканирование штрихкода прямо с уже играющего <video>.
+ * В отличие от decodeBarcode() (single-shot по снимку), тут ZXing сам читает
+ * кадры из видеопотока — то же самое, что делает нативное приложение камеры.
+ * Возвращает функцию остановки; вызывающий обязан звать её на unmount.
+ */
+export function startLiveBarcodeScan(
+  video: HTMLVideoElement,
+  onDetected: (barcode: string) => void,
+): () => void {
+  const reader = new BrowserMultiFormatReader(HINTS);
+  let stopped = false;
+  let controls: { stop: () => void } | null = null;
+
+  reader
+    .decodeFromVideoElement(video, (result) => {
+      if (stopped || !result) return;
+      stopped = true;
+      controls?.stop();
+      onDetected(result.getText());
+    })
+    .then((c) => {
+      controls = c;
+      // Если stop() успели вызвать снаружи ещё до того как промис зарезолвился
+      // (например компонент размонтировали мгновенно) — останавливаем сразу.
+      if (stopped) c.stop();
+    })
+    .catch(() => {
+      // Камера отвалилась/не поддерживается — тихо игнорируем,
+      // пользователь всегда может закрыть экран сканирования сам.
+    });
+
+  return () => {
+    stopped = true;
+    controls?.stop();
+  };
+}

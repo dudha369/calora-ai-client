@@ -1,13 +1,12 @@
 import axios from 'axios';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { decodeBarcode } from '../lib/decodeBarcode';
 import { fetchProductByBarcode } from '../lib/openfoodfacts';
 import { food } from '@/shared/api/food';
 import { compressImage } from '../lib/compressImage';
 import type { FoodAnalyzeResponse } from '@/shared/types/api/food';
 import type { ProductData } from '../types/productData';
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function dataUrlToFile(dataUrl: string, filename = 'photo.jpg'): File {
   const [header, b64] = dataUrl.split(',');
@@ -26,12 +25,6 @@ function extractErrorDetail(err: unknown): string | undefined {
   return undefined;
 }
 
-/**
- * "Еда не найдена" — не сбой анализа, а сигнал переснять фото.
- * Отличаем от прочих ошибок (Gemini недоступен, сеть и т.п.), для которых
- * уместен retry с тем же фото/notes — см. ScannerPage: для no_food_detected
- * кнопка ошибки должна вести на clearPhoto(), а не на retry().
- */
 function isNoFoodDetected(err: unknown): boolean {
   return extractErrorDetail(err) === 'no_food_detected';
 }
@@ -44,51 +37,32 @@ function resolveErrorMessage(err: unknown): string {
   return 'Не удалось проанализировать фото. Попробуй ещё раз.';
 }
 
-// ── State machine ─────────────────────────────────────────────────────────────
-
 export type AnalysisStatus =
   | { kind: 'idle' }
-  /** Локальное декодирование штрихкода + (если найден) запрос в OpenFoodFacts */
   | { kind: 'recognizing' }
   | { kind: 'barcode'; product: ProductData }
-  /** Штрихкода нет (или он не найден в OFF) — ждём подтверждения/уточнения перед ИИ */
   | { kind: 'ready' }
   | { kind: 'analyzing' }
   | { kind: 'food'; result: FoodAnalyzeResponse }
-  /** isNoFood=true → еда не распознана на фото, retry бессмысленен, нужно новое фото */
   | { kind: 'error'; message: string; isNoFood: boolean };
 
 export interface UseFoodAnalysisReturn {
   status: AnalysisStatus;
-  /** Запускает ИИ-анализ с опциональным уточнением пользователя. */
   runAnalysis: (notes?: string) => void;
-  /** Повторяет последний анализ с тем же фото и теми же notes —
-   *  для кнопки "Попробовать снова" при ошибке (например 503 от Gemini),
-   *  без необходимости переснимать фото и заново вводить уточнение. */
   retry: () => void;
-  /** Notes, с которыми выполняется/выполнялся последний анализ. Нужно,
-   *  чтобы FoodNotesSheet, смонтированный заново во время retry (минуя
-   *  'ready'), мог показать уже сохранённое уточнение, а не пустое поле. */
   pendingNotes: string | undefined;
 }
 
 /**
- * Детектирование запускается автоматически при появлении фото:
- *   1. Локальное декодирование штрихкода (zxing + BarcodeDetector) — без сети.
- *   2. Если штрихкод найден → запрос к OpenFoodFacts.
- *      - продукт найден  → status 'barcode', поток завершён.
- *      - не найден в OFF → шаг 3, как при отсутствии штрихкода вовсе.
- *   3. Совпадения нет → status 'ready'. Сам вызов ИИ НЕ запускается
- *      автоматически — ScannerPage показывает поле уточнения и вызывает
- *      runAnalysis() только когда пользователь подтвердит или пропустит его.
- *
- * requestIdRef — «номер поколения» запроса: и авто-детект, и runAnalysis
- * увеличивают его перед стартом и сверяют перед записью результата в state.
- * Так одной примитивной защитой закрываются обе гонки: смена фото
- * посреди детекта и повторный вызов runAnalysis поверх ещё не
- * завершившегося предыдущего вызова.
+ * detectBarcode — пытаться ли локально декодировать штрихкод из снимка перед
+ * AI-анализом. true только для mode==='barcode' — обычное фото еды больше не
+ * пытается искать штрихкод (раньше искало всегда, независимо от режима).
  */
-export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
+export function useFoodAnalysis(
+  photo: string | null,
+  detectBarcode: boolean = true,
+): UseFoodAnalysisReturn {
+  const { i18n } = useTranslation();
   const [status, setStatus] = useState<AnalysisStatus>({ kind: 'idle' });
   const requestIdRef = useRef(0);
   const lastNotesRef = useRef<string | undefined>(undefined);
@@ -98,6 +72,11 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
 
     if (!photo) {
       setStatus({ kind: 'idle' });
+      return;
+    }
+
+    if (!detectBarcode) {
+      setStatus({ kind: 'ready' });
       return;
     }
 
@@ -115,17 +94,14 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
             setStatus({ kind: 'barcode', product });
             return;
           }
-          // Штрихкод есть, но продукта нет в OFF — отдаём фото ИИ ниже.
         }
 
         setStatus({ kind: 'ready' });
       } catch {
-        // Сбой декодирования/OFF — не блокируем пользователя ошибкой,
-        // просто отдаём фото на ИИ-анализ как обычное фото еды.
         if (requestIdRef.current === requestId) setStatus({ kind: 'ready' });
       }
     })();
-  }, [photo]);
+  }, [photo, detectBarcode]);
 
   const runAnalysis = useCallback(
     (notes?: string) => {
@@ -138,7 +114,7 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
         try {
           const compressed = await compressImage(photo);
           const file = dataUrlToFile(compressed);
-          const { data } = await food.analyze(file, notes);
+          const { data } = await food.analyze(file, notes, i18n.language);
           if (requestIdRef.current === requestId) {
             setStatus({ kind: 'food', result: data });
           }
@@ -153,7 +129,7 @@ export function useFoodAnalysis(photo: string | null): UseFoodAnalysisReturn {
         }
       })();
     },
-    [photo],
+    [photo, i18n.language],
   );
 
   const retry = useCallback(() => {

@@ -11,7 +11,6 @@ import { bottlePlastic } from '@lucide/lab';
 
 import { useTheme } from '@/shared/context/ThemeContext';
 import { useUser } from '@/shared/context/UserContext';
-import { Section } from '@/shared/ui/Section/Section';
 import { toApiDate, isSameDay } from '@/shared/lib/date';
 import { cn } from '@/shared/lib/cn';
 import { MARKER_WATER_COLOR } from '@/shared/constants/markers';
@@ -124,7 +123,10 @@ export const WaterDayContent = ({
 
   return (
     <section className="flex h-full flex-col gap-2.5 overflow-y-auto px-4 pb-4">
-      <Section className="flex flex-row items-stretch gap-2 overflow-hidden p-4">
+      <section
+        className="flex items-stretch gap-2 rounded-3xl p-4"
+        style={{ backgroundColor: theme.section_bg_color }}
+      >
         <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex flex-col gap-1">
             <span
@@ -171,9 +173,9 @@ export const WaterDayContent = ({
           </div>
 
           <span
-            className="w-fit rounded-xl px-3 py-2 text-sm font-medium"
+            className="w-fit rounded-xl px-2 py-1 text-sm font-medium"
             style={{
-              backgroundColor: theme.accent_text_color,
+              outline: `2px dashed ${MARKER_WATER_COLOR}`,
               color: theme.text_color,
             }}
           >
@@ -189,7 +191,7 @@ export const WaterDayContent = ({
             className="h-full w-full max-w-28"
           />
         </div>
-      </Section>
+      </section>
 
       {isToday && (
         <div className="flex flex-col gap-0.5">

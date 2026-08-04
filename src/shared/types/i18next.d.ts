@@ -6,6 +6,7 @@ import type enWaterPage from '@/locales/en/water_page.json';
 import type enScannerPage from '@/locales/en/scanner_page.json';
 import type enProfilePage from '@/locales/en/profile_page.json';
 import type enSettingsPage from '@/locales/en/settings_page.json';
+import type enQuickActions from '@/locales/en/quick_actions.json';
 
 declare module 'i18next' {
   interface CustomTypeOptions {
@@ -18,6 +19,7 @@ declare module 'i18next' {
       scanner_page: typeof enScannerPage;
       profile_page: typeof enProfilePage;
       settings_page: typeof enSettingsPage;
+      quick_actions: typeof enQuickActions;
     };
   }
 }

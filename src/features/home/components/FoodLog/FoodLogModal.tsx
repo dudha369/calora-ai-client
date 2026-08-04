@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
-import { Clock, Copy, Scale, Pencil } from 'lucide-react';
+import { Clock, Copy, Scale, Pencil, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getIntlLocale } from '@/shared/lib/locale';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { NutritionGrid } from '../NutritionGrid/NutritionGrid';
@@ -14,6 +15,8 @@ import type { FoodLog } from '@/shared/types/api/food';
 import { useTelegram } from '@/shared/hooks/useTelegram';
 import { cn } from '@/shared/lib/cn';
 import { MealImageOverlay } from '@/shared/ui/MealImageOverlay';
+import { favorites } from '@/shared/api/favorites';
+import { useQuery } from '@tanstack/react-query';
 
 type Mode = 'view' | 'edit' | 'copy';
 
@@ -42,11 +45,8 @@ export const FoodLogModal = ({
   const { safeTop } = useTelegram();
   const { t, i18n } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
+  const queryClient = useQueryClient();
 
-  // Раньше edit/copy были отдельными <BottomSheet> — переключение между
-  // ними гоняло полную анимацию закрытия+открытия и выглядело дёргано.
-  // Теперь один смонтированный BottomSheet, контент внутри подменяется
-  // мгновенно, без анимации.
   const [mode, setMode] = useState<Mode>('view');
   const [isCopied, setIsCopied] = useState(false);
 
@@ -91,8 +91,45 @@ export const FoodLogModal = ({
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  // Back-кнопка / backdrop / drag внутри edit/copy — просто мгновенный
-  // возврат в 'view', без анимации закрытия всего модала.
+  const { data: existingFavorite } = useQuery({
+    queryKey: ['favorites', 'by-log', log.id],
+    queryFn: async () => (await favorites.getByLog(log.id)).data,
+  });
+  const isFavorited = !!existingFavorite;
+
+  const { mutate: addFavorite, isPending: isAddingFavorite } = useMutation({
+    mutationFn: () =>
+      favorites.create({
+        meal_name: displayName,
+        source_log_id: log.id,
+        items: log.items.map((i) => ({
+          food_name: i.food_name,
+          portion_g: i.portion_g,
+          calories: i.calories,
+          protein_g: i.protein_g,
+          fat_g: i.fat_g,
+          carbs_g: i.carbs_g,
+          fiber_g: i.fiber_g,
+          sugar_g: i.sugar_g,
+          water_ml: i.water_ml,
+        })),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+    },
+  });
+
+  const { mutate: removeFavorite, isPending: isRemovingFavorite } = useMutation(
+    {
+      mutationFn: () => favorites.removeByLog(log.id),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      },
+    },
+  );
+
+  const isFavoritePending = isAddingFavorite || isRemovingFavorite;
+
   const handleDismissRequest = useCallback(() => {
     if (mode !== 'view') {
       setMode('view');
@@ -191,12 +228,34 @@ export const FoodLogModal = ({
                   </span>
                 </p>
 
-                <div className="flex gap-1.5">
+                <div className="flex items-center gap-1.5">
                   <Label
                     icon={<Scale size={12} />}
                     text={`${portion_g} ${tc('units.g')}`}
                   />
                   <Label icon={<Clock size={12} />} text={formattedTime} />
+
+                  <button
+                    onClick={() =>
+                      isFavorited ? removeFavorite() : addFavorite()
+                    }
+                    disabled={isFavoritePending}
+                    className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs transition-opacity active:opacity-70 disabled:opacity-70"
+                    style={{
+                      backgroundColor: theme.section_bg_color,
+                      color: isFavorited ? theme.link_color : theme.text_color,
+                    }}
+                  >
+                    <Star
+                      size={12}
+                      fill={isFavorited ? theme.link_color : 'none'}
+                    />
+                    <span>
+                      {isFavorited
+                        ? t('added_to_favorites')
+                        : t('add_to_favorites')}
+                    </span>
+                  </button>
                 </div>
               </div>
             </div>

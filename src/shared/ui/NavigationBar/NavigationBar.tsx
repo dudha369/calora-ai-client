@@ -1,14 +1,8 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavItem } from './NavItem';
 import { FabButton } from './FabButton';
-import {
-  House,
-  GlassWater,
-  Plus,
-  Camera,
-  ChartNoAxesColumn,
-  User,
-} from 'lucide-react';
+import { House, GlassWater, Plus, ChartNoAxesColumn, User } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useScanner } from '@/features/scanner/hooks/useScanner';
 import {
@@ -16,28 +10,31 @@ import {
   iconCounterRotationDeg,
 } from '../../hooks/useDeviceOrientationAngle';
 import { useTelegram } from '@/shared/hooks/useTelegram';
+import { QuickActionsOverlay } from '@/shared/ui/QuickActions/QuickActionsOverlay';
 
 const ICON_SIZE = 24;
 
-/**
- * Навигационная панель — всегда горизонтальная, внизу экрана.
- *
- * На странице сканера (isLiveCamera=true) при повороте устройства
- * каждая иконка counter-rotate чтобы оставаться "прямой" относительно
- * ориентации телефона. Layout самого navbar'а не меняется.
- */
 export const NavigationBar = () => {
   const theme = useTheme();
   const { t } = useTranslation('common');
-
   const { safeBottom } = useTelegram();
-
-  const { isLiveCamera } = useScanner();
+  const { isLiveCamera, shutterHandler } = useScanner();
   const deviceAngle = useDeviceOrientationAngle(isLiveCamera);
 
-  // Иконки поворачиваются только на странице сканера
   const iconRotation = isLiveCamera ? iconCounterRotationDeg(deviceAngle) : 0;
   const isBarRotated = isLiveCamera && deviceAngle !== 0;
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Пока ScannerPage зарегистрировал shutterHandler (живое фото еды) — FAB
+  // работает как затвор, а не как переключатель меню.
+  const handleFabClick = () => {
+    if (shutterHandler) {
+      shutterHandler();
+      return;
+    }
+    setIsMenuOpen((v) => !v);
+  };
 
   return (
     <footer
@@ -65,12 +62,13 @@ export const NavigationBar = () => {
           />
 
           <FabButton
-            to="/scanner"
+            isOpen={!shutterHandler && isMenuOpen}
+            onToggle={handleFabClick}
             icon={<Plus strokeWidth={3.5} size={ICON_SIZE + 12} />}
-            activeIcon={<Camera strokeWidth={2} size={ICON_SIZE + 8} />}
-            label={t('nav.scanner')}
+            label={shutterHandler ? t('nav.capture') : t('nav.add')}
             navbarColor={theme.secondary_bg_color}
             iconRotation={iconRotation}
+            variant={shutterHandler ? 'shutter' : 'menu'}
           />
 
           <NavItem
@@ -89,6 +87,10 @@ export const NavigationBar = () => {
           />
         </nav>
       </div>
+
+      {isMenuOpen && !shutterHandler && (
+        <QuickActionsOverlay onClose={() => setIsMenuOpen(false)} />
+      )}
     </footer>
   );
 };

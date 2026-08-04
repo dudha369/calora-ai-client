@@ -99,7 +99,7 @@ export const StreakPopup = ({ currentStreak, onClose }: StreakPopupProps) => {
             <div className="grid grid-cols-7 gap-2">
               {Array.from({ length: 7 }).map((_, i) => (
                 <div key={i} className="flex flex-col items-center gap-2">
-                  <Skeleton className="h-3 w-6" />
+                  <Skeleton className="h-3 w-7.5" />
                   <Skeleton className="size-7.5 rounded-full" />
                 </div>
               ))}

@@ -15,7 +15,8 @@
   "nav": {
     "home": "Home",
     "water": "Water",
-    "scanner": "Scanner",
+    "add": "Add",
+    "capture": "Capture",
     "analytics": "Analytics",
     "profile": "Profile"
   },
@@ -53,5 +54,8 @@
     "kg": "kg",
     "lbs": "lbs",
     "cm": "cm"
-  }
+  },
+  "optional": "optional",
+  "auto": "Auto",
+  "manual": "Manual"
 }

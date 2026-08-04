@@ -62,5 +62,7 @@
   "edit_meal": "Editing",
   "copy_meal": "Copying",
   "remove_photo": "Remove photo",
-  "photo_removed": "Photo removed — click to restore"
+  "photo_removed": "Photo removed — click to restore",
+  "add_to_favorites": "Favorite",
+  "added_to_favorites": "Added"
 }

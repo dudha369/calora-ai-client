@@ -103,21 +103,25 @@ export const WaterPage = () => {
         className="sticky top-0 z-10 flex flex-col gap-2 px-4 pt-1"
         style={{ backgroundColor: theme.bg_color }}
       >
-        <section className="relative flex items-center justify-center px-px">
-          <button
-            onClick={() => setCalendarOpen(true)}
-            className="absolute left-0 flex items-center rounded-xl transition-opacity active:opacity-60"
-            style={{ color: theme.hint_color }}
-          >
-            <CalendarDays size={26} />
-          </button>
+        <section className="flex w-full items-center px-px">
+          <div className="flex flex-1 justify-start">
+            <button
+              onClick={() => setCalendarOpen(true)}
+              className="flex items-center rounded-xl transition-opacity hover:opacity-80"
+              style={{ color: theme.hint_color }}
+            >
+              <CalendarDays size={26} />
+            </button>
+          </div>
 
           <span
-            className="text-xl leading-none font-semibold tracking-wide"
+            className="shrink-0 text-xl leading-none font-semibold tracking-wide"
             style={{ color: theme.text_color }}
           >
             {tc('nav.water')}
           </span>
+
+          <div className="flex-1" />
         </section>
 
         <section>
