@@ -3,6 +3,11 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import { getIntlLocale, capitalizeFirst } from '@/shared/lib/locale';
 import { withOpacity } from '@/shared/lib/colors';
 import { getMarkerBackground } from '@/shared/lib/getMarkerBackground';
+import { needsContrastOutline } from '@/shared/lib/contrast';
+import {
+  MARKER_FOOD_COLOR,
+  MARKER_WATER_COLOR,
+} from '@/shared/constants/markers';
 import { useMemo } from 'react';
 
 interface DateStripItemProps {
@@ -76,6 +81,17 @@ export const DateStripItem = ({
     theme.hint_color,
   );
 
+  const soloMarkerColor =
+    !isDisabled && hasFood !== hasWater
+      ? hasFood
+        ? MARKER_FOOD_COLOR
+        : MARKER_WATER_COLOR
+      : null;
+  const effectiveBg = bg === 'transparent' ? theme.bg_color : bg;
+  const lowContrast = soloMarkerColor
+    ? needsContrastOutline(effectiveBg, soloMarkerColor)
+    : false;
+
   return (
     <button
       onClick={isDisabled ? undefined : onClick}
@@ -106,7 +122,7 @@ export const DateStripItem = ({
         className="h-1 w-1/2 rounded-full"
         style={{
           background: bar_bg,
-          ...(isSelected && {
+          ...((isSelected || lowContrast) && {
             outline: `1px solid ${theme.button_text_color}`,
           }),
         }}

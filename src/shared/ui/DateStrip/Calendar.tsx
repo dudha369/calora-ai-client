@@ -211,7 +211,7 @@ export const Calendar = ({
                   />
                 ) : (
                   <div className="grid grid-cols-7 gap-1.5">
-                    {Array.from({ length: 35 }, (_, i) => (
+                    {Array.from({ length: 42 }, (_, i) => (
                       <div key={i} className="aspect-square" />
                     ))}
                   </div>

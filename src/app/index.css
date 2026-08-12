@@ -98,7 +98,10 @@ html {
   overflow: hidden;
 }
 
-@media screen and (orientation: landscape) {
+/* src/app/index.css */
+/* Только реальные тач-устройства — на десктопе с мышью широкое окно
+   формально тоже "landscape", но разворачивать его на 90° не нужно. */
+@media screen and (orientation: landscape) and (hover: none) and (pointer: coarse) {
   body:not([data-page="scanner"]) {
     position: fixed;
 

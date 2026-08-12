@@ -11,6 +11,7 @@ import {
 import { SegmentedControl } from '@/shared/ui/SegmentedControl';
 import { useBackButton } from '@/shared/hooks/useBackButton';
 import { useTheme } from '@/shared/context/ThemeContext';
+import { useNavBar } from '@/shared/context/NavBarContext';
 import { food, todayApiDate } from '@/shared/api/food';
 import { favorites } from '@/shared/api/favorites';
 import { logFavoriteMeal } from '@/shared/lib/logFavoriteMeal';
@@ -45,12 +46,17 @@ export const LogSearchPage = () => {
   const { t } = useTranslation('quick_actions');
   const { t: tc } = useTranslation('common');
   const queryClient = useQueryClient();
+  const { setHidden } = useNavBar();
 
   const [tab, setTab] = useState<Tab>('all');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<FoodSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [selected, setSelected] = useState<FoodSearchResult | null>(null);
+
+  // Скрываем навбар пока открыта клавиатура — иначе он остаётся висеть
+  // поверх/под клавиатурой и выглядит как лишний плавающий элемент.
+  useEffect(() => () => setHidden(false), [setHidden]);
 
   const runSearch = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -137,6 +143,8 @@ export const LogSearchPage = () => {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setHidden(true)}
+              onBlur={() => setHidden(false)}
               placeholder={t('search_sheet.placeholder')}
               className="flex-1 bg-transparent text-sm"
               style={{ color: theme.text_color }}

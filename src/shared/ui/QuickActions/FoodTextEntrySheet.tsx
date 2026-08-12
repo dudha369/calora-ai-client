@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { food, todayApiDate } from '@/shared/api/food';
+import { resolveAiErrorMessage } from '@/shared/lib/aiErrors';
 import { FoodResultModal } from '@/features/scanner/components/FoodResultModal';
 import type {
   AnalyzedDish,
@@ -26,7 +27,6 @@ type Status =
 export const FoodTextEntrySheet = ({ onClose }: FoodTextEntrySheetProps) => {
   const theme = useTheme();
   const { t, i18n } = useTranslation('quick_actions');
-  const { t: tc } = useTranslation('common');
   const queryClient = useQueryClient();
 
   const [description, setDescription] = useState('');
@@ -39,8 +39,8 @@ export const FoodTextEntrySheet = ({ onClose }: FoodTextEntrySheetProps) => {
     try {
       const { data } = await food.analyzeText(trimmed, i18n.language);
       setStatus({ kind: 'result', result: data });
-    } catch {
-      setStatus({ kind: 'error', message: tc('errors.general.subtitle') });
+    } catch (err) {
+      setStatus({ kind: 'error', message: resolveAiErrorMessage(err) });
     }
   };
 

@@ -7,6 +7,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    errorElement: <RouterErrorBoundary />,
     hydrateFallbackElement: <LoadingScreen />,
     children: [
       {

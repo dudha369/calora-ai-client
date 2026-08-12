@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation, useQuery } from '@tanstack/react-query';
 import { CalendarDays, Flame } from 'lucide-react';
 
 import { useUser } from '@/shared/context/UserContext';
@@ -18,6 +18,8 @@ import { FoodLogModal } from '../components/FoodLog/FoodLogModal';
 import type { CopyMealResult } from '../components/FoodLog/CopyMealSheet';
 import type { FoodLog } from '@/shared/types/api/food';
 import { StreakDialog } from '../../streak/components/StreakDialog';
+import { users } from '@/shared/api/users';
+import type { StreakInfo } from '@/shared/types/api/streak';
 
 export const HomePage = () => {
   const theme = useTheme();
@@ -61,6 +63,19 @@ export const HomePage = () => {
   const [foodLogEditing, setFoodLogEditing] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const { data: streakInfo } = useQuery<StreakInfo>({
+    queryKey: ['streak'],
+    queryFn: async () => (await users.getStreak()).data,
+    staleTime: 10_000,
+    enabled: !!user_data,
+  });
+
+  useEffect(() => {
+    if (streakInfo?.lost_streak_value != null && !foodLogModalOpen) {
+      setStreakPopupOpen(true);
+    }
+  }, [streakInfo?.lost_streak_value]);
 
   useEffect(() => {
     const dateParam = searchParams.get('date');

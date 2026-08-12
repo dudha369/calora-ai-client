@@ -1,10 +1,10 @@
-import axios from 'axios';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { decodeBarcode } from '../lib/decodeBarcode';
 import { fetchProductByBarcode } from '../lib/openfoodfacts';
 import { food } from '@/shared/api/food';
 import { compressImage } from '../lib/compressImage';
+import { isNoFoodDetected, resolveAiErrorMessage } from '@/shared/lib/aiErrors';
 import type { FoodAnalyzeResponse } from '@/shared/types/api/food';
 import type { ProductData } from '../types/productData';
 
@@ -13,28 +13,6 @@ function dataUrlToFile(dataUrl: string, filename = 'photo.jpg'): File {
   const mime = header.match(/:(.*?);/)?.[1] ?? 'image/jpeg';
   const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
   return new File([bytes], filename, { type: mime });
-}
-
-function extractErrorDetail(err: unknown): string | undefined {
-  if (axios.isAxiosError(err)) {
-    return err.response?.data?.detail;
-  }
-  if (err && typeof err === 'object' && 'detail' in err) {
-    return (err as { detail?: string }).detail;
-  }
-  return undefined;
-}
-
-function isNoFoodDetected(err: unknown): boolean {
-  return extractErrorDetail(err) === 'no_food_detected';
-}
-
-function resolveErrorMessage(err: unknown): string {
-  if (isNoFoodDetected(err)) {
-    return 'На фотографии не найдена еда. Убедитесь, что продукт в кадре, и попробуйте ещё раз.';
-  }
-  if (err instanceof Error) return err.message;
-  return 'Не удалось проанализировать фото. Попробуй ещё раз.';
 }
 
 export type AnalysisStatus =
@@ -122,7 +100,7 @@ export function useFoodAnalysis(
           if (requestIdRef.current === requestId) {
             setStatus({
               kind: 'error',
-              message: resolveErrorMessage(err),
+              message: resolveAiErrorMessage(err),
               isNoFood: isNoFoodDetected(err),
             });
           }

@@ -19,10 +19,10 @@ export function isSameMonth(a: Date, b: Date): boolean {
   return monthKeyOf(a) === monthKeyOf(b);
 }
 
-/**
- * Ячейки сетки одного месяца. null = пустая ячейка перед 1-м числом
- * (неделя начинается с понедельника — как и в DateStrip/DayCarousel).
- */
+// src/shared/lib/calendarMonths.ts
+const TOTAL_CALENDAR_CELLS = 42; // 6 недель × 7 дней — сетка всегда одной высоты,
+// независимо от того, сколько дней и с какого дня недели начинается месяц
+
 export function buildCalendarCells(
   year: number,
   month: number,
@@ -34,6 +34,7 @@ export function buildCalendarCells(
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startDow; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+  while (cells.length < TOTAL_CALENDAR_CELLS) cells.push(null);
   return cells;
 }
 

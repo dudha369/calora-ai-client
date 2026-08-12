@@ -6,6 +6,7 @@ import type {
   NutriScore,
   NovaGroup,
 } from '../types/productData';
+import { cleanProductText } from '@/shared/lib/text';
 
 const offAxios = axios.create({
   baseURL: 'https://world.openfoodfacts.org/api/v2',
@@ -275,8 +276,8 @@ export async function fetchProductByBarcode(
 
   return {
     barcode,
-    name: p.product_name?.trim() || 'Неизвестный продукт',
-    brand: p.brands?.split(',')[0]?.trim() ?? null,
+    name: cleanProductText(p.product_name) || 'Неизвестный продукт',
+    brand: cleanProductText(p.brands?.split(',')[0]) || null,
     imageUrl: p.image_front_url ?? p.image_url ?? null,
 
     packageQuantityG: p.product_quantity ?? null,
@@ -293,7 +294,7 @@ export async function fetchProductByBarcode(
     allergens,
     nutriScore,
     novaGroup,
-    ingredientsText: p.ingredients_text?.trim() ?? null,
+    ingredientsText: cleanProductText(p.ingredients_text) || null,
     labels: parseLabels(p.labels_tags),
   };
 }
