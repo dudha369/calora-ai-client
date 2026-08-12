@@ -13,6 +13,9 @@ import { LiveBarcodeScanner } from '../components/LiveBarcodeScanner';
 import { ManualCameraBarcodeScreen } from '../components/ManualCameraBarcodeScreen';
 import { ManualBarcodeSheet } from '../components/ManualBarcodeSheet';
 import { BarcodeResultModal } from '../components/BarcodeResultModal';
+import { BarcodeNotFoundSheet } from '../components/BarcodeNotFoundSheet';
+import { BarcodeDecodeFailedSheet } from '../components/BarcodeDecodeFailedSheet';
+import { ProductSubmitSheet } from '../components/ProductSubmitSheet';
 import { FoodResultModal } from '../components/FoodResultModal';
 import { FoodNotesSheet } from '../components/FoodNotesSheet';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
@@ -53,6 +56,7 @@ export const ScannerPage = () => {
 
   const [pickedProduct, setPickedProduct] = useState<ProductData | null>(null);
   const [manualEntryOpen, setManualEntryOpen] = useState(false);
+  const [productSubmitOpen, setProductSubmitOpen] = useState(false);
 
   const { photo, clearPhoto, handleFileChange, camera, capture } =
     useScannerCapture(state?.photo ?? null, !useLiveBarcode);
@@ -279,30 +283,101 @@ export const ScannerPage = () => {
         />
       );
     }
-    if (photo && status.kind === 'ready') {
-      // decodeBarcode отработал на снимке и штрихкода не нашёл
+    if (status.kind === 'barcode_not_found') {
+      if (productSubmitOpen) {
+        return (
+          <ProductSubmitSheet
+            barcode={status.barcode}
+            mode="add"
+            onClose={() => setProductSubmitOpen(false)}
+            onSubmitted={() => {
+              setProductSubmitOpen(false);
+              clearPhoto();
+            }}
+          />
+        );
+      }
+      return (
+        <BarcodeNotFoundSheet
+          barcode={status.barcode}
+          onAnalyzeWithAi={() => runAnalysis()}
+          onAddProduct={() => setProductSubmitOpen(true)}
+          onManualEntry={() => {
+            clearPhoto();
+            setManualEntryOpen(true);
+          }}
+          onClose={clearPhoto}
+        />
+      );
+    }
+
+    if (status.kind === 'analyzing') {
+      return (
+        <div className="relative flex w-full flex-1 items-center justify-center bg-black">
+          {photo && (
+            <img
+              src={photo}
+              className="h-auto w-full object-cover opacity-50"
+              alt=""
+            />
+          )}
+          <div
+            className="absolute inset-x-4 bottom-6 z-10 rounded-2xl py-3 text-center text-sm font-medium backdrop-blur-sm"
+            style={{
+              backgroundColor: `${theme.bg_color}CC`,
+              color: theme.text_color,
+            }}
+          >
+            {tq('voice_sheet.analyzing')}
+          </div>
+        </div>
+      );
+    }
+
+    if (status.kind === 'food') {
+      return (
+        <FoodResultModal
+          result={status.result}
+          photo={photo}
+          onConfirm={handleFoodConfirm}
+          onClose={() => deleteOrphanAndClose(status.result.photo_key)}
+        />
+      );
+    }
+
+    if (status.kind === 'error') {
       return (
         <BottomSheet
           title={t('error')}
           onClose={clearPhoto}
           actionLabel={t('try_again')}
-          onAction={clearPhoto}
-          secondaryAction={{
-            text: tq('barcode_manual.link'),
-            onClick: () => {
-              clearPhoto();
-              setManualEntryOpen(true);
-            },
-            position: 'left',
-          }}
+          iconCustomEmojiId="5260687119092817530"
+          onAction={status.isNoFood ? clearPhoto : retry}
         >
           <p
             className="py-2 text-center text-sm"
             style={{ color: theme.subtitle_text_color }}
           >
-            {tq('barcode_manual.not_found_photo')}
+            {status.message}
           </p>
         </BottomSheet>
+      );
+    }
+    if (photo && status.kind === 'ready') {
+      // decodeBarcode не смог извлечь номер из снимка — ДРУГОЙ случай, чем
+      // "штрихкод прочитан, но товара нет в OFF" (см. barcode_not_found выше).
+      // Не тупик: предлагаем ввести вручную (там уже есть полный flow
+      // "не найден → добавить"), проанализировать фото через ИИ, или пересъёмку.
+      return (
+        <BarcodeDecodeFailedSheet
+          onRetry={clearPhoto}
+          onManualEntry={() => {
+            clearPhoto();
+            setManualEntryOpen(true);
+          }}
+          onAnalyzeWithAi={() => runAnalysis()}
+          onClose={clearPhoto}
+        />
       );
     }
     if (photo) {

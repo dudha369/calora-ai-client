@@ -95,7 +95,7 @@ export function App() {
         <>
           {safeTop >= 44 && (
             <header
-              className="pointer-events-none fixed top-0 left-0 flex w-full flex-col justify-end"
+              className="pointer-events-none fixed top-0 left-0 z-999 flex w-full flex-col justify-end"
               style={{
                 height: safeTop,
                 color: theme.button_text_color,

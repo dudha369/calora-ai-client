@@ -194,7 +194,7 @@ export const WaterDayContent = ({
       </section>
 
       {isToday && (
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-px">
           <span
             className="ml-1 text-base font-semibold"
             style={{ color: theme.subtitle_text_color }}
@@ -238,7 +238,7 @@ export const WaterDayContent = ({
           className="flex items-center gap-px"
           style={{ color: theme.subtitle_text_color }}
         >
-          <span className="text-base font-semibold tracking-wide">
+          <span className="ml-1 text-base font-semibold">
             {t('today_logs')}
           </span>
 

@@ -46,7 +46,7 @@ export const WaterLogCard = ({
         opacity: isDeleting ? 0.5 : 1,
       }}
     >
-      <div className="flex min-w-0 flex-1 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-2">
         <div className="size-10 shrink-0 rounded-full p-2">
           <Droplets size={24} style={{ color: MARKER_WATER_COLOR }} />
         </div>

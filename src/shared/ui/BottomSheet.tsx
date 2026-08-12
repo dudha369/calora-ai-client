@@ -369,7 +369,11 @@ export const BottomSheet = ({
                 className="absolute right-4 rounded-full transition-opacity hover:opacity-70"
                 aria-label={t('buttons.close')}
               >
-                <X size={20} style={{ color: theme.text_color }} />
+                <X
+                  size={20}
+                  strokeWidth={2.5}
+                  style={{ color: theme.text_color }}
+                />
               </button>
             )}
           </header>

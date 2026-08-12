@@ -1,4 +1,10 @@
-import { useState, useRef, useEffect, type KeyboardEvent } from 'react';
+import {
+  useState,
+  useRef,
+  useEffect,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from 'react';
 import { useTheme } from '@/shared/context/ThemeContext';
 
 export interface NutritionEditGridCellProps {
@@ -43,11 +49,20 @@ export const NutritionEditGridCell = ({
   };
 
   const commit = () => {
-    const parsed = Number(inputValue);
+    const parsed = Number(inputValue.replace(',', '.'));
     if (!isNaN(parsed) && parsed >= 0) {
       onChange(step < 1 ? Math.round(parsed * 10) / 10 : Math.round(parsed));
     }
     setisEditing(false);
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // На ru/ua-раскладках мобильная цифровая клавиатура шлёт ',' как разделитель
+    // дробной части, но type="number" принимает только '.', молча отклоняет
+    // ввод и из-за этого прыгает курсор. Нормализуем сами и валидируем как
+    // обычный текст — без побочных эффектов нативного numeric-инпута.
+    const normalized = e.target.value.replace(',', '.');
+    if (/^\d*\.?\d*$/.test(normalized)) setInputValue(normalized);
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -58,23 +73,31 @@ export const NutritionEditGridCell = ({
 
   return (
     <div
-      className="group relative flex h-13 flex-1 cursor-pointer flex-col items-center justify-center gap-1 py-2 transition-opacity hover:opacity-80 active:opacity-60"
+      className="group relative flex h-13 flex-1 transform-gpu cursor-pointer flex-col items-center justify-center gap-1 py-2 transition-opacity hover:opacity-80 active:opacity-60"
       onClick={!isEditing ? handleTap : undefined}
     >
       {isEditing ? (
         <input
           ref={inputRef}
-          type="number"
+          type="text"
           inputMode="decimal"
-          step={step}
-          min={0}
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={handleInputChange}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className="w-16 rounded-lg bg-transparent text-center text-lg leading-none font-medium focus:ring-0"
+          className="w-16 appearance-none rounded-lg bg-transparent text-center text-lg font-medium tabular-nums focus:ring-0"
           style={{
             color: theme.text_color,
+            // Нативный <input> считает высоту строки по своим UA-метрикам,
+            // игнорируя leading-none, который прекрасно работает на <span>.
+            // Без явных height/lineHeight/padding инпут оказывается выше
+            // span'а, который он заменяет — из-за justify-center в родителе
+            // это визуально "выталкивает" лейбл ниже при переходе в режим
+            // редактирования (см. скриншоты: "Сахары" уезжает вниз).
+            height: '1.125rem',
+            lineHeight: 1,
+            padding: 0,
+            border: 'none',
           }}
         />
       ) : (

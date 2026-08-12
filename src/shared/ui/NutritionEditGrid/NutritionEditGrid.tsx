@@ -55,7 +55,7 @@ export const NutritionEditGrid = ({
   const theme = useTheme();
   const { t } = useTranslation('home_page');
   const { t: tc } = useTranslation('common');
-  const [syncEnabled, setSyncEnabled] = useState(false);
+  const [syncEnabled, setSyncEnabled] = useState(true);
 
   const handleChange = (key: keyof NutritionValues, newValue: number) => {
     onChange(
@@ -109,7 +109,7 @@ export const NutritionEditGrid = ({
           </div>
 
           <div
-            className="mx-auto h-0.5 w-[90%] rounded-full"
+            className="mx-auto h-0.5 w-[90%] shrink-0 rounded-full"
             style={{ backgroundColor: theme.section_separator_color }}
           />
 
@@ -182,7 +182,7 @@ export const NutritionEditGrid = ({
           <button
             onClick={() => onRemoveItem()}
             aria-label={tc('buttons.delete')}
-            className="flex items-center rounded-full px-1 transition-opacity hover:opacity-80 active:opacity-60"
+            className="flex shrink-0 items-center rounded-full px-1 transition-opacity hover:opacity-80 active:opacity-60"
             style={{ color: theme.destructive_text_color }}
           >
             <Trash2 size={16} />

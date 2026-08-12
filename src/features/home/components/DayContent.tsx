@@ -171,7 +171,7 @@ export const DayContent = ({
         </div>
 
         <div
-          className="flex flex-col gap-3 transition-opacity duration-300"
+          className="transition-opacity duration-300"
           style={{ opacity: isNetworkFetching && !statsLoading ? 0.7 : 1 }}
         >
           <FoodLogList

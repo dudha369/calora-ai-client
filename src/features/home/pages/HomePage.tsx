@@ -72,10 +72,21 @@ export const HomePage = () => {
   });
 
   useEffect(() => {
-    if (streakInfo?.lost_streak_value != null && !foodLogModalOpen) {
+    // Серия восстановлена/отклонена (или изначально не теряна) — сбрасываем
+    // флаг в sessionStorage, чтобы СЛЕДУЮЩАЯ потеря серии снова показала попап один раз.
+    if (streakInfo?.lost_streak_value == null) {
+      sessionStorage.removeItem('streakLostShownThisSession');
+      return;
+    }
+
+    const hasBeenShown = sessionStorage.getItem('streakLostShownThisSession');
+
+    // Проверяем !streakPopupOpen, чтобы линтер не ругался на cascading renders
+    if (!hasBeenShown && !foodLogModalOpen && !streakPopupOpen) {
+      sessionStorage.setItem('streakLostShownThisSession', 'true');
       setStreakPopupOpen(true);
     }
-  }, [streakInfo?.lost_streak_value]);
+  }, [streakInfo?.lost_streak_value, foodLogModalOpen, streakPopupOpen]);
 
   useEffect(() => {
     const dateParam = searchParams.get('date');

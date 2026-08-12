@@ -5,6 +5,8 @@ import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { fetchProductByBarcode } from '../lib/openfoodfacts';
 import type { ProductData } from '../types/productData';
+import { ProductSubmitSheet } from './ProductSubmitSheet';
+import { useOpenFoodFactsAvailable } from '@/shared/hooks/useOpenFoodFactsStatus';
 
 interface ManualBarcodeSheetProps {
   onClose: () => void;
@@ -28,6 +30,8 @@ export const ManualBarcodeSheet = ({
   const [code, setCode] = useState('');
   const [state, setState] = useState<SearchState>('idle');
   const [foundProduct, setFoundProduct] = useState<ProductData | null>(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const offAvailable = useOpenFoodFactsAvailable();
 
   const runSearch = useCallback(async (value: string) => {
     setState('loading');
@@ -142,23 +146,43 @@ export const ManualBarcodeSheet = ({
         )}
 
         {state === 'not_found' && (
-          <div
-            className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-            style={{ backgroundColor: theme.section_bg_color }}
-          >
-            <BarcodeIcon
-              size={18}
-              style={{ color: theme.destructive_text_color }}
-            />
-            <span
-              className="text-sm"
-              style={{ color: theme.destructive_text_color }}
+          <>
+            <div
+              className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+              style={{ backgroundColor: theme.section_bg_color }}
             >
-              {t('barcode_manual.not_found')}
-            </span>
-          </div>
+              <BarcodeIcon
+                size={18}
+                style={{ color: theme.destructive_text_color }}
+              />
+              <span
+                className="text-sm"
+                style={{ color: theme.destructive_text_color }}
+              >
+                {t('barcode_manual.not_found')}
+              </span>
+            </div>
+            {offAvailable && (
+              <button
+                onClick={() => setAddOpen(true)}
+                className="text-center text-sm font-medium underline underline-offset-2"
+                style={{ color: theme.button_color }}
+              >
+                {t('barcode_manual.add_product')}
+              </button>
+            )}
+          </>
         )}
       </div>
+
+      {addOpen && (
+        <ProductSubmitSheet
+          barcode={code}
+          mode="add"
+          onClose={() => setAddOpen(false)}
+          onSubmitted={onClose}
+        />
+      )}
     </BottomSheet>
   );
 };

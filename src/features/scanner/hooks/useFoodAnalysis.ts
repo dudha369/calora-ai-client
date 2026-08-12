@@ -19,6 +19,7 @@ export type AnalysisStatus =
   | { kind: 'idle' }
   | { kind: 'recognizing' }
   | { kind: 'barcode'; product: ProductData }
+  | { kind: 'barcode_not_found'; barcode: string }
   | { kind: 'ready' }
   | { kind: 'analyzing' }
   | { kind: 'food'; result: FoodAnalyzeResponse }
@@ -61,20 +62,29 @@ export function useFoodAnalysis(
     setStatus({ kind: 'recognizing' });
 
     (async () => {
+      let barcode: string | null = null;
       try {
-        const barcode = await decodeBarcode(photo);
-        if (requestIdRef.current !== requestId) return;
+        barcode = await decodeBarcode(photo);
+      } catch {
+        barcode = null;
+      }
+      if (requestIdRef.current !== requestId) return;
 
-        if (barcode) {
-          const product = await fetchProductByBarcode(barcode);
-          if (requestIdRef.current !== requestId) return;
-          if (product) {
-            setStatus({ kind: 'barcode', product });
-            return;
-          }
-        }
-
+      if (!barcode) {
+        // Действительно не нашли штрихкод в кадре — это отдельный случай
+        // от "штрихкод есть, но товара нет в базе".
         setStatus({ kind: 'ready' });
+        return;
+      }
+
+      try {
+        const product = await fetchProductByBarcode(barcode);
+        if (requestIdRef.current !== requestId) return;
+        setStatus(
+          product
+            ? { kind: 'barcode', product }
+            : { kind: 'barcode_not_found', barcode },
+        );
       } catch {
         if (requestIdRef.current === requestId) setStatus({ kind: 'ready' });
       }

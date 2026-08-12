@@ -29,21 +29,29 @@ export function SegmentedControl<T extends string>({
 
   return (
     <div
-      className={cn('inline-flex gap-px rounded-xl p-1', className)}
+      className={cn('inline-flex rounded-xl p-1', className)}
       style={{ backgroundColor: theme.secondary_bg_color }}
     >
       {options.map((opt) => {
         const isActive = opt.value === value;
+
+        let backgroundColor, color;
+        if (isActive) {
+          backgroundColor = theme.accent_text_color;
+          color = theme.button_text_color;
+        } else {
+          backgroundColor = 'transparent';
+          color = theme.hint_color;
+        }
+
         return (
           <button
             key={opt.value}
             onClick={() => onChange(opt.value)}
-            className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-200"
+            className="flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium transition-all duration-200 max-sm:px-2"
             style={{
-              backgroundColor: isActive
-                ? theme.accent_text_color
-                : 'transparent',
-              color: isActive ? theme.button_text_color : theme.hint_color,
+              backgroundColor,
+              color,
             }}
           >
             {opt.icon}

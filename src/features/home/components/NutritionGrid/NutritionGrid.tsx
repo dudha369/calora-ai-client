@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/shared/context/ThemeContext';
-import { NutritionGridCard } from './NutritionGridCard';
+import { NutritionGridCardCell } from './NutritionGridCardCell';
 import type { FoodLogBase } from '@/shared/types/api/food';
 import { useUser } from '@/shared/context/UserContext';
 
@@ -61,43 +61,50 @@ export const NutritionGrid = ({ data }: NutritionGridProps) => {
         )}
       </div>
 
-      <div className="col-span-3 row-span-2">
-        <NutritionGridCard
-          row1={{
-            first: {
-              title: t('protein'),
-              value: data.total_protein_g,
-              unit: tc('units.g'),
-            },
-            second: {
-              title: t('fat'),
-              value: data.total_fat_g,
-              unit: tc('units.g'),
-            },
-            third: {
-              title: t('carbs'),
-              value: data.total_carbs_g,
-              unit: tc('units.g'),
-            },
-          }}
-          row2={{
-            first: {
-              title: t('sugars'),
-              value: data.total_sugar_g,
-              unit: tc('units.g'),
-            },
-            second: {
-              title: t('fiber'),
-              value: data.total_fiber_g,
-              unit: tc('units.g'),
-            },
-            third: {
-              title: t('water'),
-              value: data.total_water_ml,
-              unit: tc('units.ml'),
-            },
-          }}
+      <div
+        className="col-span-3 row-span-2 flex flex-col rounded-2xl"
+        style={{ backgroundColor: theme.secondary_bg_color }}
+      >
+        <div className="flex flex-1">
+          <NutritionGridCardCell
+            title={t('protein')}
+            value={data.total_protein_g}
+            unit={tc('units.g')}
+          />
+          <NutritionGridCardCell
+            title={t('fat')}
+            value={data.total_fat_g}
+            unit={tc('units.g')}
+          />
+          <NutritionGridCardCell
+            title={t('carbs')}
+            value={data.total_carbs_g}
+            unit={tc('units.g')}
+          />
+        </div>
+
+        <div
+          className="mx-auto h-0.5 w-[90%] shrink-0 rounded-full"
+          style={{ backgroundColor: theme.section_separator_color }}
         />
+
+        <div className="flex flex-1">
+          <NutritionGridCardCell
+            title={t('sugars')}
+            value={data.total_sugar_g}
+            unit={tc('units.g')}
+          />
+          <NutritionGridCardCell
+            title={t('fiber')}
+            value={data.total_fiber_g}
+            unit={tc('units.g')}
+          />
+          <NutritionGridCardCell
+            title={t('water')}
+            value={data.total_water_ml}
+            unit={tc('units.ml')}
+          />
+        </div>
       </div>
     </div>
   );
