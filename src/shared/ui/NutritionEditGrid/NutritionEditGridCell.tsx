@@ -26,7 +26,7 @@ export const NutritionEditGridCell = ({
   onChange,
 }: NutritionEditGridCellProps) => {
   const theme = useTheme();
-  const [isEditing, setisEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -45,7 +45,7 @@ export const NutritionEditGridCell = ({
 
   const handleTap = () => {
     setInputValue(fmt(value, step));
-    setisEditing(true);
+    setIsEditing(true);
   };
 
   const commit = () => {
@@ -53,15 +53,11 @@ export const NutritionEditGridCell = ({
     if (!isNaN(parsed) && parsed >= 0) {
       onChange(step < 1 ? Math.round(parsed * 10) / 10 : Math.round(parsed));
     }
-    setisEditing(false);
+    setIsEditing(false);
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // На ru/ua-раскладках мобильная цифровая клавиатура шлёт ',' как разделитель
-    // дробной части, но type="number" принимает только '.', молча отклоняет
-    // ввод и из-за этого прыгает курсор. Нормализуем сами и валидируем как
-    // обычный текст — без побочных эффектов нативного numeric-инпута.
-    const normalized = e.target.value.replace(',', '.');
+    const normalized = e.target.value.trim().replace(',', '.');
     if (/^\d*\.?\d*$/.test(normalized)) setInputValue(normalized);
   };
 
@@ -85,19 +81,12 @@ export const NutritionEditGridCell = ({
           onChange={handleInputChange}
           onBlur={commit}
           onKeyDown={handleKeyDown}
-          className="w-16 appearance-none rounded-lg bg-transparent text-center text-lg font-medium tabular-nums focus:ring-0"
+          className="w-16 rounded-lg bg-transparent text-center text-lg font-medium tabular-nums focus:ring-0"
           style={{
             color: theme.text_color,
-            // Нативный <input> считает высоту строки по своим UA-метрикам,
-            // игнорируя leading-none, который прекрасно работает на <span>.
-            // Без явных height/lineHeight/padding инпут оказывается выше
-            // span'а, который он заменяет — из-за justify-center в родителе
-            // это визуально "выталкивает" лейбл ниже при переходе в режим
-            // редактирования (см. скриншоты: "Сахары" уезжает вниз).
             height: '1.125rem',
             lineHeight: 1,
             padding: 0,
-            border: 'none',
           }}
         />
       ) : (
